@@ -1,72 +1,143 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
-    </ul>
-
-    <br/>
     <section>
-      <b-field label="Find a name" id="searchbox">
+      <b-field label="Search for a Destination" id="searchbox">
         <b-autocomplete
-          v-model="name"
+          v-model="destination"
           :data="filteredDataArray"
-          placeholder="e.g. jQuery"
-          icon="magnify"
+          placeholder="e.g. tioman island"
           clearable
           @select="option => selected = option">
           <template #empty>No results found</template>
         </b-autocomplete>
       </b-field>
     </section>
+
+    {{ isDestinationValid }}
+
+    <div id="hotel-cards">
+
+      <div
+        class="card" style="width: 20rem" 
+        v-for="(hotel, key) in hotels" v-bind:key="key"
+      >
+        <div class="card-image">
+          <figure class="image is-4by3">
+            <img :src="hotel['image_url']" alt="Placeholder image">
+          </figure>
+        </div>
+        <div class="card-content">
+          <div class="media">
+            <div class="media-content">
+              <p class="title is-4">{{ hotel['name'] }}</p>
+            </div>
+          </div>
+
+          <div class="content">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Phasellus nec iaculis mauris.
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script>
 import destinations from './assets/destinations.json'
 import fuzzysort from 'fuzzysort'
+import sleep from 'await-sleep'
+import axios from 'axios'
 
 export default {
   name: 'app',
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
-      destinationNames: [],
-      name: '',
-      selected: null
+      destinationNames: [], // array of destination names
+      destinationMappings: {}, // map destination name to ID
+      hotels: {},
+      selected: null,
+      destination: ''
     }
-  }, 
+  },
+  methods: {
+    async loadHotels() {
+      const baseUrl = "https://hotelapi.loyalty.dev/api/hotels"
+      const destinationID = this.destinationMappings[
+        this.destination
+      ]
+
+      try {
+        const response = await axios.get(baseUrl, {
+          params: {destination_id: destinationID}
+        });
+        console.log(response);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  },
   mounted: function () {
-    const destinationNames = []
     for (let destination of destinations) {
       // console.log(destination)
-      this.destinationNames.push(destination["term"])
-    }
+      const destinationID = destination["uid"]
+      const destinationName = destination["term"]
+      this.destinationNames.push(destinationName)
+      this.destinationMappings[destinationName] = destinationID
+    };
+
+    const baseSearchURL = "https://hotelapi.loyalty.dev/api/hotels";
+    const self = this;
+
+    (async () => {
+      let lastDestID = null;
+
+      while (true) {
+        await sleep(100);
+        if (!self.isDestinationValid) {
+          continue
+        } else if (self.destinationID === lastDestID) {
+          continue
+        }
+
+        lastDestID = self.destinationID;
+        
+        try {
+          const response = await axios.get(baseSearchURL, {
+            params: {destination_id: self.destinationID}
+          })
+        } catch (error) {
+          console.error(error)
+        }
+      }
+    })();
+
+    console.log("mount complete")
   },
   computed: {
     filteredDataArray() {
-      const results = fuzzysort.go(this.name, this.destinationNames)
-      if ((results.length) === 0) { return [] }
+      const matches = fuzzysort.go(
+        this.destination, this.destinationNames
+      )
+      
+      if ((matches.length) === 0) { return [] }
       
       const names = []
-      const length = Math.min(results.length, 100)
+      const length = Math.min(matches.length, 50)
       for (let k=0; k<length; k++) {
-        console.log(k, results[k])
-        names.push(results[k]['target'])
+        // console.log(k, matches[k])
+        const destinationName = matches[k]['target'];
+        names.push(destinationName)
       }
       return names
+    },
+
+    isDestinationValid() {
+      return this.destinationMappings.hasOwnProperty(
+        this.destination
+      )
     }
   }
 }
@@ -78,9 +149,14 @@ export default {
 }
 
 #searchbox {
-  width: 20rem;
+  width: 50rem;
   margin-left: auto;
   margin-right: auto;
+}
+
+div#hotel-cards {
+  padding: 5rem;
+  background-color: red;
 }
 
 @font-face {

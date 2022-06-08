@@ -1,8 +1,9 @@
 var path = require('path')
 var webpack = require('webpack')
+require("babel-polyfill");
 
 module.exports = {
-  entry: './src/main.js',
+  entry: ['babel-polyfill', './src/main.js'],
   output: {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/dist/',
@@ -87,7 +88,12 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     noInfo: true,
-    overlay: true
+    overlay: true,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+      "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
+    }
   },
   performance: {
     hints: false
