@@ -1,0 +1,5 @@
+###### Requirements without Version Specifiers ######
+Django
+django-rest-framework
+django-cors-headers
+djoser
