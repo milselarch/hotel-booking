@@ -1,13 +1,12 @@
 {
   "name": "dest-search",
-  "description": "A Vue.js project",
   "version": "1.0.0",
-  "author": "milselarch <milselarch@gmail.com>",
-  "license": "GPLV3",
   "private": true,
+  "description": "A Vue.js project",
+  "author": "milselarch <milselarch@gmail.com>",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
@@ -17,14 +16,12 @@
     "axios": "^0.27.2",
     "buefy": "^0.9.21",
     "fuzzysort": "^2.0.1",
-    "vue": "^2.5.11"
+    "vue": "^2.5.11",
+    "vue-router": "^3.5.4"
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ],
   "devDependencies": {
+    "@vue/cli-plugin-router": "^4.5.17",
+    "@vue/cli-service": "^5.0.4",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-plugin-transform-regenerator": "^6.26.0",
@@ -42,5 +39,11 @@
     "vue-template-compiler": "^2.4.4",
     "webpack": "^3.6.0",
     "webpack-dev-server": "^2.9.1"
-  }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ],
+  "license": "GPLV3"
 }

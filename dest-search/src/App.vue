@@ -28,8 +28,9 @@
       </template>
     </b-navbar>
 
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <router-view/>
+    <router-link to="/about"><p>About</p></router-link>
+    <router-link to="/"><p>Home</p></router-link>
 
     <section>
       <b-field label="Search for a Destination" id="searchbox">
@@ -47,7 +48,6 @@
     {{ isDestinationValid }}
 
     <div id="hotel-cards">
-
       <div
         class="card" style="width: 20rem" 
         v-for="(hotel, key) in hotels" v-bind:key="key"
@@ -80,11 +80,6 @@ import destinations from './assets/destinations.json'
 import fuzzysort from 'fuzzysort'
 import sleep from 'await-sleep'
 import axios from 'axios'
-
-const routes = {
-  '/': Home,
-  '/about': About
-}
 
 export default {
   name: 'app',
