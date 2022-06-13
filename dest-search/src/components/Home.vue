@@ -1,8 +1,39 @@
 <template>
   <div id="home">
+    <b-modal v-model="loginModalActive" :width="640" scroll="keep">
+      <Login/>
+    </b-modal>
+
+    <b-modal v-model="signupModalActive" :width="640" scroll="keep">
+      <SignUp/>
+    </b-modal>
+    
     <div id="front-cover">
-      <div class="description">
-        <h1>The Bestest Hotels in the Multiverse</h1>
+      <div class="description-wrapper">
+        <div class="description">
+          <h1>The Bestest Hotels in the Multiverse</h1>
+          <p id="short-info">
+            Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
+            both veterans of the lifestyle and loyalty space, have 
+            found a way to credit customers up to ten times the volume 
+            of miles that can be earned elsewhere. That is for booking 
+            the same hotel at the same or similar rates.
+          </p>
+          <div class="buttons">
+            <b-button 
+              type="is-primary" id="login" outlined
+              @click="loginModalActive = true"
+            >
+              Login
+            </b-button>
+            <b-button 
+              type="is-primary" id="signup" outlined
+              @click="signupModalActive = true"
+            >
+              Sign Up
+            </b-button>
+          </div>
+        </div>
       </div>
 
       <div class="search-options">
@@ -62,6 +93,9 @@ import fuzzysort from 'fuzzysort'
 import sleep from 'await-sleep'
 import axios from 'axios'
 
+import Login from '@/components/Login.vue'
+import SignUp from '@/components/SignUp.vue'
+
 export default {
   name: 'Home',
   data () {
@@ -71,7 +105,10 @@ export default {
       destinationMappings: {}, // map destination name to ID
       hotels: {},
       selected: null,
-      destination: ''
+      destination: '',
+
+      loginModalActive: false,
+      signupModalActive: false
     }
   },
   methods: {
@@ -151,6 +188,10 @@ export default {
         this.destination
       )
     }
+  },
+
+  components: {
+    Login, SignUp
   }
 }
 </script>
@@ -164,22 +205,45 @@ div#front-cover {
   display: flex;
   flex-direction: row;
   align-items: stretch;
+  margin-top: 3rem;
   width: 100%;
 
-  & > div.description {
+  & > div.description-wrapper {
     flex-grow: 1;
-    & > h1 {
-      font-family: "Babas Neue";
-      text-align: left !important;
-      padding-left: 20%;
-      padding-right: 20%;
+
+    & > div.description {
+      margin-left: 20%;
+      margin-right: 20%;
+
+      & button#signup {
+        margin-left: 0.5rem;
+      }
+
+      & button#login {
+        margin-left: 0.1rem;
+      }
+
+      & > p#short-info {
+        text-align: left !important;
+        margin-bottom: 2rem;
+      }
+
+      & > h1 {
+        font-family: "Babas Neue";
+        text-align: left !important;
+        line-height: 5rem;
+        margin-bottom: 1rem;
+      }
     }
   }
 
   & > div.search-options {
     width: 30rem;
-    margin: 5rem;
+    margin-left: 5rem;
+    margin-right: 5rem;
     background: #BBB;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 
     * .searchbox {
       width: 20rem;

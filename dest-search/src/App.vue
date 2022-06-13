@@ -49,12 +49,6 @@ export default {
   font-family: 'Open Sans', sans-serif;
 }
 
-#searchbox {
-  width: 50rem;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 div#hotel-cards {
   padding: 5rem;
   background-color: red;
@@ -78,7 +72,6 @@ div#hotel-cards {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   margin-top: 0px;
 
