@@ -49,6 +49,23 @@ export default {
   font-family: 'Open Sans', sans-serif;
 }
 
+hr {
+  background-color: #AAA;
+}
+
+button.title-button > span {
+  font-family: 'Babas Neue';
+  font-size: 5rem;
+}
+
+button.fat-button {
+  padding-left: 3rem;
+  padding-right: 3rem;
+  padding-top: 1.4rem;
+  padding-bottom: 1.4rem;
+  margin-bottom: 2rem;
+}
+
 div#hotel-cards {
   padding: 5rem;
   background-color: red;

@@ -41,7 +41,7 @@
 
         <div class="button-controls">
           <b-button 
-            type="is-dark" id="login" 
+            type="is-dark" id="signup" class="fat-button"
           >
             Sign Up
           </b-button>
@@ -89,9 +89,9 @@ div#login-form {
     width: 100%;
   }
 
-  & button#login {
+  & button#signup {
     width: 10rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     height: 3rem;
   }
 

@@ -28,12 +28,12 @@
 
         <div class="button-controls">
           <b-button 
-            type="is-dark" id="login" 
+            type="is-dark" id="login" class="fat-button"
           >
             Login
           </b-button>
           <a href="#" id="signup">Sign Up</a>
-          <a target="_blank" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Forgot Password</a>
+          <a target="_blank" href="https://youtu.be/dQw4w9WgXcQ">Forgot Password</a>
         </div>
       </section>
 
@@ -76,12 +76,6 @@ div#login-form {
     margin: 0px;
     margin-top: 3rem;
     width: 100%;
-  }
-
-  & button#login {
-    width: 10rem;
-    margin-bottom: 2rem;
-    height: 3rem;
   }
 
   & a#signup {

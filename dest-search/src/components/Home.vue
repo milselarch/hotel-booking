@@ -239,11 +239,11 @@ div#front-cover {
 
   & > div.search-options {
     width: 30rem;
-    margin-left: 5rem;
-    margin-right: 5rem;
-    background: #BBB;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    margin-left: 0rem;
+    margin-right: 10%;
+    background: #EEE;
+    padding: 2rem;
+    flex-grow: 0.2;
 
     * .searchbox {
       width: 20rem;
