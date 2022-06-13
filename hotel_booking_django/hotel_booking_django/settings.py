@@ -44,9 +44,6 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
-]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -85,8 +82,12 @@ WSGI_APPLICATION = 'hotel_booking_django.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'main_DB',
+        'ENGINE': 'django.db.backends.mysql', 
+        'NAME': 'hotel_booking',
+        'USER': 'root',
+        'PASSWORD': 'AS12qw34!@',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
