@@ -32,7 +32,7 @@
           >
             Login
           </b-button>
-          <a href="#" id="signup">Sign Up</a>
+          <a href="#" id="signup" @click="openSignupModal()">Sign Up</a>
           <a target="_blank" href="https://youtu.be/dQw4w9WgXcQ">Forgot Password</a>
         </div>
       </section>
@@ -48,6 +48,12 @@
     data() {
       return {
         hasError: false
+      }
+    },
+
+    methods: {
+      openSignupModal() {
+        this.$emit('open-signup', true)
       }
     }
   }

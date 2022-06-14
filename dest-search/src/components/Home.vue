@@ -1,13 +1,10 @@
 <template>
   <div id="home">
-    <b-modal v-model="loginModalActive" :width="640" scroll="keep">
-      <Login/>
+    <b-modal v-model="modalActive" :width="640" scroll="keep">
+      <Login v-show="loginModalActive" @open-signup="openSignup()"/>
+      <SignUp v-show="signupModalActive" />
     </b-modal>
 
-    <b-modal v-model="signupModalActive" :width="640" scroll="keep">
-      <SignUp/>
-    </b-modal>
-    
     <div id="front-cover">
       <div class="description-wrapper">
         <div class="description">
@@ -22,13 +19,13 @@
           <div class="buttons">
             <b-button 
               type="is-primary" id="login" outlined
-              @click="loginModalActive = true"
+              @click="openLogin()"
             >
               Login
             </b-button>
             <b-button 
               type="is-primary" id="signup" outlined
-              @click="signupModalActive = true"
+              @click="openSignup()"
             >
               Sign Up
             </b-button>
@@ -107,6 +104,7 @@ export default {
       selected: null,
       destination: '',
 
+      modalActive: false,
       loginModalActive: false,
       signupModalActive: false
     }
@@ -126,6 +124,18 @@ export default {
       } catch (error) {
         console.error(error);
       }
+    },
+
+    openSignup() {
+      this.loginModalActive = false;
+      this.signupModalActive = true;
+      this.modalActive = true;
+    },
+
+    openLogin() {
+      this.loginModalActive = true;
+      this.signupModalActive = false;
+      this.modalActive = true;
     }
   },
   mounted: function () {
