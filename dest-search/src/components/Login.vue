@@ -7,7 +7,7 @@
 
         <b-field label="Email" class="input-field"
           :type="{ 'is-danger': hasError }"
-          :message="{ 'Email is not available': hasError }">
+          :message="email_error">
           <b-input
             type="email" value="" v-model="email"
             maxlength="30" placeholder="nobody@nowhere.com"
@@ -16,15 +16,18 @@
 
         <b-field label="Password" class="input-field"
           :type="{ 'is-danger': hasError }"
-          :message="[
-            { 'Password is too short': hasError },
-            { 'Password must have at least 8 characters': hasError }
-          ]">
+          :message="password_error">
           <b-input 
             value="" type="password" maxlength="30"
             placeholder="password123" v-model="password"
           ></b-input>
         </b-field>
+
+        <b-message 
+          type="is-danger" has-icon
+          style="white-space: pre-line"
+          v-show="other_errors !== ''"
+        >{{ other_errors }}</b-message>
 
         <div class="button-controls">
           <b-button 
@@ -49,32 +52,79 @@
 
     data() {
       return {
-        hasError: false
+        email: '',
+        password: '',
+
+        email_error: {},
+        password_error: {},
+        other_errors: '',
+
+        hasError: false,
+        pending: false
       }
     },
 
     methods: {
       openSignupModal() {
-        this.$emit('open-signup', true)
+        this.$emit('open-signup', this.name)
       },
 
       login() {
+        const self = this;
+        self.pending = true;
+
         console.log("button clicked")
         const formdata = {
           email: this.email,
           password: this.password,
         }
-        
+
+        self.hasError = false;
+        self.email_error = {};
+        self.password_error = {};
+        self.other_errors = ''
+
         axios.post(
           'auth/jwt/create/', formdata
-        ).then(response=>{
+        ).then(response => {
+          console.log('JWT CREATE SUCCESS')
           this.$router.push("/about") // TODO: redirect to profile page
           console.log(response.data);
           const access_token = response.data.access
           const refresh_token = response.data.refresh
           // axios.defaults.headers.common["Authorization"] = 'Bearer ' + access_token
-        }).catch(error =>{
-          console.log(error)
+        
+        }).catch(err_resp =>{
+          const errors = err_resp.response.data
+
+          if (errors.hasOwnProperty('email')) {
+            self.email_error = errors['email']
+          } if (errors.hasOwnProperty('password')) {
+            self.password_error = errors['password']
+          }
+
+          console.error('ERRORS', errors)
+
+          const other_errors = []
+          for (let cause in errors) {
+            // only go through errors not covered already
+            if (formdata.hasOwnProperty(cause)) { continue; }
+            const reasons = errors[cause];
+            if (reasons instanceof Array) {
+              other_errors.push(...errors[cause])
+            } else {
+              other_errors.push(errors[cause])
+            }
+          }
+
+          console.log('OERRROS-LKOGIN', other_errors)
+          self.other_errors = other_errors.join('\n');
+          this.hasError = true;
+        
+        }).finally(() => {
+          // simulate a delay for loading a response
+          // setTimeout(() => { self.pending = false }, 1000)
+          self.pending = false;
         })
       }
     }

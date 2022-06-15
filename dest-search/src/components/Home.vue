@@ -5,7 +5,7 @@
         v-show="loginModalActive" @open-signup="openSignup()"
       />
       <SignUp 
-        v-show="signupModalActive" @open-login="openLogin()"
+        v-show="signupModalActive" @open-login="postSignup"
       />
     </b-modal>
 
@@ -93,6 +93,7 @@ import destinations from '@/assets/destinations.json'
 import fuzzysort from 'fuzzysort'
 import sleep from 'await-sleep'
 import axios from 'axios'
+import _ from 'lodash'
 
 import Login from '@/components/Login.vue'
 import SignUp from '@/components/SignUp.vue'
@@ -136,6 +137,18 @@ export default {
       this.modalActive = true;
     },
 
+    postSignup(name) {
+      const escaped_name = _.escape(name)
+      this.$buefy.toast.open({
+        duration: 5000,
+        message: `Welcome  to Ascenda, ${escaped_name}!`,
+        type: 'is-success',
+        pauseOnHover: true
+      });
+
+      this.openLogin();
+    },
+
     openLogin() {
       this.loginModalActive = true;
       this.signupModalActive = false;
@@ -143,6 +156,8 @@ export default {
     }
   },
   mounted: function () {
+    const self = this;
+
     for (let destination of destinations) {
       // console.log(destination)
       const destinationID = destination["uid"]
@@ -152,7 +167,6 @@ export default {
     };
 
     const baseSearchURL = "https://hotelapi.loyalty.dev/api/hotels";
-    const self = this;
 
     (async () => {
       let lastDestID = null;

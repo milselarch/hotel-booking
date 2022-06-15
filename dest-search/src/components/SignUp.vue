@@ -99,6 +99,7 @@
           re_password: this.re_password,
         }
 
+        self.hasError = false;
         self.name_error = {};
         self.email_error = {};
         self.password_error = {};
@@ -108,15 +109,7 @@
         axios.post(
           'auth/users/', formdata
         ).then(response => {
-          self.hasError = false;
-          self.$buefy.toast.open({
-            duration: 5000,
-            message: `Welcome to ascenda, ${self.name}`,
-            type: 'is-link',
-            pauseOnHover: true
-          })
-
-          this.$emit('open-login', true)
+          this.$emit('open-login')
        
        }).catch(err_resp => {
           const errors = err_resp.response.data
@@ -137,7 +130,12 @@
           for (let cause in errors) {
             // only go through errors not covered already
             if (formdata.hasOwnProperty(cause)) { continue; }
-            other_errors.push(...errors[cause])
+            const reasons = errors[cause];
+            if (reasons instanceof Array) {
+              other_errors.push(...errors[cause])
+            } else {
+              other_errors.push(errors[cause])
+            }
           }
 
           self.other_errors = other_errors.join('\n');
