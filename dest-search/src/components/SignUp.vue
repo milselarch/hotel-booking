@@ -7,7 +7,7 @@
 
         <b-field label="Email" class="input-field"
           :type="{ 'is-danger': hasError }"
-          :message="{ 'Email is not available': hasError }">
+          :message="email_error">
           <b-input
             type="email" value=""
             maxlength="30" placeholder="nobody@nowhere.com"
@@ -17,7 +17,7 @@
 
         <b-field label="Name" class="input-field"
           :type="{ 'is-danger': hasError }"
-          :message="{ 'Please check your name': hasError }">
+          :message="name_error">
           <b-input
             value="" maxlength="30" placeholder="John Doe"
             v-model="name"
@@ -26,10 +26,7 @@
 
         <b-field label="Password" class="input-field"
           :type="{ 'is-danger': hasError }"
-          :message="[
-            { 'Password is too short': hasError },
-            { 'Password must have at least 8 characters': hasError }
-          ]">
+          :message="password_error">
           <b-input 
             value="" type="password" maxlength="30"
             placeholder="password123" v-model="password"
@@ -38,20 +35,22 @@
 
         <b-field label="Confirm Password" class="input-field"
           :type="{ 'is-danger': hasError }"
-          :message="[
-            { 'Password is too short': hasError },
-            { 'Password must have at least 8 characters': hasError }
-          ]">
+          :message="re_password_error">
           <b-input 
             value="" type="password" maxlength="30"
             placeholder="password123" v-model="re_password"
           ></b-input>
         </b-field>
 
+        <b-message 
+          type="is-danger" has-icon
+          style="white-space: pre-line"
+        >{{ other_errors }}</b-message>
 
         <div class="button-controls">
           <b-button 
-            type="is-dark" id="signup" class="fat-button" @click="signup()"
+            type="is-dark" id="signup" class="fat-button"
+            @click="signup()" :disabled="pending"
           >
             Sign Up
           </b-button>
@@ -70,26 +69,77 @@
 
     data() {
       return {
-        hasError: false
+        name: '',
+        email: '',
+        password: '',
+        re_password: '',
+
+        name_error: {},
+        email_error: {},
+        password_error: {},
+        re_password_error: {},
+        other_errors: {},
+
+        hasError: false,
+        // used to check if form is being processed
+        pending: false 
       }
     },
     methods: {
+
       signup() {
+        const self = this;
+        self.pending = true
+
         const formdata = {
           email: this.email,
           name: this.name,
           password: this.password,
           re_password: this.re_password,
         }
-        
-        axios
-          .post('auth/users/', formdata)
-          .then(response=>{
-            this.$router.push("/about") // TODO: change to open login modal
-          })
-          .catch(error =>{
-            console.log(error)
-          })
+
+        self.name_error = {};
+        self.email_error = {};
+        self.password_error = {};
+        self.re_password_error = {};
+        self.other_errors = {}
+
+        axios.post(
+          'auth/users/', formdata
+        ).then(response => {
+          self.hasError = false;
+          self.$router.push("/about") // TODO: change to open login modal
+       
+       }).catch(err_resp => {
+          const errors = err_resp.response.data
+
+          if (errors.hasOwnProperty('email')) {
+            self.email_error = errors['email']
+          } if (errors.hasOwnProperty('name')) {
+            self.name_error = errors['name']
+          } if (errors.hasOwnProperty('password')) {
+            self.password_error = errors['password']
+          } if (errors.hasOwnProperty('re_password')) {
+            self.re_password_error = errors['re_password']
+          }
+
+          console.error('ERRORS', errors)
+
+          const other_errors = []
+          for (let cause in errors) {
+            // only go through errors not covered already
+            if (formdata.hasOwnProperty(cause)) { continue; }
+            other_errors.push(...errors[cause])
+          }
+
+          self.other_errors = other_errors.join('\n');
+          self.hasError = true;
+
+        }).finally(() => {
+          // simulate a delay for loading a response
+          // setTimeout(() => { self.pending = false }, 1000)
+          self.pending = false;
+        })
       }
     }
   };

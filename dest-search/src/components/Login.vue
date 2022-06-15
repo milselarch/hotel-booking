@@ -54,7 +54,6 @@
     },
 
     methods: {
-
       openSignupModal() {
         this.$emit('open-signup', true)
       },
@@ -66,18 +65,17 @@
           password: this.password,
         }
         
-        axios
-          .post('auth/jwt/create/', formdata)
-          .then(response=>{
-            this.$router.push("/about") // TODO: redirect to profile page
-            console.log(response.data);
-            const access_token = response.data.access
-            const refresh_token = response.data.refresh
-            // axios.defaults.headers.common["Authorization"] = 'Bearer ' + access_token
-          })
-          .catch(error =>{
-            console.log(error)
-          })
+        axios.post(
+          'auth/jwt/create/', formdata
+        ).then(response=>{
+          this.$router.push("/about") // TODO: redirect to profile page
+          console.log(response.data);
+          const access_token = response.data.access
+          const refresh_token = response.data.refresh
+          // axios.defaults.headers.common["Authorization"] = 'Bearer ' + access_token
+        }).catch(error =>{
+          console.log(error)
+        })
       }
     }
   }
