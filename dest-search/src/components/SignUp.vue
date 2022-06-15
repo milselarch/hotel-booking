@@ -11,6 +11,16 @@
           <b-input
             type="email" value=""
             maxlength="30" placeholder="nobody@nowhere.com"
+            v-model="email"
+          ></b-input>
+        </b-field>
+
+        <b-field label="Name" class="input-field"
+          :type="{ 'is-danger': hasError }"
+          :message="{ 'Please check your name': hasError }">
+          <b-input
+            value="" maxlength="30" placeholder="John Doe"
+            v-model="name"
           ></b-input>
         </b-field>
 
@@ -22,7 +32,7 @@
           ]">
           <b-input 
             value="" type="password" maxlength="30"
-            placeholder="password123"
+            placeholder="password123" v-model="password"
           ></b-input>
         </b-field>
 
@@ -34,14 +44,14 @@
           ]">
           <b-input 
             value="" type="password" maxlength="30"
-            placeholder="password123"
+            placeholder="password123" v-model="re_password"
           ></b-input>
         </b-field>
 
 
         <div class="button-controls">
           <b-button 
-            type="is-dark" id="signup" class="fat-button"
+            type="is-dark" id="signup" class="fat-button" @click="signup()"
           >
             Sign Up
           </b-button>
@@ -53,6 +63,8 @@
 </template>
 
 <script>
+  import axios from 'axios';
+
   export default {
     name: 'SignUp',
 
@@ -60,8 +72,30 @@
       return {
         hasError: false
       }
+    },
+    methods: {
+      signup() {
+        const formdata = {
+          email: this.email,
+          name: this.name,
+          password: this.password,
+          re_password: this.re_password,
+        }
+        
+        axios
+          .post('auth/users/', formdata)
+          .then(response=>{
+            this.$router.push("/about") // TODO: change to open login modal
+          })
+          .catch(error =>{
+            console.log(error)
+          })
+      }
     }
-  }
+  };
+
+  
+
 </script>
 
 <style lang="scss" scoped>
