@@ -53,6 +53,10 @@ hr {
   background-color: #AAA;
 }
 
+p.help {
+  font-size: 1rem;
+}
+
 button.title-button > span {
   font-family: 'Babas Neue';
   font-size: 5rem;
