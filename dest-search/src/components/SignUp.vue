@@ -45,6 +45,7 @@
         <b-message 
           type="is-danger" has-icon
           style="white-space: pre-line"
+          v-show="other_errors !== ''"
         >{{ other_errors }}</b-message>
 
         <div class="button-controls">
@@ -78,7 +79,7 @@
         email_error: {},
         password_error: {},
         re_password_error: {},
-        other_errors: {},
+        other_errors: '',
 
         hasError: false,
         // used to check if form is being processed
@@ -102,13 +103,20 @@
         self.email_error = {};
         self.password_error = {};
         self.re_password_error = {};
-        self.other_errors = {}
+        self.other_errors = ''
 
         axios.post(
           'auth/users/', formdata
         ).then(response => {
           self.hasError = false;
-          self.$router.push("/about") // TODO: change to open login modal
+          self.$buefy.toast.open({
+            duration: 5000,
+            message: `Welcome to ascenda, ${self.name}`,
+            type: 'is-link',
+            pauseOnHover: true
+          })
+
+          this.$emit('open-login', true)
        
        }).catch(err_resp => {
           const errors = err_resp.response.data

@@ -1,8 +1,12 @@
 <template>
   <div id="home">
     <b-modal v-model="modalActive" :width="640" scroll="keep">
-      <Login v-show="loginModalActive" @open-signup="openSignup()"/>
-      <SignUp v-show="signupModalActive" />
+      <Login 
+        v-show="loginModalActive" @open-signup="openSignup()"
+      />
+      <SignUp 
+        v-show="signupModalActive" @open-login="openLogin()"
+      />
     </b-modal>
 
     <div id="front-cover">
