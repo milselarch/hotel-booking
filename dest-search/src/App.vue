@@ -4,8 +4,9 @@
       <template #brand>
         <b-navbar-item tag="router-link" :to="{ path: '/' }">
           <img
-            src="https://res.cloudinary.com/crunchbase-production/image/upload/c_lpad,f_auto,q_auto:eco,dpr_1/wdssvw2kkzjjiagwckjf"
-            alt="Lightweight UI components for Vue.js based on Bulma"
+            src="./assets/ascenda_logo.svg"
+            alt="Ascenda hotels"
+            class="inverted"
           >
         </b-navbar-item>
       </template>
@@ -47,6 +48,10 @@ export default {
 <style lang="scss">
 * {
   font-family: 'Open Sans', sans-serif;
+}
+
+img.inverted {
+  filter: invert(100%);
 }
 
 hr {

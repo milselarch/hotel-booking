@@ -95,7 +95,14 @@
           // axios.defaults.headers.common["Authorization"] = 'Bearer ' + access_token
         
         }).catch(err_resp =>{
-          const errors = err_resp.response.data
+          // console.log('ERR_RESP', err_resp)
+          let errors = err_resp.response.data
+          const other_errors = []
+
+          if (errors === undefined) {
+            other_errors.push(err_resp.message)
+            errors = []
+          }
 
           if (errors.hasOwnProperty('email')) {
             self.email_error = errors['email']
@@ -105,7 +112,6 @@
 
           console.error('ERRORS', errors)
 
-          const other_errors = []
           for (let cause in errors) {
             // only go through errors not covered already
             if (formdata.hasOwnProperty(cause)) { continue; }
