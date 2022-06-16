@@ -46,7 +46,7 @@
               placeholder="e.g. tioman island"
               clearable
               @select="option => selected = option">
-              <template #empty>No results found</template>
+              <template #empty>{{ searchEmptyMessage }}</template>
             </b-autocomplete>
           </b-field>
 
@@ -89,7 +89,6 @@
 </template>
 
 <script>
-import destinations from '@/assets/destinations.json'
 import fuzzysort from 'fuzzysort'
 import sleep from 'await-sleep'
 import axios from 'axios'
@@ -103,8 +102,10 @@ export default {
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
+      destinationsLoaded: false,
       destinationNames: [], // array of destination names
       destinationMappings: {}, // map destination name to ID
+      
       hotels: {},
       selected: null,
       destination: '',
@@ -158,13 +159,21 @@ export default {
   mounted: function () {
     const self = this;
 
-    for (let destination of destinations) {
-      // console.log(destination)
-      const destinationID = destination["uid"]
-      const destinationName = destination["term"]
-      this.destinationNames.push(destinationName)
-      this.destinationMappings[destinationName] = destinationID
-    };
+    const loader = import('@/assets/destinations.json')
+    loader.then(async (destinations) => {
+      // await sleep(10000); // simulate json load delay
+      // console.log('DESINATIONS JSON LOADED')
+
+      for (let destination of destinations) {
+        // console.log(destination)
+        const destinationID = destination["uid"]
+        const destinationName = destination["term"]
+        self.destinationNames.push(destinationName)
+        self.destinationMappings[destinationName] = destinationID
+      };
+
+      self.destinationsLoaded = true;
+    })
 
     const baseSearchURL = "https://hotelapi.loyalty.dev/api/hotels";
 
@@ -193,7 +202,16 @@ export default {
 
     console.log("mount complete")
   },
+
   computed: {
+    searchEmptyMessage() {
+      if (this.destinationsLoaded) {
+        return 'No results found'
+      } else {
+        return 'Loading avaliable desinations...'
+      }
+    },
+
     filteredDataArray() {
       const matches = fuzzysort.go(
         this.destination, this.destinationNames

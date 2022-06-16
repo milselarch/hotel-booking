@@ -3,5 +3,7 @@
     ["env", { "modules": false }],
     "stage-3"
   ],
-  "plugins": ["transform-regenerator"]
+  "plugins": [
+    "transform-regenerator", "syntax-dynamic-import"
+  ]
 }
