@@ -13,9 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.generic import TemplateView
+
+from hotel_booking_django.api_proxy import proxy_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,5 +27,9 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    re_path(r'^.*', TemplateView.as_view(template_name = 'index.html'))
+    re_path('proxy/(?P<path>.*)', proxy_view),
+    re_path(
+        r'^.*',
+        TemplateView.as_view(template_name='index.html')
+    ),
 ]
