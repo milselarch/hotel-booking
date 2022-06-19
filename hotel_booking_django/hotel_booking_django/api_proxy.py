@@ -15,6 +15,7 @@ def proxy_view(request, path):
 
     # print('params', get_params)
     remote_url = f'{base_url}/{path}?{formatted_get_params}'
+    print(f'REMOTE: {remote_url}')
     proxy_success, error_message = True, ''
     response_json, raw_response = {}, ''
     response, status = None, -1

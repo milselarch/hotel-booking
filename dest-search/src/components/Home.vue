@@ -67,7 +67,8 @@
       >
         <div class="card-image">
           <figure class="image is-4by3">
-            <img :src="hotel['image_url']" alt="Placeholder image">
+            <img :src="build_image_url(hotel)" 
+            alt="Hotel image not found">
           </figure>
         </div>
         <div class="card-content">
@@ -77,9 +78,7 @@
             </div>
           </div>
 
-          <div class="content">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Phasellus nec iaculis mauris.
+          <div class="content clipped" v-html="hotel['description']">
           </div>
         </div>
       </div>
@@ -106,7 +105,7 @@ export default {
       destinationNames: [], // array of destination names
       destinationMappings: {}, // map destination name to ID
       
-      hotels: {},
+      hotels: [],
       selected: null,
       destination: '',
 
@@ -116,17 +115,34 @@ export default {
     }
   },
   methods: {
-    async loadHotels() {
-      const baseUrl = "https://hotelapi.loyalty.dev/api/hotels"
-      const destinationID = this.destinationMappings[
-        this.destination
-      ]
+    build_image_url(hotel_data) {
+      const image_details = hotel_data.image_details;
+      const prefix = image_details.prefix;
+      const image_no = hotel_data.default_image_index;
+      const suffix = image_details.suffix;
+
+      const image_count = hotel_data.imageCount;
+      if (image_count === 0) {
+        return 'https://www.htmlcsscolor.com/preview/gallery/D1D1D1.png'
+      }
+
+      return `${prefix}${image_no}${suffix}`
+    },
+
+    async load_hotels(destinationID) {
+      const self = this;
 
       try {
-        const response = await axios.get(baseUrl, {
+        const response = await axios.get("proxy/hotels", {
           params: {destination_id: destinationID}
         });
-        console.log(response);
+
+        console.warn('RESPONSE', response)
+        if (response.status !== 200) {
+          throw response.statusText;
+        }
+
+        self.hotels = response.data.proxy_json;
       } catch (error) {
         console.error(error);
       }
@@ -178,25 +194,22 @@ export default {
     const baseSearchURL = "https://hotelapi.loyalty.dev/api/hotels";
 
     (async () => {
-      let lastDestID = null;
+      let last_dest_id = null;
 
       while (true) {
         await sleep(100);
         if (!self.isDestinationValid) {
           continue
-        } else if (self.destinationID === lastDestID) {
+        } 
+        
+        const dest_id = self.destinationMappings[self.destination]
+        if (last_dest_id === dest_id) {
           continue
         }
 
-        lastDestID = self.destinationID;
-        
-        try {
-          const response = await axios.get(baseSearchURL, {
-            params: {destination_id: self.destinationID}
-          })
-        } catch (error) {
-          console.error(error)
-        }
+        last_dest_id = dest_id;
+        console.log('DESTID', dest_id)
+        await self.load_hotels(dest_id)
       }
     })();
 
@@ -302,6 +315,20 @@ div#front-cover {
 div#hotel-cards {
   padding: 5rem;
   background-color: red;
+
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  & > .card {
+    margin: 1rem;
+
+    & > .card-content {
+      text-overflow: ellipsis;
+      max-height: 20rem;
+      overflow-y: scroll;
+    }
+  }
 }
 
 h1, h2 {
