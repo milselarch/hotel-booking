@@ -293,8 +293,8 @@ div#front-cover {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  margin-top: 3rem;
-  margin-bottom: 2rem;
+  margin-top: 4rem;
+  margin-bottom: 4rem;
   width: 100%;
 
   & > div.description-wrapper {

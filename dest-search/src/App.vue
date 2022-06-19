@@ -1,8 +1,12 @@
 <template>
   <div id="app">
-    <b-navbar id="main-navbar">
+    <b-navbar
+      id="main-navbar" fixed-top
+    >
       <template #brand>
-        <b-navbar-item tag="router-link" :to="{ path: '/' }">
+        <b-navbar-item 
+          tag="router-link" :to="{ path: '/' }"
+        >
           <img
             src="./assets/ascenda_logo.svg"
             alt="Ascenda hotels"
@@ -83,8 +87,7 @@ div.card-content > div.content.clipped p {
 */
 
 br {
-      clear: both;
-
+  clear: both;
 }
 
 img.inverted {
@@ -137,6 +140,13 @@ button.fat-button {
     padding-left: 2rem !important;
     padding-right: 2rem !important;
     padding: 1rem;
+
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(5px);
+    /*
+    backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
+    */
   }
 }
 
