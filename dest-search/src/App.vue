@@ -112,11 +112,6 @@ button.fat-button {
   margin-bottom: 2rem;
 }
 
-div#hotel-cards {
-  padding: 5rem;
-  background-color: red;
-}
-
 @font-face {
   font-family: "Open Sans";
   src:
