@@ -65,7 +65,8 @@
       >
         <div class="card-image">
           <figure class="image is-4by3">
-            <img :src="build_image_url(hotel)" 
+            <img :src="build_image_url(hotel)"
+            class="card-image" 
             @error="replace_default_image"
             alt="Hotel image not found">
           </figure>
@@ -351,6 +352,11 @@ div#hotel-cards {
 
   & > .card {
     margin: 1rem;
+
+    & img.card-image {
+      // preserve aspect ratio for card images
+      object-fit: cover;
+    }
 
     & > .card-content > div.content {
       text-overflow: ellipsis;
