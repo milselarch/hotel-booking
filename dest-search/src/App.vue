@@ -1,8 +1,12 @@
 <template>
   <div id="app">
-    <b-navbar id="main-navbar">
+    <b-navbar
+      id="main-navbar" fixed-top
+    >
       <template #brand>
-        <b-navbar-item tag="router-link" :to="{ path: '/' }">
+        <b-navbar-item 
+          tag="router-link" :to="{ path: '/' }"
+        >
           <img
             src="./assets/ascenda_logo.svg"
             alt="Ascenda hotels"
@@ -50,6 +54,42 @@ export default {
   font-family: 'Open Sans', sans-serif;
 }
 
+::-webkit-scrollbar {
+  width: 20px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a8bbbf;
+}
+
+/*
+div.card-content > div.content.clipped p {
+  background-color: beige;
+  text-overflow:ellipsis;
+  overflow:hidden;
+  // Addition lines for 2 line or multiline ellipsis
+  display: -webkit-box !important;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+}
+*/
+
+br {
+  clear: both;
+}
+
 img.inverted {
   filter: invert(100%);
 }
@@ -73,11 +113,6 @@ button.fat-button {
   padding-top: 1.4rem;
   padding-bottom: 1.4rem;
   margin-bottom: 2rem;
-}
-
-div#hotel-cards {
-  padding: 5rem;
-  background-color: red;
 }
 
 @font-face {
@@ -105,6 +140,13 @@ div#hotel-cards {
     padding-left: 2rem !important;
     padding-right: 2rem !important;
     padding: 1rem;
+
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(5px);
+    /*
+    backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
+    */
   }
 }
 

@@ -110,8 +110,8 @@
           'auth/users/', formdata
         ).then(response => {
           this.$emit('open-login')
-       
-       }).catch(err_resp => {
+  
+        }).catch(err_resp => {
           let errors = err_resp.response.data
           const other_errors = []
 

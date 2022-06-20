@@ -58,8 +58,6 @@
 
     </div>
 
-    {{ isDestinationValid }}
-
     <div id="hotel-cards">
       <div
         class="card" style="width: 20rem" 
@@ -67,7 +65,10 @@
       >
         <div class="card-image">
           <figure class="image is-4by3">
-            <img :src="hotel['image_url']" alt="Placeholder image">
+            <img :src="build_image_url(hotel)"
+            class="card-image" 
+            @error="replace_default_image"
+            alt="Hotel image not found">
           </figure>
         </div>
         <div class="card-content">
@@ -77,9 +78,11 @@
             </div>
           </div>
 
-          <div class="content">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Phasellus nec iaculis mauris.
+          <p class="address subtitle is-6">
+            {{ hotel['address'] }}
+          </p>
+
+          <div class="content clipped" v-html="hotel['description']">
           </div>
         </div>
       </div>
@@ -96,6 +99,8 @@ import _ from 'lodash'
 
 import Login from '@/components/Login.vue'
 import SignUp from '@/components/SignUp.vue'
+import BLANK_IMAGE from "@/assets/image_not_found.png"
+
 
 export default {
   name: 'Home',
@@ -106,7 +111,7 @@ export default {
       destinationNames: [], // array of destination names
       destinationMappings: {}, // map destination name to ID
       
-      hotels: {},
+      hotels: [],
       selected: null,
       destination: '',
 
@@ -116,17 +121,57 @@ export default {
     }
   },
   methods: {
-    async loadHotels() {
-      const baseUrl = "https://hotelapi.loyalty.dev/api/hotels"
-      const destinationID = this.destinationMappings[
-        this.destination
-      ]
+    replace_default_image(e) {
+      /*
+      load the image not found image if the original
+      hotel image fails to load. We need this because
+      theres a lot of hotels where the image provided
+      actually does not exist in the server
+      */
+      // https://stackoverflow.com/questions/39009538
+      if (e.target.src == BLANK_IMAGE) { return; }
+      e.target.src = BLANK_IMAGE;
+    },
+    build_image_url(hotel_data) {
+      const image_details = hotel_data.image_details;
+      const prefix = image_details.prefix;
+      const image_no = hotel_data.default_image_index;
+      const suffix = image_details.suffix;
+
+      const image_count = hotel_data.imageCount;
+      if (image_count === 0) {
+        return BLANK_IMAGE;
+      }
+
+      return `${prefix}${image_no}${suffix}`
+    },
+
+    async load_hotels(destinationID) {
+      const self = this;
+      /*
+      TODO: implement lazier loading i.e. dont 
+      try and force showing all the hotels once their data
+      has arrived (some searches have crashed the site lol)
+      TODO: add rating, address info, and booking button
+      TODO: filter by rating and amentities
+      TODO: show loader when loading hotels
+      TODO: show error message when hotel load fails
+      TODO-P1: filter by room number 
+      (have to add rooms to destinations.json)
+      TODO-P2: dynamic card shrinking + pinterest gallery style layout
+      */
 
       try {
-        const response = await axios.get(baseUrl, {
+        const response = await axios.get("proxy/hotels", {
           params: {destination_id: destinationID}
         });
-        console.log(response);
+
+        console.warn('RESPONSE', response)
+        if (response.status !== 200) {
+          throw response.statusText;
+        }
+
+        self.hotels = response.data.proxy_json;
       } catch (error) {
         console.error(error);
       }
@@ -178,25 +223,22 @@ export default {
     const baseSearchURL = "https://hotelapi.loyalty.dev/api/hotels";
 
     (async () => {
-      let lastDestID = null;
+      let last_dest_id = null;
 
       while (true) {
         await sleep(100);
         if (!self.isDestinationValid) {
           continue
-        } else if (self.destinationID === lastDestID) {
+        } 
+        
+        const dest_id = self.destinationMappings[self.destination]
+        if (last_dest_id === dest_id) {
           continue
         }
 
-        lastDestID = self.destinationID;
-        
-        try {
-          const response = await axios.get(baseSearchURL, {
-            params: {destination_id: self.destinationID}
-          })
-        } catch (error) {
-          console.error(error)
-        }
+        last_dest_id = dest_id;
+        console.log('DESTID', dest_id)
+        await self.load_hotels(dest_id)
       }
     })();
 
@@ -251,7 +293,8 @@ div#front-cover {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  margin-top: 3rem;
+  margin-top: 4rem;
+  margin-bottom: 4rem;
   width: 100%;
 
   & > div.description-wrapper {
@@ -301,7 +344,27 @@ div#front-cover {
 
 div#hotel-cards {
   padding: 5rem;
-  background-color: red;
+  background-color: beige;
+
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  & > .card {
+    margin: 1rem;
+
+    & img.card-image {
+      // preserve aspect ratio for card images
+      object-fit: cover;
+    }
+
+    & > .card-content > div.content {
+      text-overflow: ellipsis;
+      max-height: 19rem;
+      overflow-y: scroll;
+      padding-right: 0.5rem;
+    }
+  }
 }
 
 h1, h2 {
@@ -317,6 +380,13 @@ li {
   display: inline-block;
   margin: 0 10px;
 }
+
+/*
+p.address {
+  font-family: 'Babas Neue';
+  font-size: 1.2rem;
+}
+*/
 
 a {
   color: #42b983;
