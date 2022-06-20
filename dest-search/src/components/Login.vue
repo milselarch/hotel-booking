@@ -169,6 +169,8 @@ div#login-form {
 
 div#wrapper {
   padding: 2rem;
+  width: 25rem;
+  margin: auto;
   background-color: white;
 }
 </style>
