@@ -62,11 +62,12 @@
       v-infinite-scroll="loadMoreHotels" 
       infinite-scroll-disabled="allHotelsLoaded"
       infinite-scroll-distance="10"
-      id="hotel-cards"
+      id="hotel-cards" ref="cards_holder"
     >
       <div
         class="card" style="width: 20rem" 
         v-for="(hotel, key) in hotelsLoaded" v-bind:key="key"
+        ref="cards"
       >
         <div class="card-image">
           <figure class="image is-4by3">
@@ -76,6 +77,7 @@
             alt="Hotel image not found">
           </figure>
         </div>
+
         <div class="card-content">
           <div class="media">
             <div class="media-content">
@@ -87,7 +89,8 @@
             {{ hotel['address'] }}
           </p>
 
-          <div class="content clipped" v-html="hotel['description']">
+
+          <div class="content clipped" >
           </div>
         </div>
       </div>
@@ -97,14 +100,17 @@
 </template>
 
 <script>
+// v-html="hotel['description']"
 import fuzzysort from 'fuzzysort'
 import sleep from 'await-sleep'
 import axios from 'axios'
+import $ from 'jquery'
 import _ from 'lodash'
 
 import Login from '@/components/Login.vue'
 import SignUp from '@/components/SignUp.vue'
 import BLANK_IMAGE from "@/assets/image_not_found.png"
+import { faL } from '@fortawesome/free-solid-svg-icons'
 
 
 export default {
@@ -120,6 +126,9 @@ export default {
       hotelsLoaded: [],
       selected: null,
       destination: '',
+      cardWidth: null,
+      cardHolderWidth: null,
+      cardsPreloaded: false,
 
       modalActive: false,
       loginModalActive: false,
@@ -127,8 +136,53 @@ export default {
     }
   },
   methods: {
+    preloadCards() {
+      if (
+        (self.cardWidth === null) ||
+        (self.cardHolderWidth === null) ||
+        (self.cardsPreloaded === true)
+      ) {
+        return false;
+      }
+
+      this.loadMoreHotels()
+      this.cardsPreloaded = true
+      return true
+    },
+
     loadMoreHotels() {
-      for (let k=0; k<10; k++) {
+      /*
+      loads hotel cards such the entirety
+      of the last row is filled. 
+      */
+      const self = this;
+      let smartLoading = true;
+      let numToLoad = 9;
+      
+      if (
+        (self.cardWidth === null) ||
+        (self.cardHolderWidth === null)
+      ) {
+        smartLoading = false;
+      }
+
+      console.log(self.cardHolderWidth, self.cardWidth, smartLoading)
+
+      if (smartLoading) {
+        const numHotelsLoaded = self.hotelsLoaded.length;
+        const cardsPerRow = Math.max(1, Math.floor(
+          self.cardHolderWidth / self.cardWidth
+        ))
+
+        numToLoad += cardsPerRow - (
+          (numHotelsLoaded + numToLoad) % cardsPerRow
+        )
+      }
+
+      // let numToLoad = 10;
+      // numToLoad = 10
+
+      for (let k=0; k<numToLoad; k++) {
         const hotelIndex = this.hotelsLoaded.length;
         if (hotelIndex >= this.hotels.length) {
           return false;
@@ -242,6 +296,11 @@ export default {
     const baseSearchURL = "https://hotelapi.loyalty.dev/api/hotels";
 
     (async () => {
+      /*
+      this async loop will load in hotel data from the 
+      backend once a valid desination is entered into the
+      autocomplete search box
+      */
       let last_dest_id = null;
 
       while (true) {
@@ -258,6 +317,37 @@ export default {
         last_dest_id = dest_id;
         console.log('DESTID', dest_id)
         await self.load_hotels(dest_id)
+      }
+    })();
+
+    const cardsHolder = $(self.$refs.cards_holder)
+    self.cardHolderWidth = cardsHolder.width()
+    self.preloadCards()
+
+    $(window).resize(() => {
+      self.cardHolderWidth = cardsHolder.width()
+      console.log('OUTERWIDTH', cardsHolder, self.cardHolderWidth)
+    });
+
+    (async () => {
+      /*
+      this while loop will wait for hotel cards to render
+      so that we can reocrd their width
+      */
+      while (true) {
+        await sleep(100);
+        if (self.$refs.cards === undefined) {
+          continue;
+        } else if (self.$refs.cards.length === 0) {
+          continue;
+        }
+        
+        const card = self.$refs.cards[0]
+        // get width (+horizontal margin) taken by card
+        self.cardWidth = $(card).outerWidth(true)
+        console.log('WIDTH', self.cardWidth)
+        self.preloadCards()
+        break
       }
     })();
 

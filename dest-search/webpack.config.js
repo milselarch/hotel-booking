@@ -1,6 +1,5 @@
 var path = require('path')
 var webpack = require('webpack')
-const VueLoader = require('vue-loader')
 
 require("babel-polyfill");
 
@@ -105,10 +104,7 @@ module.exports = {
   performance: {
     hints: false
   },
-  devtool: '#eval-source-map',
-  plugins: [
-    new VueLoader.VueLoaderPlugin()
-  ]
+  devtool: '#eval-source-map'
 }
 
 if (process.env.NODE_ENV === 'production') {
