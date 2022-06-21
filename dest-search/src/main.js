@@ -7,6 +7,8 @@ import 'buefy/dist/buefy.css'
 
 import axios from 'axios'
 
+const infiniteScroll =  require('vue-infinite-scroll');
+
 axios.defaults.baseURL = "http://127.0.0.1:8000/"
 
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -18,6 +20,7 @@ import router from './router'
 library.add(fas)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(Buefy, { defaultIconPack: 'fas' })
+Vue.use(infiniteScroll)
 Vue.use(VueRouter);
 
 new Vue({

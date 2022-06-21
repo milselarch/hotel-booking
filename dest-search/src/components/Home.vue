@@ -58,10 +58,15 @@
 
     </div>
 
-    <div id="hotel-cards">
+    <div 
+      v-infinite-scroll="loadMoreHotels" 
+      infinite-scroll-disabled="allHotelsLoaded"
+      infinite-scroll-distance="10"
+      id="hotel-cards"
+    >
       <div
         class="card" style="width: 20rem" 
-        v-for="(hotel, key) in hotels" v-bind:key="key"
+        v-for="(hotel, key) in hotelsLoaded" v-bind:key="key"
       >
         <div class="card-image">
           <figure class="image is-4by3">
@@ -112,6 +117,7 @@ export default {
       destinationMappings: {}, // map destination name to ID
       
       hotels: [],
+      hotelsLoaded: [],
       selected: null,
       destination: '',
 
@@ -121,6 +127,17 @@ export default {
     }
   },
   methods: {
+    loadMoreHotels() {
+      for (let k=0; k<10; k++) {
+        const hotelIndex = this.hotelsLoaded.length;
+        if (hotelIndex >= this.hotels.length) {
+          return false;
+        }
+
+        this.hotelsLoaded.push(this.hotels[hotelIndex])
+      }
+    },
+
     replace_default_image(e) {
       /*
       load the image not found image if the original
@@ -149,7 +166,7 @@ export default {
     async load_hotels(destinationID) {
       const self = this;
       /*
-      TODO: implement lazier loading i.e. dont 
+      / TODO: implement lazier loading i.e. dont 
       try and force showing all the hotels once their data
       has arrived (some searches have crashed the site lol)
       TODO: add rating, address info, and booking button
@@ -172,6 +189,8 @@ export default {
         }
 
         self.hotels = response.data.proxy_json;
+        self.hotelsLoaded = []
+        self.loadMoreHotels();
       } catch (error) {
         console.error(error);
       }
@@ -246,6 +265,13 @@ export default {
   },
 
   computed: {
+    allHotelsLoaded () {
+      return (
+        this.hotels.length ===
+        this.hotelsLoaded.length
+      )
+    },
+
     searchEmptyMessage() {
       if (this.destinationsLoaded) {
         return 'No results found'
