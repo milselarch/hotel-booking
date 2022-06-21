@@ -1,0 +1,47 @@
+# hotel-booking
+
+
+# DB Install Instructions
+Fresh DB Install Instructions:
+1) Install MySql and Workbench (Products: MySQL Server, MySQL Workbench) 
+	and	Setup Root password (any password you like) 
+		Install Link: https://dev.mysql.com/downloads/windows/installer/8.0.html
+		Video Tutorial: https://www.youtube.com/watch?v=u96rVINbAUI
+		
+2) In MySQL Workbench, Create a new Connection (any connection name) 
+	using the root user account with the rest of the default settings
+	
+3) Open the connection and then under the query tab, 
+	paste the following 4 lines 
+	& execute (press the lighting icon) to create an empty DB & mysql user account:
+
+CREATE DATABASE hotel_booking;
+CREATE USER 'esc_server'@'localhost' IDENTIFIED BY 'AS12qw34!@';
+GRANT ALL PRIVILEGES ON hotel_booking . * TO 'esc_server'@'localhost';
+FLUSH PRIVILEGES; 
+	
+4) Open your terminal and cd to your git project folder. 
+	Activate Python Virtual Environment: "<virtual_environment_name>\scripts\activate"
+	Run "pip install -r requirements.txt" if you have not already,
+	which ensures that mysqlclient is installed as a python package
+
+5) cd to "hotel_booking_django" and run "python manage.py migrate"
+
+DONE.
+
+SQL Version Control Flow:
+1) After any "models.py" changes are made in django, 
+switch to command line, cd to "<git project folder>\hotel_booking_django"
+2) run "python manage.py makemigrations"
+	This would create "migration" scripts
+	under the migrations folder for the respective app folder
+3) run "python manage.py migrate"
+4) Before commiting this migration scripts into git, 
+	ensure you've pulled the latest files 
+	and in the migrations folder of the corresponding app folder (i.e accounts\migrations),
+	ensure your newly generated script's running number does not conflict with existing scripts.
+	If the number conflicts, ensure you rename your script file name with the next appropriate number.
+	Note: the running number is the number in the file name. 
+	i.e. for the script 0023_script_description.py, the number is 0023
+5) Ensure that you do a run "python manage.py migrate" 
+	and that there is no errors before pushing into git
