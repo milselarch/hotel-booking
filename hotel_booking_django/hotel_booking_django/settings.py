@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'djoser',
     'accounts',
+    'booking',
+    'common',
+    'payment',
 ]
 
 
@@ -145,6 +148,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('JWT',),
+   'USER_ID_FIELD': 'uid',
 }
 
 DJOSER = {
@@ -157,4 +161,4 @@ DJOSER = {
     }
 }
 
-AUTH_USER_MODEL = 'accounts.UserAccount'
+AUTH_USER_MODEL = 'accounts.user_account'
