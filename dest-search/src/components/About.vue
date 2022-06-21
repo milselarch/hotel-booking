@@ -78,9 +78,6 @@ export default {
         return "Breakfast not included"
       }
     }
-  },
-  mounted(){
-    this.check_breakfast()
   }
 }
 </script>
