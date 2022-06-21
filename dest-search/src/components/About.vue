@@ -21,7 +21,8 @@
               <!-- <ul>
                 <li v-for="(amenity, key) in room.amenities" v-bind:key="key">{{amenity}}</li>
               </ul> -->
-              <p>{{ room.price }}</p>
+              <p>{{ check_breakfast(room) }}</p>
+              <p style="font-size:1.5em">SGD <b>{{ room.price }}</b></p>
             </div>
           </div>
 
@@ -46,7 +47,7 @@ export default {
   name: 'About',
   data(){
     return{
-      rooms: Roomlist
+      rooms: Roomlist,
     }
   },
   methods: {
@@ -65,10 +66,21 @@ export default {
       const images = room.images;
       if (images.length > 0){
         const url = images[0];
-        console.log(Object.values(url)[0]);
+        // console.log(Object.values(url)[0]);
         return Object.values(url)[0];
       }
+    },
+    check_breakfast(room){
+      if (room.roomAdditionalInfo.breakfastInfo == "hotel_detail_breakfast_included"){
+        return "Breakfast included"
+      }
+      else {
+        return "Breakfast not included"
+      }
     }
+  },
+  mounted(){
+    this.check_breakfast()
   }
 }
 </script>
