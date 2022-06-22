@@ -23,7 +23,7 @@ FLUSH PRIVILEGES;
 ```
 	
 4) Open your terminal and cd to your git project folder.  
-	Activate Python Virtual Environment: "<virtual_environment_name>\scripts\activate"  
+	Activate Python Virtual Environment: `<virtual_environment_name>\scripts\activate`  
 	Run `pip install -r requirements.txt` if you have not already,  
 	which ensures that mysqlclient is installed as a python package
 
@@ -43,11 +43,11 @@ switch to command line, cd to "<git_project_root_folder>\hotel_booking_django"
 
 4) Before commiting this migration scripts into git,  
 	ensure you've pulled the latest files  
-	and in the migrations folder of the corresponding app folder (i.e accounts\migrations),  
+	and in the migrations folder of the corresponding django app (i.e "<git_project_root_folder>\hotel_booking_django\accounts\migrations"),  
 	__ensure your newly generated script's running number does not conflict with existing scripts.__  
 	If the number conflicts, ensure you __rename your script file name with the next appropriate number__.  
 	>Note: the running number is the number in the file name.  
 	i.e. for the script ***0023***_script_description.py, the number is 0023
 	
-5) Ensure that you do a run "python manage.py migrate" 
+5) Ensure that you do a run `python manage.py migrate` 
 	and that there is no errors before commiting & pushing into git
