@@ -249,7 +249,7 @@ export default {
       self.loadError = false;
       self.hotels = []
 
-      await sleep(10000);
+      // await sleep(10000);
       
       /*
       / TODO: implement lazier loading i.e. dont 
