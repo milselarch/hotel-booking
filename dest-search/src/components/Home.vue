@@ -59,7 +59,7 @@
     </div>
 
     <div 
-      v-infinite-scroll="loadMoreHotels" 
+      v-infinite-scroll="render_more_hotels" 
       infinite-scroll-disabled="allHotelsLoaded"
       infinite-scroll-distance="10"
       id="hotel-cards" ref="cards_holder"
@@ -89,11 +89,22 @@
             {{ hotel['address'] }}
           </p>
 
+          <b-rate 
+            v-model="hotel['rating']" :disabled="true"
+            :spaced="true"
+          />
 
           <div class="content clipped" >
           </div>
         </div>
       </div>
+    </div>
+
+    <div
+      id="end-bar" v-show="allHotelsLoaded && scrollable"
+      ref="end_bar"
+    >
+      <a v-on:click="scrollToTop()">— Go back to top —</a>
     </div>
 
   </div>
@@ -132,10 +143,15 @@ export default {
 
       modalActive: false,
       loginModalActive: false,
-      signupModalActive: false
+      signupModalActive: false,
+      scrollable: false
     }
   },
   methods: {
+    scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    
     preloadCards() {
       if (
         (self.cardWidth === null) ||
@@ -145,12 +161,12 @@ export default {
         return false;
       }
 
-      this.loadMoreHotels()
+      this.render_more_hotels()
       this.cardsPreloaded = true
       return true
     },
 
-    loadMoreHotels() {
+    render_more_hotels() {
       /*
       loads hotel cards such the entirety
       of the last row is filled. 
@@ -217,7 +233,7 @@ export default {
       return `${prefix}${image_no}${suffix}`
     },
 
-    async load_hotels(destinationID) {
+    async load_hotels(dest_id) {
       const self = this;
       /*
       / TODO: implement lazier loading i.e. dont 
@@ -232,19 +248,31 @@ export default {
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
 
-      try {
-        const response = await axios.get("proxy/hotels", {
-          params: {destination_id: destinationID}
-        });
+      const price_endpoint = `proxy/destinations/${dest_id}/prices`
+      const price_request = axios.get(price_endpoint)
+      const hotel_request = axios.get("proxy/hotels", {
+        params: {destination_id: dest_id}
+      });      
 
-        console.warn('RESPONSE', response)
+      try {
+        // wait for both requests to complete
+        const [price_resp, hotel_resp] = await Promise.all([
+          price_request, hotel_request
+        ])
+
+        let response = hotel_resp;
+        console.warn('RESPONSE', price_resp, hotel_resp)
         if (response.status !== 200) {
           throw response.statusText;
         }
 
         self.hotels = response.data.proxy_json;
+        self.hotels.sort((hotel1, hotel2) => {
+          return -(hotel1['rating'] - hotel2['rating'])
+        })
+
         self.hotelsLoaded = []
-        self.loadMoreHotels();
+        self.render_more_hotels();
       } catch (error) {
         console.error(error);
       }
@@ -351,11 +379,35 @@ export default {
       }
     })();
 
+    (async () => {
+      /*
+      this while loop will wait for hotel cards to render
+      so that we can reocrd their width
+      */
+      while (true) {
+        await sleep(100);
+        const documentHeight = $(document).height()
+        const windowHeight = $(window).height()
+        const endBarHeight = $(self.$refs.end_bar).height()
+        const contentHeight = documentHeight - endBarHeight
+
+        // console.log('DOC HEIGHT', documentHeight)
+        // console.log('WINDOW HEIGHT', windowHeight)
+        // console.log('BAR HEIGHT', endBarHeight)
+
+        if (contentHeight > windowHeight) {
+          self.scrollable = true
+        } else {
+          self.scrollable = false
+        }
+      }
+    })();
+
     console.log("mount complete")
   },
 
   computed: {
-    allHotelsLoaded () {
+    allHotelsLoaded() {
       return (
         this.hotels.length ===
         this.hotelsLoaded.length
@@ -403,6 +455,20 @@ export default {
 <style lang="scss" scoped>
 * {
   font-family: 'Open Sans', sans-serif;
+}
+
+div#end-bar {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  display: flex;
+
+  & > a {
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: 'Babas Neue';
+    font-size: 2rem;
+  }
 }
 
 div#front-cover {
@@ -497,12 +563,9 @@ li {
   margin: 0 10px;
 }
 
-/*
 p.address {
-  font-family: 'Babas Neue';
-  font-size: 1.2rem;
+  margin-bottom: 0.2rem;
 }
-*/
 
 a {
   color: #42b983;
