@@ -8,7 +8,20 @@ from django.http import JsonResponse
 
 @csrf_exempt
 def proxy_view(request, path):
-    base_url = f'https://hotelapi.loyalty.dev/api'
+    return proxy_request(
+        request, path, base_url=f'https://hotelapi.loyalty.dev/api'
+    )
+
+
+@csrf_exempt
+def proxy_mocklabs(request, path):
+    return proxy_request(
+        request, path, base_url=f'https://ascendahotels.mocklab.io/api'
+    )
+
+
+def proxy_request(request, path, base_url):
+    assert not base_url.endswith('/')
     formatted_get_params = '&'.join([
         f'{param}={request.GET[param]}' for param in request.GET
     ])

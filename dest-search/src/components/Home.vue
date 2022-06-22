@@ -63,7 +63,13 @@
       infinite-scroll-disabled="allHotelsLoaded"
       infinite-scroll-distance="10"
       id="hotel-cards" ref="cards_holder"
+      v-bind:class="{ bland: isDestinationValid }"
     >
+      <div id="status" v-show="show_load_status">
+        <p id="status-text">{{ statusText }}</p>
+        <square id="spinner" v-show="isLoading"></square>
+      </div>
+
       <div
         class="card" style="width: 20rem" 
         v-for="(hotel, key) in hotelsLoaded" v-bind:key="key"
@@ -140,6 +146,9 @@ export default {
       cardWidth: null,
       cardHolderWidth: null,
       cardsPreloaded: false,
+
+      isLoading: false,
+      loadError: false,
 
       modalActive: false,
       loginModalActive: false,
@@ -235,12 +244,19 @@ export default {
 
     async load_hotels(dest_id) {
       const self = this;
+      self.isLoading = true;
+      self.hotelsLoaded = [];
+      self.loadError = false;
+      self.hotels = []
+
+      await sleep(10000);
+      
       /*
       / TODO: implement lazier loading i.e. dont 
       try and force showing all the hotels once their data
       has arrived (some searches have crashed the site lol)
-      TODO: add rating, address info, and booking button
-      TODO: filter by rating and amentities
+      / TODO: add rating, address info, and booking button
+      / TODO: filter by rating
       TODO: show loader when loading hotels
       TODO: show error message when hotel load fails
       TODO-P1: filter by room number 
@@ -248,11 +264,13 @@ export default {
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
 
-      const price_endpoint = `proxy/destinations/${dest_id}/prices`
+      const price_endpoint = `mocklabs/destinations/${dest_id}/prices`
+      // pricing api has missing destinations (e.g. TXQ5)
+      // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
       const price_request = axios.get(price_endpoint)
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
-      });      
+      });
 
       try {
         // wait for both requests to complete
@@ -260,8 +278,9 @@ export default {
           price_request, hotel_request
         ])
 
-        let response = hotel_resp;
-        console.warn('RESPONSE', price_resp, hotel_resp)
+        let response = await hotel_resp;
+        console.warn('RESPONSE', price_resp, response)
+        console.log('CODE', response.data.status_code)
         if (response.status !== 200) {
           throw response.statusText;
         }
@@ -274,8 +293,11 @@ export default {
         self.hotelsLoaded = []
         self.render_more_hotels();
       } catch (error) {
+        self.loadError = true;
         console.error(error);
       }
+
+      self.isLoading = false;
     },
 
     openSignup() {
@@ -407,6 +429,20 @@ export default {
   },
 
   computed: {
+    show_load_status() {
+      return this.loadError || this.isLoading
+    },
+
+    statusText () {
+      if (this.loadError) {
+        return "failed to load hotels\n●︿●"
+      } else if (this.isLoading) {
+        return "loading hotels"
+      }
+
+      return ""
+    },
+
     allHotelsLoaded() {
       return (
         this.hotels.length ===
@@ -532,6 +568,10 @@ div#hotel-cards {
   justify-content: center;
   flex-wrap: wrap;
 
+  &.bland {
+    background-color: #e7e6d5;
+  }
+
   & > .card {
     margin: 1rem;
 
@@ -545,6 +585,26 @@ div#hotel-cards {
       max-height: 19rem;
       overflow-y: scroll;
       padding-right: 0.5rem;
+    }
+  }
+
+  & > div#status {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    & > p#status-text {
+      font-family: 'Babas Neue';
+      font-size: 2rem;
+      white-space: pre-wrap;
+      text-align: center;
+    }
+
+    & > #spinner {
+      margin-top: 0.5rem;
+      margin-left: auto;
+      margin-right: auto;
+      width: fit-content;
     }
   }
 }

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import VueRouter from "vue-router";
 
+import VueSpinners from 'vue-spinners'
 import Buefy from 'buefy'
 import 'buefy/dist/buefy.css'
 
@@ -18,6 +19,8 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import router from './router'
 
 library.add(fas)
+
+Vue.use(VueSpinners)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(Buefy, { defaultIconPack: 'fas' })
 Vue.use(infiniteScroll)

@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 
-from hotel_booking_django.api_proxy import proxy_view
+from hotel_booking_django.api_proxy import proxy_view, proxy_mocklabs
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,6 +28,8 @@ urlpatterns = [
 
 urlpatterns += [
     re_path('proxy/(?P<path>.*)', proxy_view),
+    re_path('mocklabs/(?P<path>.*)', proxy_mocklabs),
+
     re_path(
         r'^.*',
         TemplateView.as_view(template_name='index.html')

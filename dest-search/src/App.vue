@@ -99,7 +99,12 @@ hr {
 }
 
 p.help {
-  font-size: 1rem;
+  // error message font size for login / signup forms
+  font-size: 0.9rem;
+}
+
+div.spinner {
+  margin: 0px !important;
 }
 
 button.title-button > span {
