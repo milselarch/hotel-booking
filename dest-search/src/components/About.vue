@@ -22,7 +22,7 @@
                 <li v-for="(amenity, key) in room.amenities" v-bind:key="key">{{amenity}}</li>
               </ul> -->
               <p>{{ check_breakfast(room) }}</p>
-              <p style="font-size:1.5em">SGD <b>{{ room.price }}</b></p>
+              <p style="font-size:1.5em">SGD <b>{{ check_price(room) }}</b></p>
             </div>
           </div>
 
@@ -40,14 +40,16 @@
   
 </template>
 <script>
-import Roomlist from '../../json-samples/fullertonean.json';
+import Roomlistean from '../../json-samples/fullertonean.json';
+import Roomlistbeds from '../../json-samples/fullertonbedscom.json';
+import Roomlistwgl from '../../json-samples/fullertonwgl.json';
 import BLANK_IMAGE from "@/assets/image_not_found.png"
 
 export default {
   name: 'About',
   data() {
     return{
-      rooms: Roomlist,
+      rooms: Roomlistean,
     }
   },
   methods: {
@@ -79,6 +81,20 @@ export default {
       else {
         return "Breakfast not included"
       }
+    },
+    check_price(room){
+      let cheaper = room.price;
+      for (let other in Roomlistbeds.rooms){
+        if (Roomlistbeds.rooms[other].key == room.key){
+          cheaper = Math.min(Roomlistbeds.rooms[other].price, cheaper)
+        }
+      }
+      for (let another in Roomlistwgl.rooms){
+        if (Roomlistwgl.rooms[another].key == room.key){
+          cheaper = Math.min(Roomlistwgl.rooms[another].price, cheaper)
+        }
+      }
+      return cheaper
     }
   }
 }
