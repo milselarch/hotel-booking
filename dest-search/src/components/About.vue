@@ -45,7 +45,7 @@ import BLANK_IMAGE from "@/assets/image_not_found.png"
 
 export default {
   name: 'About',
-  data(){
+  data() {
     return{
       rooms: Roomlist,
     }
@@ -59,16 +59,18 @@ export default {
       actually does not exist in the server
       */
       // https://stackoverflow.com/questions/39009538
-      if (e.target.src == BLANK_IMAGE) { return; }
+      if (e.target.src === BLANK_IMAGE) { return; }
       e.target.src = BLANK_IMAGE;
     },
     build_image(room){
       const images = room.images;
-      if (images.length > 0){
-        const url = images[0];
-        // console.log(Object.values(url)[0]);
-        return Object.values(url)[0];
+      if (images.length === 0) {
+        return BLANK_IMAGE;
       }
+
+      const url = images[0];
+      // console.log(Object.values(url)[0]);
+      return Object.values(url)[0];
     },
     check_breakfast(room){
       if (room.roomAdditionalInfo.breakfastInfo == "hotel_detail_breakfast_included"){

@@ -73,7 +73,7 @@
       <div
         class="card" style="width: 20rem" 
         v-for="(hotel, key) in hotelsLoaded" v-bind:key="key"
-        ref="cards"
+        ref="cards" @click="selectHotel(hotel)"
       >
         <div class="card-image">
           <figure class="image is-4by3">
@@ -128,6 +128,7 @@ import Login from '@/components/Login.vue'
 import SignUp from '@/components/SignUp.vue'
 import BLANK_IMAGE from "@/assets/image_not_found.png"
 import { faL } from '@fortawesome/free-solid-svg-icons'
+import router from '../router'
 
 
 export default {
@@ -157,6 +158,13 @@ export default {
     }
   },
   methods: {
+    selectHotel(hotel) {
+      console.log('SELECTED', hotel, hotel['id'])
+      router.push({
+        path: `/hotels/${hotel['id']}`
+      })
+    },
+
     scrollToTop() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
@@ -225,7 +233,7 @@ export default {
       actually does not exist in the server
       */
       // https://stackoverflow.com/questions/39009538
-      if (e.target.src == BLANK_IMAGE) { return; }
+      if (e.target.src === BLANK_IMAGE) { return; }
       e.target.src = BLANK_IMAGE;
     },
     build_image_url(hotel_data) {
@@ -376,7 +384,6 @@ export default {
 
     $(window).resize(() => {
       self.cardHolderWidth = cardsHolder.width()
-      console.log('OUTERWIDTH', cardsHolder, self.cardHolderWidth)
     });
 
     (async () => {
@@ -574,6 +581,7 @@ div#hotel-cards {
 
   & > .card {
     margin: 1rem;
+    cursor: pointer;
 
     & img.card-image {
       // preserve aspect ratio for card images
