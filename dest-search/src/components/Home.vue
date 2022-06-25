@@ -22,13 +22,13 @@
           </p>
           <div class="buttons">
             <b-button 
-              type="is-primary" id="login" outlined
+              type="is-dark" id="login" outlined
               @click="openLogin()"
             >
               Login
             </b-button>
             <b-button 
-              type="is-primary" id="signup" outlined
+              type="is-dark" id="signup" outlined
               @click="openSignup()"
             >
               Sign Up
@@ -41,7 +41,7 @@
         <section>
           <b-field label="Search for a Destination" class="searchbox">
             <b-autocomplete
-              v-model="destination"
+              v-model="destinationInput"
               :data="filteredDataArray"
               placeholder="e.g. tioman island"
               clearable
@@ -50,60 +50,44 @@
             </b-autocomplete>
           </b-field>
 
+          <!--
           <b-field class="searchbox" label="Name">
             <b-input value="Kevin Garvey"></b-input>
           </b-field>
+          -->
+
+          <b-button
+            type="is-dark" expanded outlined
+            @click="begin_search"
+          > Search
+          </b-button>
         </section>
       </div>
 
     </div>
 
     <div 
-      v-infinite-scroll="render_more_hotels" 
-      infinite-scroll-disabled="allHotelsLoaded"
-      infinite-scroll-distance="10"
-      id="hotel-cards" ref="cards_holder"
       v-bind:class="{ bland: isDestinationValid }"
+      id="hotel-load-status"
     >
-      <div id="status" v-show="show_load_status">
+      <div id="status" v-show="true">
         <p id="status-text">{{ statusText }}</p>
         <square id="spinner" v-show="isLoading"></square>
       </div>
+    </div>
 
-      <div
+    <div
+      id="hotel-cards" ref="cards_holder"
+      v-infinite-scroll="render_more_hotels" 
+      infinite-scroll-disabled="allHotelsLoaded"
+      infinite-scroll-distance="100"
+    >
+      <HotelCard
         class="card" style="width: 20rem" 
         v-for="(hotel, key) in hotelsLoaded" v-bind:key="key"
-        ref="cards" @click="selectHotel(hotel)"
-      >
-        <div class="card-image">
-          <figure class="image is-4by3">
-            <img :src="build_image_url(hotel)"
-            class="card-image" 
-            @error="replace_default_image"
-            alt="Hotel image not found">
-          </figure>
-        </div>
-
-        <div class="card-content">
-          <div class="media">
-            <div class="media-content">
-              <p class="title is-4">{{ hotel['name'] }}</p>
-            </div>
-          </div>
-
-          <p class="address subtitle is-6">
-            {{ hotel['address'] }}
-          </p>
-
-          <b-rate 
-            v-model="hotel['rating']" :disabled="true"
-            :spaced="true"
-          />
-
-          <div class="content clipped" >
-          </div>
-        </div>
-      </div>
+        @click.native="selectHotel(hotel)"
+        ref="cards" :hotel="hotel"
+      />
     </div>
 
     <div
@@ -126,7 +110,7 @@ import _ from 'lodash'
 
 import Login from '@/components/Login.vue'
 import SignUp from '@/components/SignUp.vue'
-import BLANK_IMAGE from "@/assets/image_not_found.png"
+import HotelCard from '@/components/HotelCard.vue'
 import { faL } from '@fortawesome/free-solid-svg-icons'
 import router from '../router'
 
@@ -144,12 +128,14 @@ export default {
       hotelsLoaded: [],
       selected: null,
       destination: '',
+      destinationInput: '',
       cardWidth: null,
       cardHolderWidth: null,
       cardsPreloaded: false,
 
       isLoading: false,
       loadError: false,
+      lastDestID: null,
 
       modalActive: false,
       loginModalActive: false,
@@ -158,6 +144,15 @@ export default {
     }
   },
   methods: {
+    begin_search() {
+      console.log("SEARCH", this.destinationInput)
+      const mappings = this.destinationMappings;
+
+      if (mappings.hasOwnProperty(this.destinationInput)) {
+        this.destination = this.destinationInput;
+      }
+    },
+
     selectHotel(hotel) {
       console.log('SELECTED', hotel, hotel['id'])
       router.push({
@@ -199,7 +194,11 @@ export default {
         smartLoading = false;
       }
 
-      console.log(self.cardHolderWidth, self.cardWidth, smartLoading)
+      /*
+      console.log(
+        'LOAD', self.cardHolderWidth, self.cardWidth, smartLoading
+      )
+      */
 
       if (smartLoading) {
         const numHotelsLoaded = self.hotelsLoaded.length;
@@ -207,9 +206,15 @@ export default {
           self.cardHolderWidth / self.cardWidth
         ))
 
+        // console.log('LOADP', numHotelsLoaded, numToLoad)
+
+        // round off the number of hotel cards to load
+        // so that it fills up the entirety of the last row
         numToLoad += cardsPerRow - (
           (numHotelsLoaded + numToLoad) % cardsPerRow
         )
+        // console.log('NEWLOAD', numToLoad, cardsPerRow)
+        // console.log('LOADH', numHotelsLoaded, numToLoad)
       }
 
       // let numToLoad = 10;
@@ -223,31 +228,6 @@ export default {
 
         this.hotelsLoaded.push(this.hotels[hotelIndex])
       }
-    },
-
-    replace_default_image(e) {
-      /*
-      load the image not found image if the original
-      hotel image fails to load. We need this because
-      theres a lot of hotels where the image provided
-      actually does not exist in the server
-      */
-      // https://stackoverflow.com/questions/39009538
-      if (e.target.src === BLANK_IMAGE) { return; }
-      e.target.src = BLANK_IMAGE;
-    },
-    build_image_url(hotel_data) {
-      const image_details = hotel_data.image_details;
-      const prefix = image_details.prefix;
-      const image_no = hotel_data.default_image_index;
-      const suffix = image_details.suffix;
-
-      const image_count = hotel_data.imageCount;
-      if (image_count === 0) {
-        return BLANK_IMAGE;
-      }
-
-      return `${prefix}${image_no}${suffix}`
     },
 
     async load_hotels(dest_id) {
@@ -359,20 +339,24 @@ export default {
       backend once a valid desination is entered into the
       autocomplete search box
       */
-      let last_dest_id = null;
 
       while (true) {
         await sleep(100);
         if (!self.isDestinationValid) {
           continue
         } 
+
+        const mappings = self.destinationMappings;
+        if (!mappings.hasOwnProperty(self.destination)) {
+          continue
+        }
         
         const dest_id = self.destinationMappings[self.destination]
-        if (last_dest_id === dest_id) {
+        if (self.lastDestID === dest_id) {
           continue
         }
 
-        last_dest_id = dest_id;
+        self.lastDestID = dest_id;
         console.log('DESTID', dest_id)
         await self.load_hotels(dest_id)
       }
@@ -380,6 +364,7 @@ export default {
 
     const cardsHolder = $(self.$refs.cards_holder)
     self.cardHolderWidth = cardsHolder.width()
+    console.log('HOLER WIDTH', self.cardHolderWidth)
     self.preloadCards()
 
     $(window).resize(() => {
@@ -398,8 +383,10 @@ export default {
         } else if (self.$refs.cards.length === 0) {
           continue;
         }
+
+        console.log('CARDS', self.$refs.cards)
         
-        const card = self.$refs.cards[0]
+        const card = self.$refs.cards[0].$el
         // get width (+horizontal margin) taken by card
         self.cardWidth = $(card).outerWidth(true)
         console.log('WIDTH', self.cardWidth)
@@ -437,7 +424,10 @@ export default {
 
   computed: {
     show_load_status() {
-      return this.loadError || this.isLoading
+      return (
+        this.loadError || this.isLoading ||
+        (this.lastDestID !== null)
+      )
     },
 
     statusText () {
@@ -446,8 +436,10 @@ export default {
       } else if (this.isLoading) {
         return "loading hotels"
       }
-
-      return ""
+    
+      const dest_name = this.destination
+      console.log('DESTNAME', dest_name)
+      return dest_name
     },
 
     allHotelsLoaded() {
@@ -467,7 +459,7 @@ export default {
 
     filteredDataArray() {
       const matches = fuzzysort.go(
-        this.destination, this.destinationNames
+        this.destinationInput, this.destinationNames
       )
       
       if ((matches.length) === 0) { return [] }
@@ -484,13 +476,13 @@ export default {
 
     isDestinationValid() {
       return this.destinationMappings.hasOwnProperty(
-        this.destination
+        this.destinationInput
       )
     }
   },
 
   components: {
-    Login, SignUp
+    Login, SignUp, HotelCard
   }
 }
 </script>
@@ -501,7 +493,6 @@ export default {
 }
 
 div#end-bar {
-  margin-top: 3rem;
   margin-bottom: 3rem;
   display: flex;
 
@@ -511,6 +502,11 @@ div#end-bar {
     margin-right: auto;
     font-family: 'Babas Neue';
     font-size: 2rem;
+    color: #e5d390;
+
+    &:hover {
+      color: #7a7561;
+    }
   }
 }
 
@@ -552,15 +548,16 @@ div#front-cover {
   }
 
   & > div.search-options {
-    width: 30rem;
+    width: 40rem;
     margin-left: 0rem;
     margin-right: 10%;
-    background: #EEE;
+    background: white;
+    border: #DDD solid 0.1rem;
     padding: 2rem;
     flex-grow: 0.2;
 
     * .searchbox {
-      width: 20rem;
+      width: 100%;
       margin-left: auto;
       margin-right: auto;
     }
@@ -569,15 +566,11 @@ div#front-cover {
 
 div#hotel-cards {
   padding: 5rem;
-  background-color: beige;
+  background-color: white;
 
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-
-  &.bland {
-    background-color: #e7e6d5;
-  }
 
   & > .card {
     margin: 1rem;
@@ -595,6 +588,15 @@ div#hotel-cards {
       padding-right: 0.5rem;
     }
   }
+}
+
+div#hotel-load-status {
+  padding: 5rem;
+  background-color: beige;
+
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
 
   & > div#status {
     display: flex;
@@ -614,6 +616,10 @@ div#hotel-cards {
       margin-right: auto;
       width: fit-content;
     }
+  }
+
+  &.bland {
+    background-color: #e7e6d5;
   }
 }
 
