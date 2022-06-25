@@ -59,6 +59,7 @@
           <b-button
             type="is-dark" expanded outlined
             @click="begin_search"
+            :disabled="!allow_search || isLoading"
           > Search
           </b-button>
         </section>
@@ -136,6 +137,9 @@ export default {
       isLoading: false,
       loadError: false,
       lastDestID: null,
+      beginSearch: false, 
+      // whether or not we should send a request 
+      // to the backend to search for hotels
 
       modalActive: false,
       loginModalActive: false,
@@ -145,12 +149,13 @@ export default {
   },
   methods: {
     begin_search() {
-      console.log("SEARCH", this.destinationInput)
-      const mappings = this.destinationMappings;
-
-      if (mappings.hasOwnProperty(this.destinationInput)) {
-        this.destination = this.destinationInput;
+      if (!this.allow_search) {
+        return false;
       }
+      
+      this.destination = this.destinationInput;
+      this.beginSearch = true;
+      return true;
     },
 
     selectHotel(hotel) {
@@ -278,6 +283,45 @@ export default {
           return -(hotel1['rating'] - hotel2['rating'])
         })
 
+        const hotel_mapping = {}
+        for (let k=0; k<self.hotels.length; k++) {
+          const hotel = self.hotels[k];
+          hotel_mapping[hotel.id] = k
+        }
+
+        console.log('PRICE_RESP', price_resp)
+        const price_data = price_resp.data;
+
+        if (price_data === undefined) {
+           // pass if proxy_json has no data attribute
+        } else if (price_data.proxy_json === undefined) {
+          // pass if proxy_json not in price response
+        } else if (price_data.proxy_json.hotels === undefined) {
+          // pass if price response have no hotels
+        } else {
+          // add price as a property to each hotel
+          // in the original hotels api response
+          const hotel_prices = price_data.proxy_json.hotels
+          console.log('HOTEL_PRICES', hotel_prices)
+          console.log('MAPPING', hotel_mapping)
+
+          for (let k=0; k<hotel_prices.length; k++) {
+            const hotel_pricing = hotel_prices[k]
+            const hotel_id = hotel_pricing.id
+            const hotel_index = hotel_mapping[hotel_id]
+
+            if (hotel_index === undefined) {
+              // hotel was not found in original hotels response
+              continue
+            }
+
+            console.log('HOTEL_ID', hotel_id)
+            console.log('HOTEL_INDEX', hotel_index)
+            self.hotels[hotel_index]['price'] = hotel_pricing.price
+            console.log('HOTEL', k, self.hotels[hotel_id])
+          }
+        }
+
         self.hotelsLoaded = []
         self.render_more_hotels();
       } catch (error) {
@@ -349,16 +393,17 @@ export default {
         const mappings = self.destinationMappings;
         if (!mappings.hasOwnProperty(self.destination)) {
           continue
+        } else if (this.beginSearch === false) {
+          continue
         }
         
         const dest_id = self.destinationMappings[self.destination]
-        if (self.lastDestID === dest_id) {
-          continue
-        }
+
 
         self.lastDestID = dest_id;
         console.log('DESTID', dest_id)
         await self.load_hotels(dest_id)
+        self.beginSearch = false;
       }
     })();
 
@@ -423,6 +468,27 @@ export default {
   },
 
   computed: {
+    allow_search() {
+      const mappings = this.destinationMappings;
+      if (!mappings.hasOwnProperty(this.destinationInput)) {
+        return false;
+      }
+
+      const dest_id = this.destinationMappings[this.destinationInput]
+
+      if (
+        (this.lastDestID === dest_id) &&
+        (this.loadError === false)
+      ) {
+        // skip search if we already searched
+        // the same destination previously already
+        // successfully (i.e. no errors)
+        return false;
+      }
+
+      return true;
+    },
+
     show_load_status() {
       return (
         this.loadError || this.isLoading ||

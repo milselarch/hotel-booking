@@ -6,6 +6,7 @@
       <template #brand>
         <b-navbar-item 
           tag="router-link" :to="{ path: '/' }"
+          class="nav-group"
         >
           <img
             src="./assets/ascenda_logo.svg"
@@ -16,7 +17,7 @@
       </template>
 
       <template #end>
-        <b-navbar-item tag="div">
+        <b-navbar-item tag="div" class="nav-group">
           <b-navbar-item href="#">
             <router-link to="/">Home</router-link>
           </b-navbar-item>
@@ -144,7 +145,6 @@ button.fat-button {
   & > nav#main-navbar.navbar {
     padding-left: 2rem !important;
     padding-right: 2rem !important;
-    padding: 1rem;
 
     background-color: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(5px);
@@ -152,6 +152,11 @@ button.fat-button {
     backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
     */
+
+    & .nav-group {
+      padding-top: 0.8rem;
+      padding-bottom: 0.8rem;
+    }
   }
 }
 

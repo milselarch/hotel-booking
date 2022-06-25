@@ -28,6 +28,10 @@
         :spaced="true"
       />
 
+      <p id="price" v-show="show_price">
+        SGD <b>{{ hotel['price'] }}</b>
+      </p>
+
       <div class="content clipped" >
       </div>
     </div>
@@ -66,6 +70,11 @@ export default {
       return `${prefix}${image_no}${suffix}`
     },
   },
+  computed: {
+    show_price() {
+      return this.hotel['price'] !== undefined
+    }
+  },
   props: ['hotel']
 }
 </script>
@@ -73,6 +82,10 @@ export default {
 <style lang="scss" scoped>
 p.address {
   margin-bottom: 0.2rem;
+}
+
+p#price {
+  font-size: 1.5rem;
 }
 
 .card {
