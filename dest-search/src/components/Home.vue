@@ -631,7 +631,10 @@ div#front-cover {
 }
 
 div#hotel-cards {
-  padding: 5rem;
+  padding-left: 5rem;
+  padding-right: 5rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
   background-color: white;
 
   display: flex;
@@ -657,7 +660,7 @@ div#hotel-cards {
 }
 
 div#hotel-load-status {
-  padding: 5rem;
+  padding: 2rem;
   background-color: beige;
 
   display: flex;
@@ -673,6 +676,7 @@ div#hotel-load-status {
       font-family: 'Babas Neue';
       font-size: 2rem;
       white-space: pre-wrap;
+      word-break: break-all;
       text-align: center;
     }
 
