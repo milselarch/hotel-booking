@@ -69,6 +69,10 @@
         this.$emit('open-signup', this.name)
       },
 
+      set_email(email) {
+        this.email = email
+      },
+
       login() {
         const self = this;
         self.pending = true;

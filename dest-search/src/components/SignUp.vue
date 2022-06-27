@@ -109,7 +109,7 @@
         axios.post(
           'auth/users/', formdata
         ).then(response => {
-          this.$emit('open-login')
+          this.$emit('open-login', formdata)
   
         }).catch(err_resp => {
           let errors = err_resp.response.data

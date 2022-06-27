@@ -3,6 +3,7 @@
     <b-modal v-model="modalActive" :width="640" scroll="keep">
       <Login 
         v-show="loginModalActive" @open-signup="openSignup()"
+        ref="login_modal"
       />
       <SignUp 
         v-show="signupModalActive" @open-login="postSignup"
@@ -373,8 +374,11 @@ export default {
       this.modalActive = true;
     },
 
-    postSignup(name) {
+    postSignup(form_data) {
+      const name = form_data.first_name
+      const email = form_data.email
       const escaped_name = _.escape(name)
+
       this.$buefy.toast.open({
         duration: 5000,
         message: `Welcome  to Ascenda, ${escaped_name}!`,
@@ -382,6 +386,7 @@ export default {
         pauseOnHover: true
       });
 
+      this.$refs.login_modal.set_email(email)
       this.openLogin();
     },
 
