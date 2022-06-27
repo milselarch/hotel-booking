@@ -62,6 +62,20 @@
             :disabled="!allow_search || isLoading"
           > Search
           </b-button>
+
+          <br/>
+
+          <b-button type="is-dark" @click="add_x">
+            x++
+          </b-button>
+          <b-button type="is-dark" @click="add_y">
+            persisted y++
+          </b-button>
+
+          <br/>
+          <p> x = {{ x }} </p>
+          <p> y = {{ y }} </p>
+
         </section>
       </div>
 
@@ -144,10 +158,31 @@ export default {
       modalActive: false,
       loginModalActive: false,
       signupModalActive: false,
-      scrollable: false
+      scrollable: false,
+
+      x: 0,
+      y: 0
     }
   },
   methods: {
+    load_store() {
+      const self = this;
+      self.x = self.$store.state.Store.count;
+      self.y = self.$store.state.Persistent.persistent_count;
+      console.log('STORE', self.$store);
+      console.log(self.x, self.y)
+    },
+
+    add_x() {
+      this.$store.commit('increment')
+      this.load_store()
+    },
+
+    add_y() {
+      this.$store.commit('presist_increment')
+      this.load_store()
+    },
+
     begin_search() {
       if (!this.allow_search) {
         return false;
@@ -358,6 +393,7 @@ export default {
   },
   mounted: function () {
     const self = this;
+    self.load_store();
 
     const loader = import('@/assets/destinations.json')
     loader.then(async (destinations) => {

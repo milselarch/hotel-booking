@@ -1,5 +1,6 @@
 export default {
   modules: {},
+  persistent: false,
   state: {
     count: 0
   },
