@@ -661,7 +661,7 @@ div#hotel-cards {
 
 div#hotel-load-status {
   padding: 2rem;
-  background-color: beige;
+  background-color: #f3eee0;
 
   display: flex;
   justify-content: center;
@@ -678,6 +678,13 @@ div#hotel-load-status {
       white-space: pre-wrap;
       word-break: break-all;
       text-align: center;
+
+      &:empty::before {
+        // allow paragraph elemenet to have height
+        // even when it has no content
+        content:"";
+        display:inline-block;
+      }
     }
 
     & > #spinner {

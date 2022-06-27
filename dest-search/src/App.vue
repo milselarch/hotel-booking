@@ -150,6 +150,7 @@ button.fat-button {
 
     background-color: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(5px);
+    border-bottom: 1px solid #333;
     /*
     backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
