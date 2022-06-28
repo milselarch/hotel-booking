@@ -45,7 +45,8 @@ const build_save_state = (state) => {
   
   for (const module_name in modules) {
     const module = modules[module_name];
-    if (module.persistent !== true) { continue; }
+    // ignore module stores that aren't flagged as persistent
+    if (module.persistent !== true) { continue }
 
     const module_vars = Object.keys(module.state)
     save_state[module_name] = {}
@@ -53,6 +54,11 @@ const build_save_state = (state) => {
     for (let k=0; k<module_vars.length; k++) {
       const varname = module_vars[k];
       const state_value = state[module_name][varname]
+      const default_value = module[varname]
+
+      // don't save var to localstorage if its value is 
+      // the default value set in the store
+      if (state_value === default_value) { continue }
       save_state[module_name][varname] = state_value
     }
   }

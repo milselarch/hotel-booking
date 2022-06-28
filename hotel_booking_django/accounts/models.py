@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 from django.core.validators import MaxValueValidator, MinValueValidator
 from common.models import common_attribute_model, country_code, country_currency
 
+
 class user_account_manager(BaseUserManager):
     def create_user(self, email, first_name, password = None):
         if email == None:
@@ -28,6 +29,7 @@ class user_account_manager(BaseUserManager):
         user = self.create_user
         user.is_superuser = True
         user.save()
+
 
 class user_account(AbstractBaseUser, PermissionsMixin, common_attribute_model):
     email = models.EmailField(max_length=100, unique = True)

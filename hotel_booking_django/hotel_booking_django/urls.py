@@ -19,14 +19,13 @@ from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 
 from hotel_booking_django.api_proxy import proxy_view, proxy_mocklabs
-from accounts.views import ping_test
+from accounts.views import ExampleView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
-
-    path('ping/', ping_test)
+    path('auth_test', ExampleView.as_view(), name='example')
 ]
 
 urlpatterns += [

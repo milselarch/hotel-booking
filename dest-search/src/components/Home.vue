@@ -2,8 +2,9 @@
   <div id="home">
     <b-modal v-model="modalActive" :width="640" scroll="keep">
       <Login 
-        v-show="loginModalActive" @open-signup="openSignup()"
-        ref="login_modal"
+        v-show="loginModalActive" ref="login_modal"
+        @open-signup="open_signup()"
+        @login-done="on_login_complete"
       />
       <SignUp 
         v-show="signupModalActive" @open-login="postSignup"
@@ -24,13 +25,13 @@
           <div class="buttons">
             <b-button 
               type="is-dark" id="login" outlined
-              @click="openLogin()"
+              @click="open_login()"
             >
               Login
             </b-button>
             <b-button 
               type="is-dark" id="signup" outlined
-              @click="openSignup()"
+              @click="open_signup()"
             >
               Sign Up
             </b-button>
@@ -368,7 +369,7 @@ export default {
       self.isLoading = false;
     },
 
-    openSignup() {
+    open_signup() {
       this.loginModalActive = false;
       this.signupModalActive = true;
       this.modalActive = true;
@@ -387,10 +388,17 @@ export default {
       });
 
       this.$refs.login_modal.set_email(email)
-      this.openLogin();
+      this.open_login();
     },
 
-    openLogin() {
+    on_login_complete() {
+      this.$router.push("/about") // TODO: redirect to profile page
+      this.loginModalActive = false;
+      this.signupModalActive = false;
+      this.modalActive = false;
+    },
+
+    open_login() {
       this.loginModalActive = true;
       this.signupModalActive = false;
       this.modalActive = true;

@@ -16,6 +16,10 @@
         </b-navbar-item>
       </template>
 
+      <template #start>
+        <div class="nav-group"></div>
+      </template>
+
       <template #end>
         <b-navbar-item tag="div" class="nav-group">
           <b-navbar-item href="#">
@@ -27,20 +31,68 @@
           <b-navbar-item href="#">
             Features
           </b-navbar-item>
-          <b-navbar-item href="#">
-            Contact
+          
+          <b-navbar-item
+            tag="div" id="profile-icon"
+          >
+            <section>
+              <b-dropdown aria-role="list" position="is-bottom-left">
+                <template #trigger>
+                  <b-button
+                    type="is-dark" icon-pack="far" 
+                    :disabled="!authenticated"
+                    icon-right="user" outlined
+                  />
+                </template>
+                
+                <b-dropdown-item
+                  aria-role="listitem"
+                  v-show="!authenticated"
+                >
+                  Login
+                </b-dropdown-item>
+                <b-dropdown-item
+                  aria-role="listitem"
+                  v-show="!authenticated"
+                >
+                  Register
+                </b-dropdown-item>
+
+                <b-dropdown-item
+                  aria-role="listitem"
+                  v-show="authenticated"
+                >
+                  Profile
+                </b-dropdown-item>
+                <b-dropdown-item 
+                  v-show="authenticated"
+                  aria-role="listitem"
+                >
+                  Logout
+                </b-dropdown-item>
+                <b-dropdown-item 
+                  aria-role="listitem"
+                  @click="auth_test"
+                >
+                  auth test
+                </b-dropdown-item>
+              </b-dropdown>
+
+            </section>
           </b-navbar-item>
+          
         </b-navbar-item>
       </template>
     </b-navbar>
 
     <keep-alive include="Home">
-      <router-view/>
+      <router-view id="router-view"/>
     </keep-alive>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 
 export default {
   name: 'app',
@@ -48,6 +100,49 @@ export default {
     return {
       msg: 'Welcome to Your Vue.js App',
     }
+  },
+
+  methods: {
+    async auth_test() {
+      const auth_token = this.$store.state.Persistent.auth_token
+      let authenticated = true
+      let response
+
+      try {
+        response = await axios.get('auth_test', {
+          headers: { Authorization: 'JWT ' + auth_token }
+        })
+      } catch (error) {
+        authenticated = false
+        response = error.response
+        console.log('ERR', error)
+      }
+
+      console.log(response)
+      let toast_type, message;
+      const status_code = response.status
+
+      if (authenticated) {
+        toast_type = 'is-dark'
+        message = 'auth endpoint success'
+      } else {
+        toast_type = 'is-danger'
+        message = `auth endpoint failed - ${status_code}`
+      }
+
+      this.$buefy.toast.open({
+        duration: 5000,
+        message: message,
+        type: toast_type,
+        pauseOnHover: true
+      });
+    }
+  },
+
+  computed: {
+    authenticated() {
+      return this.$store.getters.authenticated
+    },
   }
 }
 </script>
@@ -55,6 +150,17 @@ export default {
 <style lang="scss">
 * {
   font-family: 'Open Sans', sans-serif;
+}
+
+body {
+  padding: 0px;
+  display: flex;
+  margin: 0px;
+}
+
+body > div#app > #router-view {
+  padding: 0px;
+  float: top;
 }
 
 ::-webkit-scrollbar {
@@ -97,6 +203,14 @@ img.inverted {
   filter: invert(100%);
 }
 
+a.dropdown-item {
+  font-size: 1rem;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
 hr {
   background-color: #AAA;
 }
@@ -137,6 +251,10 @@ button.fat-button {
     /* Add other formats as you see fit */
 }
 
+* {
+  box-sizing: border-box;
+}
+
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -150,15 +268,39 @@ button.fat-button {
 
     background-color: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(5px);
-    border-bottom: 1px solid #333;
+    border-bottom: 0.1rem solid #333;
+    box-sizing: border-box !important;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+
     /*
     backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
     */
 
+    /*
+    & div.navbar-menu, & div.navbar-brand {
+      border-bottom: 10.1rem solid #333;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+    }
+    */
+
     & .nav-group {
-      padding-top: 0.8rem;
-      padding-bottom: 0.8rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+
+      /*
+      border-bottom: 10.1rem solid #333;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      */
+    }
+
+    & #profile-icon {
+      margin-left: 0rem;
     }
   }
 }
