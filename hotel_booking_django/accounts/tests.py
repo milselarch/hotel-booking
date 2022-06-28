@@ -1,5 +1,5 @@
 from django.test import TestCase
-from accounts.models import UserAccount
+from accounts.models import user_account
 
 class TestAuthentication(TestCase):
 
@@ -8,19 +8,22 @@ class TestAuthentication(TestCase):
 
         self.TEST_USER1 = {
             'email': 'test1@test.com',
-            'name': "Johnny Depp",
+            'first_name': "Johnny",
+            'last_name': "Depp",
             'password': 'qwe123qwe@!Q',
         }
 
         self.TEST_USER2 = {
             'email': 'test2@test.com',
-            'name': "Johnny Depp 2",
+            'first_name': "Johnny",
+            'last_name': "Depp 2",
             'password': 'qwe123qwe@!Q',
         }
 
         self.TEST_USER1_SIGNUP = {
             'email': 'test1@test.com',
-            'name': "Johnny Depp",
+            'first_name': "Johnny",
+            'last_name': "Depp",
             'password': 'qwe123qwe@!Q',
             're_password': 'qwe123qwe@!Q',
         }
@@ -34,7 +37,8 @@ class TestAuthentication(TestCase):
 
         self.TEST_USER3_SIGNUP = {
             'email': 'test3@test.com',
-            'name': "Johnny Depp 3",
+            'first_name': "Johnny",
+            'last_name': "Depp 3",
             'password': 'qwe123qwe@!Q',
             're_password': 'qwe123qwe@!Q',
         }
@@ -49,26 +53,26 @@ class TestAuthentication(TestCase):
             'password': 'qwe123qwe@!Q',
         }
 
-        UserAccount.objects.create_user(**self.TEST_USER1)
-        UserAccount.objects.create_user(**self.TEST_USER2)
+        user_account.objects.create_user(**self.TEST_USER1)
+        user_account.objects.create_user(**self.TEST_USER2)
 
 
     
     # covers if the account can be created internally on the backend
     def test_user_count(self): 
 
-        user_count = UserAccount.objects.all().count()
+        user_count = user_account.objects.all().count()
         self.assertEquals(user_count, 2)
 
     # check if user_account can be retrieved from the database and check if the
     # password matches the one inputted to the create_user method
     def test_user_password(self):
 
-        user_qs1 = UserAccount.objects.filter(email__iexact="test1@test.com")
+        user_qs1 = user_account.objects.filter(email__iexact="test1@test.com")
         user1 = user_qs1.first()
         self.assertTrue(user1.check_password(self.TEST_USER1['password']))
 
-        user_qs2 = UserAccount.objects.filter(email__iexact="test2@test.com")
+        user_qs2 = user_account.objects.filter(email__iexact="test2@test.com")
         user2 = user_qs2.first()
         self.assertTrue(user2.check_password(self.TEST_USER2['password']))
 
