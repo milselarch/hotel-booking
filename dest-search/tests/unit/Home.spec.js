@@ -16,14 +16,19 @@ import Home from '../../src/components/Home.vue'
 //     })
 // })
 
-test('test search button', () => {
-    let wrapper = mount(Home);
-
-    it('triggers event when search button is pressed', () => {
-        wrapper.findAll('b-button').at(0).trigger('click')
-
-        // expect(wrapper.emitted('begin_search')).toBeTruthy()
-        // expect(wrapper.emitted('begin_search').length).toBe(1)
-        expect(wrapper.vm.begin_search).toBeTruthy()
+describe('Home.vue Test', () => {
+  it('renders message when component is created', () => {
+    // render the component
+    const wrapper = shallowMount(Home, {
+      propsData: {
+        msg: 'Welcome to Your Vue.js App'
+      }
     })
+
+    // check the name of the component
+    expect(wrapper.vm.msg).toMatch('Welcome to Your Vue.js App')
+
+    // check that the title is rendered
+    // expect(wrapper.text()).toMatch('Welcome to Your Vue.js App')
+  })
 })
