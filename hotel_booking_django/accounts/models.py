@@ -4,11 +4,13 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from common.models import common_attribute_model, country_code, country_currency
 
 class user_account_manager(BaseUserManager):
-    def create_user(self, email, first_name, password = None):
+    def create_user(self, email, first_name, last_name, password = None):
         if email == None:
             raise ValueError("Users must have an email address")
         if first_name == None:
-            raise ValueError("Users must have a name")
+            raise ValueError("Users must have a first name")
+        if last_name == None:
+            raise ValueError("Users must have a last name")
         if password == None:
             raise ValueError("Users must have a password")
 
@@ -16,7 +18,8 @@ class user_account_manager(BaseUserManager):
 
         user = self.model(
             email = email, 
-            first_name = first_name
+            first_name = first_name,
+            last_name = last_name
         )
 
         user.set_password(password)
@@ -24,7 +27,7 @@ class user_account_manager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email, first_name, password = None):
+    def create_superuser(self, email, first_name, last_name, password = None):
         user = self.create_user
         user.is_superuser = True
         user.save()
@@ -51,10 +54,16 @@ class user_account(AbstractBaseUser, PermissionsMixin, common_attribute_model):
     objects = user_account_manager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ['first_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def get_fullname(self):
+        return self.first_name + " " + self.last_name
+
+    def get_firstname(self):
         return self.first_name
+
+    def get_lastname(self):
+        return self.last_name
 
     def get_short_name(self):
         return self.first_name

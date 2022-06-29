@@ -24,6 +24,15 @@
           ></b-input>
         </b-field>
 
+        <b-field label="Last Name" class="input-field"
+          :type="{ 'is-danger': hasError }"
+          :message="last_name_error">
+          <b-input
+            value="" maxlength="30" placeholder="John Doe"
+            v-model="last_name"
+          ></b-input>
+        </b-field>
+
         <b-field label="Password" class="input-field"
           :type="{ 'is-danger': hasError }"
           :message="password_error">
@@ -71,11 +80,13 @@
     data() {
       return {
         first_name: '',
+        last_name: '',
         email: '',
         password: '',
         re_password: '',
 
         first_name_error: {},
+        last_name_error: {},
         email_error: {},
         password_error: {},
         re_password_error: {},
@@ -95,12 +106,14 @@
         const formdata = {
           email: this.email,
           first_name: this.first_name,
+          last_name: this.last_name,
           password: this.password,
           re_password: this.re_password,
         }
 
         self.hasError = false;
         self.first_name_error = {};
+        self.last_name_error = {};
         self.email_error = {};
         self.password_error = {};
         self.re_password_error = {};
@@ -124,6 +137,8 @@
             self.email_error = errors['email']
           } if (errors.hasOwnProperty('first_name')) {
             self.first_name_error = errors['first_name']
+          } if (errors.hasOwnProperty('last_name')) {
+            self.last_name_error = errors['last_name']
           } if (errors.hasOwnProperty('password')) {
             self.password_error = errors['password']
           } if (errors.hasOwnProperty('re_password')) {
