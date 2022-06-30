@@ -19,7 +19,7 @@
           :type="{ 'is-danger': hasError }"
           :message="first_name_error">
           <b-input
-            value="" maxlength="30" placeholder="John Doe"
+            value="" maxlength="30" placeholder="John"
             v-model="first_name"
           ></b-input>
         </b-field>
@@ -28,7 +28,7 @@
           :type="{ 'is-danger': hasError }"
           :message="last_name_error">
           <b-input
-            value="" maxlength="30" placeholder="John Doe"
+            value="" maxlength="30" placeholder="Doe"
             v-model="last_name"
           ></b-input>
         </b-field>
