@@ -17,7 +17,7 @@ import Home from '../../src/components/Home.vue'
 // })
 
 describe('Home.vue Test', () => {
-  it('renders message when component is created', () => {
+  it('check message when component is created', () => {
     // render the component
     const wrapper = shallowMount(Home, {
       propsData: {
