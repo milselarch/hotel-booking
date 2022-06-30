@@ -376,8 +376,10 @@ export default {
     },
 
     postSignup(form_data) {
-      const name = form_data.first_name
+      const first_name = form_data.first_name
+      const last_name = form_data.last_name
       const email = form_data.email
+      const name = `${first_name} ${last_name}`
       const escaped_name = _.escape(name)
 
       this.$buefy.toast.open({
@@ -447,7 +449,6 @@ export default {
         }
         
         const dest_id = self.destinationMappings[self.destination]
-
 
         self.lastDestID = dest_id;
         console.log('DESTID', dest_id)

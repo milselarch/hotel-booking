@@ -93,6 +93,7 @@
 
 <script>
 import axios from 'axios'
+import AuthRequester from './AuthRequester'
 
 export default {
   name: 'app',
@@ -105,15 +106,14 @@ export default {
   methods: {
     async auth_test() {
       const auth_token = this.$store.state.Persistent.auth_token
-      let authenticated = true
+      const requester = new AuthRequester(this)
+      let authenticated = false
       let response
 
       try {
-        response = await axios.get('auth_test', {
-          headers: { Authorization: 'JWT ' + auth_token }
-        })
+        response = await requester.get('auth_test')
+        authenticated = true
       } catch (error) {
-        authenticated = false
         response = error.response
         console.log('ERR', error)
       }

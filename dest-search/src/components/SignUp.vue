@@ -98,7 +98,6 @@
       }
     },
     methods: {
-
       signup() {
         const self = this;
         self.pending = true

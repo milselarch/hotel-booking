@@ -7,17 +7,17 @@ export default {
     refresh_token: null
   },
   mutations: {
-    initialiseStore(state) {
-			// Check if the ID exists
-			if (localStorage.getItem('store')) {
-				// Replace the state object with the stored item
-				this.replaceState(
-					Object.assign(state, JSON.parse(localStorage.getItem('store')))
-				);
-			}
-		},
     presist_increment(state) {
       state.persistent_count++;
+    },
+
+    save_auth_token(state, auth_token) {
+      state.auth_token = auth_token
+    },
+
+    clear_credentials(state) {
+      state.auth_token = null
+      state.refresh_token = null
     },
     
     set_credentials(state, credentials) {
