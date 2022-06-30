@@ -65,7 +65,7 @@
                   Profile
                 </b-dropdown-item>
                 <b-dropdown-item 
-                  v-show="authenticated"
+                  v-show="authenticated" @click="logout"
                   aria-role="listitem"
                 >
                   Logout
@@ -92,8 +92,8 @@
 </template>
 
 <script>
-import axios from 'axios'
 import AuthRequester from './AuthRequester'
+// import router from './router'
 
 export default {
   name: 'app',
@@ -104,8 +104,18 @@ export default {
   },
 
   methods: {
+    logout() {
+      this.$store.commit('clear_credentials')
+      // router.push()
+      this.$buefy.toast.open({
+        duration: 5000,
+        message: `Signed out`,
+        type: 'is-dark',
+        pauseOnHover: true
+      });
+    },
+
     async auth_test() {
-      const auth_token = this.$store.state.Persistent.auth_token
       const requester = new AuthRequester(this)
       let authenticated = false
       let response
