@@ -1,5 +1,16 @@
 <template>
   <div id="app">
+    <b-modal v-model="modal_active" :width="640" scroll="keep">
+      <Login 
+        v-show="login_modal_active" ref="login_modal"
+        @open-signup="open_signup()"
+        @login-done="on_login_complete"
+      />
+      <SignUp 
+        v-show="signup_modal_active" @open-login="post_signup()"
+      />
+    </b-modal>
+
     <b-navbar
       id="main-navbar" ref="main_navbar" fixed-top
     >
@@ -49,14 +60,14 @@
                 </template>
                 
                 <b-dropdown-item
-                  aria-role="listitem"
-                  v-show="!authenticated"
+                  aria-role="listitem" v-show="!authenticated"
+                  @click="open_login()"
                 >
                   Login
                 </b-dropdown-item>
                 <b-dropdown-item
-                  aria-role="listitem"
-                  v-show="!authenticated"
+                  aria-role="listitem" v-show="!authenticated"
+                  @click="open_signup()"
                 >
                   Register
                 </b-dropdown-item>
@@ -91,7 +102,11 @@
 
     <div id="content-wrapper">
       <keep-alive include="Home">
-        <router-view id="router-view"/>
+        <router-view 
+          id="router-view"
+          @open-login="open_login()"
+          @open-signup="open_signup()"
+        />
       </keep-alive>
     </div>
   </div>
@@ -102,6 +117,8 @@ import AuthRequester from './AuthRequester'
 import router from './router'
 import $ from 'jquery'
 
+import Login from '@/components/Login.vue'
+import SignUp from '@/components/SignUp.vue'
 // import router from './router'
 
 export default {
@@ -109,6 +126,9 @@ export default {
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
+      modal_active: false,
+      login_modal_active: false,
+      signup_modal_active: false,
     }
   },
 
@@ -127,6 +147,43 @@ export default {
   },
 
   methods: {
+    on_login_complete() {
+      this.$router.push("/about") // TODO: redirect to profile page
+      this.login_modal_active = false;
+      this.signup_modal_active = false;
+      this.modal_active = false;
+    },
+
+    open_login() {
+      this.login_modal_active = true;
+      this.signup_modal_active = false;
+      this.modal_active = true;
+    },
+
+    open_signup() {
+      this.login_modal_active = false;
+      this.signup_modal_active = true;
+      this.modal_active = true;
+    },
+
+    post_signup(form_data) {
+      const first_name = form_data.first_name
+      const last_name = form_data.last_name
+      const email = form_data.email
+      const name = `${first_name} ${last_name}`
+      const escaped_name = _.escape(name)
+
+      this.$buefy.toast.open({
+        duration: 5000,
+        message: `Welcome  to Ascenda, ${escaped_name}!`,
+        type: 'is-success',
+        pauseOnHover: true
+      });
+
+      this.$refs.login_modal.set_email(email)
+      this.open_login();
+    },
+
     goto_profile_page() {
       router.push({ path: '/profile' })
     },
@@ -180,6 +237,10 @@ export default {
     authenticated() {
       return this.$store.getters.authenticated
     },
+  },
+
+  components: {
+    Login, SignUp
   }
 }
 </script>

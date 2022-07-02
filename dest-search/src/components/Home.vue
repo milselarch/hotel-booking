@@ -1,16 +1,5 @@
 <template>
   <div id="home">
-    <b-modal v-model="modalActive" :width="640" scroll="keep">
-      <Login 
-        v-show="loginModalActive" ref="login_modal"
-        @open-signup="open_signup()"
-        @login-done="on_login_complete"
-      />
-      <SignUp 
-        v-show="signupModalActive" @open-login="postSignup"
-      />
-    </b-modal>
-
     <div id="front-cover">
       <div class="description-wrapper">
         <div class="description">
@@ -143,16 +132,22 @@ export default {
       // whether or not we should send a request 
       // to the backend to search for hotels
 
-      modalActive: false,
-      loginModalActive: false,
-      signupModalActive: false,
       scrollable: false,
 
       x: 0,
       y: 0
     }
   },
+
   methods: {
+    open_login() {
+      this.$emit('open-login')
+    },
+
+    open_signup() {
+      this.$emit('open-signup')
+    },
+
     load_store() {
       const self = this;
       self.x = self.$store.state.Store.count;
@@ -354,44 +349,8 @@ export default {
 
       self.isLoading = false;
     },
-
-    open_signup() {
-      this.loginModalActive = false;
-      this.signupModalActive = true;
-      this.modalActive = true;
-    },
-
-    postSignup(form_data) {
-      const first_name = form_data.first_name
-      const last_name = form_data.last_name
-      const email = form_data.email
-      const name = `${first_name} ${last_name}`
-      const escaped_name = _.escape(name)
-
-      this.$buefy.toast.open({
-        duration: 5000,
-        message: `Welcome  to Ascenda, ${escaped_name}!`,
-        type: 'is-success',
-        pauseOnHover: true
-      });
-
-      this.$refs.login_modal.set_email(email)
-      this.open_login();
-    },
-
-    on_login_complete() {
-      this.$router.push("/about") // TODO: redirect to profile page
-      this.loginModalActive = false;
-      this.signupModalActive = false;
-      this.modalActive = false;
-    },
-
-    open_login() {
-      this.loginModalActive = true;
-      this.signupModalActive = false;
-      this.modalActive = true;
-    }
   },
+
   mounted: function () {
     const self = this;
     self.load_store();
@@ -584,7 +543,7 @@ export default {
   },
 
   components: {
-    Login, SignUp, HotelCard
+    HotelCard
   }
 }
 </script>
