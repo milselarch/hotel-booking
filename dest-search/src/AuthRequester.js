@@ -24,6 +24,11 @@ class AuthRequester {
 
   // build_headers = () => this._build_headers()
   build_headers() {
+    if (this.auth_token === null) {
+      // server will give 400 (BAD REQUEST) with a null token
+      return {}
+    }
+
     return {
       headers: { Authorization: 'JWT ' + this.auth_token }
     }
@@ -33,6 +38,13 @@ class AuthRequester {
   async refresh() {
     const self = this
     assert(!self.auth_failed)
+    if (self.refresh_token === null) {
+      // server will give 400 (BAD REQUEST) with a null token
+      self.store.commit('clear_credentials')
+      console.log('REFRESH NULL')
+      return false;
+    }
+
     console.log('ATTEMPT REFRESH')
 
     const json_info = {

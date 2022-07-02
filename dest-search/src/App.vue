@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <b-navbar
-      id="main-navbar" fixed-top
+      id="main-navbar" ref="main_navbar"
     >
       <template #brand>
         <b-navbar-item 
@@ -36,12 +36,15 @@
             tag="div" id="profile-icon"
           >
             <section>
-              <b-dropdown aria-role="list" position="is-bottom-left">
+              <b-dropdown
+                aria-role="list" position="is-bottom-left"
+              >
                 <template #trigger>
                   <b-button
                     type="is-dark" icon-pack="far" 
-                    :disabled="!authenticated"
-                    icon-right="user" outlined
+                    v-bind:class="{ off: !authenticated} "
+                    :icon-right="authenticated ? 'user' : 'address-card'" 
+                    outlined
                   />
                 </template>
                 
@@ -61,6 +64,7 @@
                 <b-dropdown-item
                   aria-role="listitem"
                   v-show="authenticated"
+                  @click="goto_profile_page"
                 >
                   Profile
                 </b-dropdown-item>
@@ -85,14 +89,19 @@
       </template>
     </b-navbar>
 
-    <keep-alive include="Home">
-      <router-view id="router-view"/>
-    </keep-alive>
+    <div id="content-wrapper">
+      <keep-alive include="Home">
+        <router-view id="router-view"/>
+      </keep-alive>
+    </div>
   </div>
 </template>
 
 <script>
 import AuthRequester from './AuthRequester'
+import router from './router'
+import $ from 'jquery'
+
 // import router from './router'
 
 export default {
@@ -104,6 +113,10 @@ export default {
   },
 
   methods: {
+    goto_profile_page() {
+      router.push({ path: '/profile' })
+    },
+
     logout() {
       this.$store.commit('clear_credentials')
       // router.push()
@@ -117,12 +130,12 @@ export default {
 
     async auth_test() {
       const requester = new AuthRequester(this)
-      let authenticated = false
+      let success = false
       let response
 
       try {
         response = await requester.get('auth_test')
-        authenticated = true
+        success = true
       } catch (error) {
         response = error.response
         console.log('ERR', error)
@@ -132,7 +145,7 @@ export default {
       let toast_type, message;
       const status_code = response.status
 
-      if (authenticated) {
+      if (success) {
         toast_type = 'is-dark'
         message = 'auth endpoint success'
       } else {
@@ -164,8 +177,10 @@ export default {
 
 body {
   padding: 0px;
-  display: flex;
+  // display: flex;
   margin: 0px;
+  width: 100%;
+  // height: 100%;
 }
 
 body > div#app > #router-view {
@@ -202,6 +217,18 @@ div.card-content > div.content.clipped p {
   -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   white-space: normal;
+}
+*/
+
+/*
+button.off {
+  background-color: white !important;
+  color: white;
+
+  &:hover {
+    background-color: #42b983 !important;
+    color: white;
+  }
 }
 */
 

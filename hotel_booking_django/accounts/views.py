@@ -13,7 +13,7 @@ from rest_framework.response import Response
 # Create your views here.
 
 
-class ExampleView(APIView):
+class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
     # authentication_classes = [JWTAuthentication]
 
