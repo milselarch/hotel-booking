@@ -64,20 +64,6 @@
             :disabled="!allow_search || isLoading"
           > Search
           </b-button>
-
-          <br/>
-
-          <b-button type="is-dark" @click="add_x">
-            x++
-          </b-button>
-          <b-button type="is-dark" @click="add_y">
-            persisted y++
-          </b-button>
-
-          <br/>
-          <p> x = {{ x }} </p>
-          <p> y = {{ y }} </p>
-
         </section>
       </div>
 

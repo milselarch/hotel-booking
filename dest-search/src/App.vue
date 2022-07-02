@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <b-navbar
-      id="main-navbar" ref="main_navbar"
+      id="main-navbar" ref="main_navbar" fixed-top
     >
       <template #brand>
         <b-navbar-item 
@@ -110,6 +110,20 @@ export default {
     return {
       msg: 'Welcome to Your Vue.js App',
     }
+  },
+
+  mounted () {
+    const self = this
+    const navbar = $(self.$refs.main_navbar.$el)
+    
+    // ensure that the navbar's height is being used
+    // to offset the rest of the page's content
+    // (ensure content and navbar don't overlap)
+    navbar.ready(() => {
+      const height = navbar.height()
+      console.log('NAVBAR PAD HEIGHT', height)
+      $('body').css("padding-top", height);
+    })
   },
 
   methods: {
