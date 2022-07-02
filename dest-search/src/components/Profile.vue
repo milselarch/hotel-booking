@@ -32,6 +32,7 @@ export default {
     return {
       status_text: 'loading profile',
       is_loading: false,
+      is_mounted: false,
 
       load_success: false,
       first_name: null,
@@ -41,14 +42,17 @@ export default {
   },
 
   methods: {
-    logout() {
+    logout(toast=false) {
       const self = this
-      self.$buefy.toast.open({
-        duration: 5000,
-        message: `User not logged in`,
-        type: 'is-danger',
-        pauseOnHover: true
-      });
+
+      if (toast) {
+        self.$buefy.toast.open({
+          duration: 5000,
+          message: `User not logged in`,
+          type: 'is-danger',
+          pauseOnHover: true
+        });
+      }
 
       self.status_text = 'login required'
       self.load_success = false
@@ -81,7 +85,7 @@ export default {
           const status_code = error.response.status;
 
           if (status_code === 401) {
-            self.logout()
+            self.logout(true)
           } else {
             self.status_text = 'profile load failed'
             response = error.response;
@@ -109,7 +113,24 @@ export default {
 
   mounted: function () {
     const self = this;
+    self.is_mounted = true;
     self.load();
+
+    (async () => {
+      while (self.is_mounted) {
+        await sleep(1000);
+        if (!self.$store.getters.authenticated) {
+          // if login credentials are removed from store
+          // logout the user from profile page
+          self.logout();
+          break;
+        }
+      }
+    })();
+  },
+
+  unmounted() {
+    self.is_mounted = false;
   }
 }
 
