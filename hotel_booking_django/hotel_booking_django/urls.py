@@ -17,16 +17,24 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.generic import TemplateView
+from django.views.decorators.csrf import csrf_exempt
 
 from hotel_booking_django.api_proxy import proxy_view, proxy_mocklabs
-from accounts.views import ping_test
+from rest_framework_simplejwt import views as jwt_views
+from accounts.views import ProfileView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
 
-    path('ping/', ping_test)
+    path('auth_test', ProfileView.as_view(), name='example'),
+    path('profile', ProfileView.as_view(), name='profile'),
+    path(
+        'token/refresh/',
+        csrf_exempt(jwt_views.TokenRefreshView.as_view()),
+        name='token_refresh'
+    ),
 ]
 
 urlpatterns += [

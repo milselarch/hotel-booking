@@ -3,7 +3,7 @@ import App from './App.vue'
 import VueRouter from "vue-router";
 
 import Vuex from 'vuex';
-import VuexStore from './store';
+import store from './store';
 import { sync } from 'vuex-router-sync';
 
 import VueSpinners from 'vue-spinners'
@@ -23,8 +23,8 @@ const infiniteScroll =  require('vue-infinite-scroll');
 axios.defaults.baseURL = "http://127.0.0.1:8000/"
 
 Vue.use(Vuex)
-const store = new Vuex.Store(VuexStore);
-sync(store, router);
+// const store = new Vuex.Store(VuexStore);
+// sync(store, router);
 
 library.add(fas)
 
@@ -37,5 +37,9 @@ Vue.use(VueRouter);
 new Vue({
   el: '#app',
   router,
+  store,
+  beforeCreate() {
+    this.$store.commit('initialize_store');
+  },
   render: h => h(App)
 })

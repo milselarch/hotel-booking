@@ -1,14 +1,5 @@
 <template>
   <div id="home">
-    <b-modal v-model="modalActive" :width="640" scroll="keep">
-      <Login 
-        v-show="loginModalActive" @open-signup="openSignup()"
-      />
-      <SignUp 
-        v-show="signupModalActive" @open-login="postSignup"
-      />
-    </b-modal>
-
     <div id="front-cover">
       <div class="description-wrapper">
         <div class="description">
@@ -23,13 +14,13 @@
           <div class="buttons">
             <b-button 
               type="is-dark" id="login" outlined
-              @click="openLogin()"
+              @click="open_login()"
             >
               Login
             </b-button>
             <b-button 
               type="is-dark" id="signup" outlined
-              @click="openSignup()"
+              @click="open_signup()"
             >
               Sign Up
             </b-button>
@@ -141,13 +132,40 @@ export default {
       // whether or not we should send a request 
       // to the backend to search for hotels
 
-      modalActive: false,
-      loginModalActive: false,
-      signupModalActive: false,
-      scrollable: false
+      scrollable: false,
+
+      x: 0,
+      y: 0
     }
   },
+
   methods: {
+    open_login() {
+      this.$emit('open-login')
+    },
+
+    open_signup() {
+      this.$emit('open-signup')
+    },
+
+    load_store() {
+      const self = this;
+      self.x = self.$store.state.Store.count;
+      self.y = self.$store.state.Persistent.persistent_count;
+      console.log('STORE', self.$store);
+      console.log(self.x, self.y)
+    },
+
+    add_x() {
+      this.$store.commit('increment')
+      this.load_store()
+    },
+
+    add_y() {
+      this.$store.commit('presist_increment')
+      this.load_store()
+    },
+
     begin_search() {
       if (!this.allow_search) {
         return false;
@@ -331,33 +349,11 @@ export default {
 
       self.isLoading = false;
     },
-
-    openSignup() {
-      this.loginModalActive = false;
-      this.signupModalActive = true;
-      this.modalActive = true;
-    },
-
-    postSignup(name) {
-      const escaped_name = _.escape(name)
-      this.$buefy.toast.open({
-        duration: 5000,
-        message: `Welcome  to Ascenda, ${escaped_name}!`,
-        type: 'is-success',
-        pauseOnHover: true
-      });
-
-      this.openLogin();
-    },
-
-    openLogin() {
-      this.loginModalActive = true;
-      this.signupModalActive = false;
-      this.modalActive = true;
-    }
   },
+
   mounted: function () {
     const self = this;
+    self.load_store();
 
     const loader = import('@/assets/destinations.json')
     loader.then(async (destinations) => {
@@ -398,7 +394,6 @@ export default {
         }
         
         const dest_id = self.destinationMappings[self.destination]
-
 
         self.lastDestID = dest_id;
         console.log('DESTID', dest_id)
@@ -548,7 +543,7 @@ export default {
   },
 
   components: {
-    Login, SignUp, HotelCard
+    HotelCard
   }
 }
 </script>

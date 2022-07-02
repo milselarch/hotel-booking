@@ -60,7 +60,11 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-"http://localhost:8080",
+    "http://localhost:8080",
+]
+
+CORS_ALLOW_HEADERS = [
+    'HTTP_AUTHORIZATION', 'content-type', 'Authorization'
 ]
 
 ROOT_URLCONF = 'hotel_booking_django.urls'

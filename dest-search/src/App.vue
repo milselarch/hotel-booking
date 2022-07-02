@@ -1,7 +1,18 @@
 <template>
   <div id="app">
+    <b-modal v-model="modal_active" :width="640" scroll="keep">
+      <Login 
+        v-show="login_modal_active" ref="login_modal"
+        @open-signup="open_signup()"
+        @login-done="on_login_complete"
+      />
+      <SignUp 
+        v-show="signup_modal_active" @open-login="post_signup()"
+      />
+    </b-modal>
+
     <b-navbar
-      id="main-navbar" fixed-top
+      id="main-navbar" ref="main_navbar" fixed-top
     >
       <template #brand>
         <b-navbar-item 
@@ -16,6 +27,10 @@
         </b-navbar-item>
       </template>
 
+      <template #start>
+        <div class="nav-group"></div>
+      </template>
+
       <template #end>
         <b-navbar-item tag="div" class="nav-group">
           <b-navbar-item href="#">
@@ -27,27 +42,205 @@
           <b-navbar-item href="#">
             Features
           </b-navbar-item>
-          <b-navbar-item href="#">
-            Contact
+          
+          <b-navbar-item
+            tag="div" id="profile-icon"
+          >
+            <section>
+              <b-dropdown
+                aria-role="list" position="is-bottom-left"
+              >
+                <template #trigger>
+                  <b-button
+                    type="is-dark" icon-pack="far" 
+                    v-bind:class="{ off: !authenticated} "
+                    :icon-right="authenticated ? 'user' : 'address-card'" 
+                    outlined
+                  />
+                </template>
+                
+                <b-dropdown-item
+                  aria-role="listitem" v-show="!authenticated"
+                  @click="open_login()"
+                >
+                  Login
+                </b-dropdown-item>
+                <b-dropdown-item
+                  aria-role="listitem" v-show="!authenticated"
+                  @click="open_signup()"
+                >
+                  Register
+                </b-dropdown-item>
+
+                <b-dropdown-item
+                  aria-role="listitem"
+                  v-show="authenticated"
+                  @click="goto_profile_page"
+                >
+                  Profile
+                </b-dropdown-item>
+                <b-dropdown-item 
+                  v-show="authenticated" @click="logout"
+                  aria-role="listitem"
+                >
+                  Logout
+                </b-dropdown-item>
+                <b-dropdown-item 
+                  aria-role="listitem"
+                  @click="auth_test"
+                >
+                  auth test
+                </b-dropdown-item>
+              </b-dropdown>
+
+            </section>
           </b-navbar-item>
+          
         </b-navbar-item>
       </template>
     </b-navbar>
 
-    <keep-alive include="Home">
-      <router-view/>
-    </keep-alive>
+    <div id="content-wrapper">
+      <keep-alive include="Home">
+        <router-view 
+          id="router-view"
+          @open-login="open_login()"
+          @open-signup="open_signup()"
+        />
+      </keep-alive>
+    </div>
   </div>
 </template>
 
 <script>
+import AuthRequester from './AuthRequester'
+import router from './router'
+import $ from 'jquery'
+
+import Login from '@/components/Login.vue'
+import SignUp from '@/components/SignUp.vue'
+// import router from './router'
 
 export default {
   name: 'app',
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
+      modal_active: false,
+      login_modal_active: false,
+      signup_modal_active: false,
     }
+  },
+
+  mounted () {
+    const self = this
+    const navbar = $(self.$refs.main_navbar.$el)
+    
+    // ensure that the navbar's height is being used
+    // to offset the rest of the page's content
+    // (ensure content and navbar don't overlap)
+    navbar.ready(() => {
+      const height = navbar.height()
+      console.log('NAVBAR PAD HEIGHT', height)
+      $('body').css("padding-top", height);
+    })
+  },
+
+  methods: {
+    on_login_complete() {
+      this.$router.push("/about") // TODO: redirect to profile page
+      this.login_modal_active = false;
+      this.signup_modal_active = false;
+      this.modal_active = false;
+    },
+
+    open_login() {
+      this.login_modal_active = true;
+      this.signup_modal_active = false;
+      this.modal_active = true;
+    },
+
+    open_signup() {
+      this.login_modal_active = false;
+      this.signup_modal_active = true;
+      this.modal_active = true;
+    },
+
+    post_signup(form_data) {
+      const first_name = form_data.first_name
+      const last_name = form_data.last_name
+      const email = form_data.email
+      const name = `${first_name} ${last_name}`
+      const escaped_name = _.escape(name)
+
+      this.$buefy.toast.open({
+        duration: 5000,
+        message: `Welcome  to Ascenda, ${escaped_name}!`,
+        type: 'is-success',
+        pauseOnHover: true
+      });
+
+      this.$refs.login_modal.set_email(email)
+      this.open_login();
+    },
+
+    goto_profile_page() {
+      router.push({ path: '/profile' })
+    },
+
+    logout() {
+      this.$store.commit('clear_credentials')
+      // router.push()
+      this.$buefy.toast.open({
+        duration: 5000,
+        message: `Signed out`,
+        type: 'is-dark',
+        pauseOnHover: true
+      });
+    },
+
+    async auth_test() {
+      const requester = new AuthRequester(this)
+      let success = false
+      let response
+
+      try {
+        response = await requester.get('auth_test')
+        success = true
+      } catch (error) {
+        response = error.response
+        console.log('ERR', error)
+      }
+
+      console.log(response)
+      let toast_type, message;
+      const status_code = response.status
+
+      if (success) {
+        toast_type = 'is-dark'
+        message = 'auth endpoint success'
+      } else {
+        toast_type = 'is-danger'
+        message = `auth endpoint failed - ${status_code}`
+      }
+
+      this.$buefy.toast.open({
+        duration: 5000,
+        message: message,
+        type: toast_type,
+        pauseOnHover: true
+      });
+    }
+  },
+
+  computed: {
+    authenticated() {
+      return this.$store.getters.authenticated
+    },
+  },
+
+  components: {
+    Login, SignUp
   }
 }
 </script>
@@ -55,6 +248,19 @@ export default {
 <style lang="scss">
 * {
   font-family: 'Open Sans', sans-serif;
+}
+
+body {
+  padding: 0px;
+  // display: flex;
+  margin: 0px;
+  width: 100%;
+  // height: 100%;
+}
+
+body > div#app > #router-view {
+  padding: 0px;
+  float: top;
 }
 
 ::-webkit-scrollbar {
@@ -89,12 +295,32 @@ div.card-content > div.content.clipped p {
 }
 */
 
+/*
+button.off {
+  background-color: white !important;
+  color: white;
+
+  &:hover {
+    background-color: #42b983 !important;
+    color: white;
+  }
+}
+*/
+
 br {
   clear: both;
 }
 
 img.inverted {
   filter: invert(100%);
+}
+
+a.dropdown-item {
+  font-size: 1rem;
+}
+
+.hidden {
+  visibility: hidden;
 }
 
 hr {
@@ -137,6 +363,10 @@ button.fat-button {
     /* Add other formats as you see fit */
 }
 
+* {
+  box-sizing: border-box;
+}
+
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -150,15 +380,39 @@ button.fat-button {
 
     background-color: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(5px);
-    border-bottom: 1px solid #333;
+    border-bottom: 0.1rem solid #333;
+    box-sizing: border-box !important;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+
     /*
     backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%) contrast(45%) brightness(160%);
     */
 
+    /*
+    & div.navbar-menu, & div.navbar-brand {
+      border-bottom: 10.1rem solid #333;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+    }
+    */
+
     & .nav-group {
-      padding-top: 0.8rem;
-      padding-bottom: 0.8rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+
+      /*
+      border-bottom: 10.1rem solid #333;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      */
+    }
+
+    & #profile-icon {
+      margin-left: 0rem;
     }
   }
 }

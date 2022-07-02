@@ -69,6 +69,10 @@
         this.$emit('open-signup', this.name)
       },
 
+      set_email(email) {
+        this.email = email
+      },
+
       login() {
         const self = this;
         self.pending = true;
@@ -88,10 +92,14 @@
           'auth/jwt/create/', formdata
         ).then(response => {
           console.log('JWT CREATE SUCCESS')
-          this.$router.push("/about") // TODO: redirect to profile page
-          console.log(response.data);
-          const access_token = response.data.access
-          const refresh_token = response.data.refresh
+          
+          const credentials = response.data
+          this.$store.commit('set_credentials', credentials)
+          this.$emit('login-done', formdata)
+
+          // console.log(response.data);
+          // const access_token = response.data.access
+          // const refresh_token = response.data.refresh
           // axios.defaults.headers.common["Authorization"] = 'Bearer ' + access_token
         
         }).catch(err_resp =>{
