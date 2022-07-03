@@ -30,7 +30,7 @@ def proxy_request(request, path, base_url):
     # print('params', get_params)
     sess = requests.Session()
     remote_url = f'{base_url}/{path}?{formatted_get_params}'
-    # print(f'REMOTE: {remote_url}')
+    print(f'REMOTE: {remote_url}')
     proxy_success, error_message = True, ''
     response_json, raw_response = {}, ''
     response, status_code = None, -1

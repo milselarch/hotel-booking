@@ -30,16 +30,27 @@
 
       <div class="search-options">
         <section>
-          <b-field label="Search Destination" class="searchbox">
+          <b-field label="Destination & Hotel Booking search"
+            class="searchbox"
+          >
             <b-autocomplete
               v-model="destinationInput"
               :data="filteredDataArray"
-              placeholder="e.g. tioman island"
-              clearable
+              placeholder="Search Destination e.g. tioman island"
+              clearable icon="compass"
               @select="option => selected = option">
               <template #empty>{{ searchEmptyMessage }}</template>
             </b-autocomplete>
           </b-field>
+
+          <b-field>
+            <b-input placeholder="Number of guests"
+              type="number" icon="user" v-model="num_guests"
+              min="1" max="20" default="1"
+            >
+            </b-input>
+          </b-field>
+
 
           <!--
           <b-field class="searchbox" label="Name">
@@ -47,10 +58,11 @@
           </b-field>
           -->
 
-          <b-field label="Select booking start and end date">
+          <b-field>
             <b-datepicker
-              placeholder="Click to select..."
+              placeholder="Select check in and checkout dates"
               v-model="dates" 
+              icon="calendar"
               :icon-right="dates_are_valid ? 'check': ''"
               :unselectable-dates="should_exclude_date"
               range>
@@ -146,6 +158,7 @@ export default {
       cardHolderWidth: null,
       cardsPreloaded: false,
 
+      num_guests: 1,
       current_date: new Date(),
       searched_dates: [],
       dates: [],
@@ -183,7 +196,7 @@ export default {
 
     fast_forward_date() {
       const date_now = moment(this.current_date)
-      const cutoff_date = date_now.add(12, 'h').toDate();
+      const cutoff_date = date_now.add(24, 'h').toDate();
       this.current_date = cutoff_date
     },
 
@@ -191,7 +204,7 @@ export default {
       // prevent days that start less than 12 hours
       // away from the current timestamp
       const date_now = moment(this.current_date)
-      const cutoff_date = date_now.add(24, 'h').toDate();
+      const cutoff_date = date_now.add(12, 'h').toDate();
       // console.log('START DATE CMP', cutoff_date, date)
       return cutoff_date > date
     },
@@ -429,6 +442,12 @@ export default {
   mounted: function () {
     const self = this;
     self.load_store();
+
+    self.current_date = new Date()
+    const date_now = moment(self.current_date)
+    const checkin_date = date_now.add(48, 'h').toDate();
+    const checkout_date = date_now.add(96 , 'h').toDate();
+    self.dates = [checkin_date, checkout_date]
 
     const loader = import('@/assets/destinations.json')
     loader.then(async (destinations) => {

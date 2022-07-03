@@ -27,10 +27,28 @@ Vue.use(Vuex)
 // sync(store, router);
 
 library.add(fas)
-
-Vue.use(VueSpinners)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(Buefy, { defaultIconPack: 'fas' })
+
+Vue.use(VueSpinners)
+
+/*
+Vue.use(Buefy, { 
+  defaultIconPack: 'fas',
+  defaultIconComponent: "vue-fontawesome",
+  customIconPacks: {
+    fas: {
+      sizes: {
+        default: "lg",
+        "is-small": "1x",
+        "is-medium": "2x",
+        "is-large": "3x"
+      },
+      iconPrefix: ""
+    }
+  }
+})
+*/
 Vue.use(infiniteScroll)
 Vue.use(VueRouter);
 
