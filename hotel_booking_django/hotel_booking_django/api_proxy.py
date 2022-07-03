@@ -67,8 +67,8 @@ def proxy_request(request, path, base_url):
         if completed:
             break
 
-        print('ATTEMPT NO', attempts)
-        time.sleep(1)
+        print('ATTEMPT NO', attempts, len(response_json))
+        time.sleep(2)
 
     return JsonResponse({
         'proxy_success': proxy_success,
