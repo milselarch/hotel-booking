@@ -54,7 +54,7 @@ class user_account(AbstractBaseUser, PermissionsMixin, common_attribute_model):
     REQUIRED_FIELDS = ['first_name']
 
     def get_fullname(self):
-        return self.first_name
+        return self.first_name + " " + self.last_name
 
     def get_short_name(self):
         return self.first_name
