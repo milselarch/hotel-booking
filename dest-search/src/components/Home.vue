@@ -11,7 +11,8 @@
             of miles that can be earned elsewhere. That is for booking 
             the same hotel at the same or similar rates.
           </p>
-          <div class="buttons">
+
+          <div class="buttons" v-show="!authenticated">
             <b-button 
               type="is-dark" id="login" outlined
               @click="open_login()"
@@ -610,6 +611,10 @@ export default {
   },
 
   computed: {
+    authenticated() {
+      return this.$store.getters.authenticated
+    },
+
     dates_are_valid() {
       if (this.dates.length !== 2) { return false }
       const start_date = this.dates[0]
