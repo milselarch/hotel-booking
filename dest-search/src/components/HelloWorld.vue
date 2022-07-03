@@ -1,3 +1,3 @@
 <template>
-  <p>Hellowword page</p>
+  <p>new message</p>
 </template>

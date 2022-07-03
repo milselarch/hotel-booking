@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import {shallowMount, mount} from '@vue/test-utils'
 import Home from '../../src/components/Home.vue'
+import Buefy from 'buefy'
 // import axios from 'axios'
 
 // jest.mock('axios');
@@ -22,6 +23,14 @@ describe('Home.vue Test', () => {
     const wrapper = shallowMount(Home, {
       propsData: {
         msg: 'Welcome to Your Vue.js App'
+      },
+      stubs: {
+        transition: false,
+        'b-button': true,
+        'b-modal': true,
+        'b-field': true,
+        'b-autocomplete': true,
+        'square': true,
       }
     })
 

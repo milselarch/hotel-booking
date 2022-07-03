@@ -91,13 +91,21 @@ export default {
     }
   },
   mounted() {
-    const getRooms = axios.get(this.url, {
-      proxy: {
-        host: 'localhost',
-        port: 8080
+    const getRooms = axios.get(this.url)
+    const room_request = axios.get("proxy/hotels/1xUw/price", {
+      params: {
+        destination_id: 'RsBU',
+        checkin: '2022-08-31',
+        checkout: '2022-09-01',
+        lang: 'en_US',
+        currency: 'SGD',
+        partner_id: '16',
+        country_code: 'SG',
+        guests: '2'
       }
-    })
-    this.roomList = getRooms
+    });
+    const room_resp = Promise.all(room_request);
+    this.roomList = room_resp.data.proxy_json;
   }
 }
 </script>
