@@ -91,7 +91,7 @@ export default {
     }
   },
   mounted() {
-    const getRooms = axios.get(this.url)
+    // const getRooms = axios.get(this.url)
     const room_request = axios.get("proxy/hotels/1xUw/price", {
       params: {
         destination_id: 'RsBU',
@@ -104,8 +104,7 @@ export default {
         guests: '2'
       }
     });
-    const room_resp = Promise.all(room_request);
-    this.roomList = room_resp.data.proxy_json;
+    this.roomList = room_request.data.proxy_json.rooms;
   }
 }
 </script>
