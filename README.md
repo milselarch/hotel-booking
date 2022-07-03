@@ -12,11 +12,12 @@ sudo apt-get install python3.10-venv
 # reqiored by django to access mysql database
 sudo apt-get install libmysqlclient-dev
 
+# install pip for python3.10
 curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
 python3.10 -m pip install virtualenv
-python3.10 -m pip venv venv 
 
 # go to project folder 
+python3.10 -m pip venv venv 
 source venv/bin/activate
 (venv)$ python -m pip install -r requirements.txt
 ```
