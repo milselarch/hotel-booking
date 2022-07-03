@@ -11,7 +11,8 @@
             of miles that can be earned elsewhere. That is for booking 
             the same hotel at the same or similar rates.
           </p>
-          <div class="buttons">
+
+          <div class="buttons" v-show="!authenticated">
             <b-button 
               type="is-dark" id="login" outlined
               @click="open_login()"
@@ -30,16 +31,31 @@
 
       <div class="search-options">
         <section>
-          <b-field label="Search for a Destination" class="searchbox">
+          <b-field label="Destination & Hotel Booking Details"
+            class="searchbox"
+          >
             <b-autocomplete
               v-model="destinationInput"
               :data="filteredDataArray"
-              placeholder="e.g. tioman island"
-              clearable
+              placeholder="Search Destination e.g. tioman island"
+              clearable icon="search-location"
+              :disabled="isLoading"
               @select="option => selected = option">
               <template #empty>{{ searchEmptyMessage }}</template>
             </b-autocomplete>
           </b-field>
+
+          <b-field>
+            <b-input placeholder="Number of guests"
+              type="number" icon="user" 
+              v-model.number="num_guests"
+              min="1" :max="max_num_guests" default="1"
+              pattern="[0-9]+" required
+              :disabled="isLoading"
+            >
+            </b-input>
+          </b-field>
+
 
           <!--
           <b-field class="searchbox" label="Name">
@@ -47,12 +63,37 @@
           </b-field>
           -->
 
+          <b-field>
+            <b-datepicker
+              placeholder="Select check in and checkout dates"
+              v-model="dates" 
+              icon="calendar"
+              :icon-right="dates_are_valid ? 'check': ''"
+              :unselectable-dates="should_exclude_date"
+              :disabled="isLoading"
+              range>
+            </b-datepicker>
+          </b-field>
+
           <b-button
             type="is-dark" expanded outlined
             @click="begin_search"
             :disabled="!allow_search || isLoading"
           > Search
           </b-button>
+
+          <!--
+          {{ [num_guests] }}
+
+          <b-button @click="fast_forward_date"> 
+            fast foward 1 day
+          </b-button>
+
+          <br/>
+          {{ dates }}
+          <br/>
+          {{ current_date }}
+          -->
         </section>
       </div>
 
@@ -95,13 +136,13 @@
 <script>
 // v-html="hotel['description']"
 import fuzzysort from 'fuzzysort'
+import moment from 'moment'
 import sleep from 'await-sleep'
+import assert from 'assert'
 import axios from 'axios'
 import $ from 'jquery'
 import _ from 'lodash'
 
-import Login from '@/components/Login.vue'
-import SignUp from '@/components/SignUp.vue'
 import HotelCard from '@/components/HotelCard.vue'
 import { faL } from '@fortawesome/free-solid-svg-icons'
 import router from '../router'
@@ -124,6 +165,13 @@ export default {
       cardWidth: null,
       cardHolderWidth: null,
       cardsPreloaded: false,
+
+      num_guests: 1,
+      searched_num_guests: null,
+      max_num_guests: 20,
+      current_date: new Date(),
+      searched_dates: [],
+      dates: [],
 
       isLoading: false,
       loadError: false,
@@ -154,6 +202,21 @@ export default {
       self.y = self.$store.state.Persistent.persistent_count;
       console.log('STORE', self.$store);
       console.log(self.x, self.y)
+    },
+
+    fast_forward_date() {
+      const date_now = moment(this.current_date)
+      const cutoff_date = date_now.add(24, 'h').toDate();
+      this.current_date = cutoff_date
+    },
+
+    should_exclude_date(date) {
+      // prevent days that start less than 12 hours
+      // away from the current timestamp
+      const date_now = moment(this.current_date)
+      const cutoff_date = date_now.add(12, 'h').toDate();
+      // console.log('START DATE CMP', cutoff_date, date)
+      return cutoff_date > date
     },
 
     add_x() {
@@ -253,12 +316,49 @@ export default {
       }
     },
 
+    make_price_request(dest_id, dates, num_guests) {
+      const [start_date, end_date] = dates
+      const start_date_str = moment(start_date).format('YYYY-MM-DD');
+      const end_date_str = moment(end_date).format('YYYY-MM-DD');
+      console.log('START DATE STR', start_date_str)
+      console.log('END DATE STR', end_date_str)
+
+      const price_endpoint = "proxy/hotels/prices"
+      // pricing api has missing destinations (e.g. TXQ5)
+      // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
+      const get_params = {
+          destination_id: dest_id, partner_id: 1,
+          checkin: start_date_str, checkout: end_date_str,
+          lang: "en_US", currency: "SGD",
+          country_code: "SG", guests: num_guests
+        }
+
+      // keep making the price request
+      // till we get that completed is true
+      const price_request = axios.get(
+        price_endpoint, {params: get_params}
+      )
+
+      return price_request
+    },
+
     async load_hotels(dest_id) {
       const self = this;
+      const dates = self.dates
+      
+      if (dates.length !== 2) {
+        return false 
+      } else if (!this.is_valid_guests(this.num_guests)) {
+        return false
+      }
+      
       self.isLoading = true;
       self.hotelsLoaded = [];
       self.loadError = false;
       self.hotels = []
+
+      self.searched_num_guests = self.num_guests
+      self.searched_dates = dates;
 
       // await sleep(10000);
       
@@ -274,11 +374,10 @@ export default {
       (have to add rooms to destinations.json)
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
-
-      const price_endpoint = `mocklabs/destinations/${dest_id}/prices`
-      // pricing api has missing destinations (e.g. TXQ5)
-      // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
-      const price_request = axios.get(price_endpoint)
+      
+      const price_request = self.make_price_request(
+        dest_id, dates, self.num_guests
+      )
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
       });
@@ -298,7 +397,13 @@ export default {
 
         self.hotels = response.data.proxy_json;
         self.hotels.sort((hotel1, hotel2) => {
-          return -(hotel1['rating'] - hotel2['rating'])
+          if (hotel1.rating < hotel2.rating) {
+            return 1
+          } else if (hotel1.rating > hotel2.rating) {
+            return -1
+          } else {
+            return 0
+          }
         })
 
         const hotel_mapping = {}
@@ -309,6 +414,8 @@ export default {
 
         console.log('PRICE_RESP', price_resp)
         const price_data = price_resp.data;
+        
+        // const price_data = price_resp.data;
 
         if (price_data === undefined) {
            // pass if proxy_json has no data attribute
@@ -349,11 +456,31 @@ export default {
 
       self.isLoading = false;
     },
+
+    is_valid_guests(num_guests) {
+      if (typeof num_guests !== 'number') {
+        return false
+      } else if (!Number.isInteger(num_guests)) {
+        return false
+      } else if (num_guests <= 0) {
+        return false
+      } else if (num_guests > this.max_num_guests) {
+        return false
+      }
+
+      return true
+    }
   },
 
   mounted: function () {
     const self = this;
     self.load_store();
+
+    self.current_date = new Date()
+    const date_now = moment(self.current_date)
+    const checkin_date = date_now.add(48, 'h').toDate();
+    const checkout_date = date_now.add(96 , 'h').toDate();
+    self.dates = [checkin_date, checkout_date]
 
     const loader = import('@/assets/destinations.json')
     loader.then(async (destinations) => {
@@ -399,6 +526,27 @@ export default {
         console.log('DESTID', dest_id)
         await self.load_hotels(dest_id)
         self.beginSearch = false;
+      }
+    })();
+
+    (async () => {
+      // continually set current date
+      // and check if the selected dates in the datepicker
+      // are still valid, and remove the date selection
+      // if they are no longer valid
+      while (true) {
+        await sleep(5 * 1000);
+        const date_now = new Date()
+        if (date_now > self.current_date) {
+          // im only putting it in a if condition
+          // so that this doesn't interfere with the testing
+          // code to inject arbitary dates in the future
+          self.current_date = date_now
+        }
+
+        if (!self.dates_are_valid) {
+          self.dates = []
+        }
       }
     })();
 
@@ -463,7 +611,23 @@ export default {
   },
 
   computed: {
+    authenticated() {
+      return this.$store.getters.authenticated
+    },
+
+    dates_are_valid() {
+      if (this.dates.length !== 2) { return false }
+      const start_date = this.dates[0]
+      if (this.should_exclude_date(start_date)) { return false }
+      return true
+    },
+
     allow_search() {
+      if (!this.is_valid_guests(this.num_guests)) {
+        return false
+      }
+
+      if (!this.dates_are_valid) { return false }
       const mappings = this.destinationMappings;
       if (!mappings.hasOwnProperty(this.destinationInput)) {
         return false;
@@ -473,11 +637,15 @@ export default {
 
       if (
         (this.lastDestID === dest_id) &&
+        (_.isEqual(this.searched_dates, this.dates)) &&
+        (this.searched_num_guests === this.num_guests) &&
         (this.loadError === false)
       ) {
         // skip search if we already searched
         // the same destination previously already
-        // successfully (i.e. no errors)
+        // successfully (i.e. no errors) and in the same
+        // booking date range and same number of guests 
+        // as previously as well
         return false;
       }
 
