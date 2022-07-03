@@ -30,14 +30,15 @@
 
       <div class="search-options">
         <section>
-          <b-field label="Destination & Hotel Booking search"
+          <b-field label="Destination & Hotel Booking Details"
             class="searchbox"
           >
             <b-autocomplete
               v-model="destinationInput"
               :data="filteredDataArray"
               placeholder="Search Destination e.g. tioman island"
-              clearable icon="compass"
+              clearable icon="search-location"
+              :disabled="isLoading"
               @select="option => selected = option">
               <template #empty>{{ searchEmptyMessage }}</template>
             </b-autocomplete>
@@ -45,8 +46,11 @@
 
           <b-field>
             <b-input placeholder="Number of guests"
-              type="number" icon="user" v-model="num_guests"
-              min="1" max="20" default="1"
+              type="number" icon="user" 
+              v-model.number="num_guests"
+              min="1" :max="max_num_guests" default="1"
+              pattern="[0-9]+" required
+              :disabled="isLoading"
             >
             </b-input>
           </b-field>
@@ -65,6 +69,7 @@
               icon="calendar"
               :icon-right="dates_are_valid ? 'check': ''"
               :unselectable-dates="should_exclude_date"
+              :disabled="isLoading"
               range>
             </b-datepicker>
           </b-field>
@@ -77,6 +82,8 @@
           </b-button>
 
           <!--
+          {{ [num_guests] }}
+
           <b-button @click="fast_forward_date"> 
             fast foward 1 day
           </b-button>
@@ -159,6 +166,8 @@ export default {
       cardsPreloaded: false,
 
       num_guests: 1,
+      searched_num_guests: null,
+      max_num_guests: 20,
       current_date: new Date(),
       searched_dates: [],
       dates: [],
@@ -306,7 +315,7 @@ export default {
       }
     },
 
-    make_price_request(dest_id, dates) {
+    make_price_request(dest_id, dates, num_guests) {
       const [start_date, end_date] = dates
       const start_date_str = moment(start_date).format('YYYY-MM-DD');
       const end_date_str = moment(end_date).format('YYYY-MM-DD');
@@ -320,7 +329,7 @@ export default {
           destination_id: dest_id, partner_id: 1,
           checkin: start_date_str, checkout: end_date_str,
           lang: "en_US", currency: "SGD",
-          country_code: "SG", guests: 2
+          country_code: "SG", guests: num_guests
         }
 
       // keep making the price request
@@ -335,13 +344,20 @@ export default {
     async load_hotels(dest_id) {
       const self = this;
       const dates = self.dates
-      if (dates.length !== 2) { return false }
+      
+      if (dates.length !== 2) {
+        return false 
+      } else if (!this.is_valid_guests(this.num_guests)) {
+        return false
+      }
       
       self.isLoading = true;
-      self.searched_dates = dates;
       self.hotelsLoaded = [];
       self.loadError = false;
       self.hotels = []
+
+      self.searched_num_guests = self.num_guests
+      self.searched_dates = dates;
 
       // await sleep(10000);
       
@@ -358,7 +374,9 @@ export default {
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
       
-      const price_request = self.make_price_request(dest_id, dates)
+      const price_request = self.make_price_request(
+        dest_id, dates, self.num_guests
+      )
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
       });
@@ -437,6 +455,20 @@ export default {
 
       self.isLoading = false;
     },
+
+    is_valid_guests(num_guests) {
+      if (typeof num_guests !== 'number') {
+        return false
+      } else if (!Number.isInteger(num_guests)) {
+        return false
+      } else if (num_guests <= 0) {
+        return false
+      } else if (num_guests > this.max_num_guests) {
+        return false
+      }
+
+      return true
+    }
   },
 
   mounted: function () {
@@ -586,6 +618,10 @@ export default {
     },
 
     allow_search() {
+      if (!this.is_valid_guests(this.num_guests)) {
+        return false
+      }
+
       if (!this.dates_are_valid) { return false }
       const mappings = this.destinationMappings;
       if (!mappings.hasOwnProperty(this.destinationInput)) {
@@ -597,12 +633,14 @@ export default {
       if (
         (this.lastDestID === dest_id) &&
         (_.isEqual(this.searched_dates, this.dates)) &&
+        (this.searched_num_guests === this.num_guests) &&
         (this.loadError === false)
       ) {
         // skip search if we already searched
         // the same destination previously already
         // successfully (i.e. no errors) and in the same
-        // booking date range as previously as well
+        // booking date range and same number of guests 
+        // as previously as well
         return false;
       }
 
