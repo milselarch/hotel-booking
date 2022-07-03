@@ -30,7 +30,7 @@
 
       <div class="search-options">
         <section>
-          <b-field label="Search for a Destination" class="searchbox">
+          <b-field label="Search Destination" class="searchbox">
             <b-autocomplete
               v-model="destinationInput"
               :data="filteredDataArray"
@@ -47,12 +47,33 @@
           </b-field>
           -->
 
+          <b-field label="Select booking start and end date">
+            <b-datepicker
+              placeholder="Click to select..."
+              v-model="dates" 
+              :icon-right="dates_are_valid ? 'check': ''"
+              :unselectable-dates="should_exclude_date"
+              range>
+            </b-datepicker>
+          </b-field>
+
           <b-button
             type="is-dark" expanded outlined
             @click="begin_search"
             :disabled="!allow_search || isLoading"
           > Search
           </b-button>
+
+          <!--
+          <b-button @click="fast_forward_date"> 
+            fast foward 1 day
+          </b-button>
+
+          <br/>
+          {{ dates }}
+          <br/>
+          {{ current_date }}
+          -->
         </section>
       </div>
 
@@ -95,13 +116,13 @@
 <script>
 // v-html="hotel['description']"
 import fuzzysort from 'fuzzysort'
+import moment from 'moment'
 import sleep from 'await-sleep'
+import assert from 'assert'
 import axios from 'axios'
 import $ from 'jquery'
 import _ from 'lodash'
 
-import Login from '@/components/Login.vue'
-import SignUp from '@/components/SignUp.vue'
 import HotelCard from '@/components/HotelCard.vue'
 import { faL } from '@fortawesome/free-solid-svg-icons'
 import router from '../router'
@@ -124,6 +145,10 @@ export default {
       cardWidth: null,
       cardHolderWidth: null,
       cardsPreloaded: false,
+
+      current_date: new Date(),
+      searched_dates: [],
+      dates: [],
 
       isLoading: false,
       loadError: false,
@@ -154,6 +179,21 @@ export default {
       self.y = self.$store.state.Persistent.persistent_count;
       console.log('STORE', self.$store);
       console.log(self.x, self.y)
+    },
+
+    fast_forward_date() {
+      const date_now = moment(this.current_date)
+      const cutoff_date = date_now.add(12, 'h').toDate();
+      this.current_date = cutoff_date
+    },
+
+    should_exclude_date(date) {
+      // prevent days that start less than 12 hours
+      // away from the current timestamp
+      const date_now = moment(this.current_date)
+      const cutoff_date = date_now.add(24, 'h').toDate();
+      // console.log('START DATE CMP', cutoff_date, date)
+      return cutoff_date > date
     },
 
     add_x() {
@@ -253,9 +293,39 @@ export default {
       }
     },
 
+    make_price_request(dest_id, dates) {
+      const [start_date, end_date] = dates
+      const start_date_str = moment(start_date).format('YYYY-MM-DD');
+      const end_date_str = moment(end_date).format('YYYY-MM-DD');
+      console.log('START DATE STR', start_date_str)
+      console.log('END DATE STR', end_date_str)
+
+      const price_endpoint = "proxy/hotels/prices"
+      // pricing api has missing destinations (e.g. TXQ5)
+      // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
+      const get_params = {
+          destination_id: dest_id, partner_id: 1,
+          checkin: start_date_str, checkout: end_date_str,
+          lang: "en_US", currency: "SGD",
+          country_code: "SG", guests: 2
+        }
+
+      // keep making the price request
+      // till we get that completed is true
+      const price_request = axios.get(
+        price_endpoint, {params: get_params}
+      )
+
+      return price_request
+    },
+
     async load_hotels(dest_id) {
       const self = this;
+      const dates = self.dates
+      if (dates.length !== 2) { return false }
+      
       self.isLoading = true;
+      self.searched_dates = dates;
       self.hotelsLoaded = [];
       self.loadError = false;
       self.hotels = []
@@ -274,11 +344,8 @@ export default {
       (have to add rooms to destinations.json)
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
-
-      const price_endpoint = `mocklabs/destinations/${dest_id}/prices`
-      // pricing api has missing destinations (e.g. TXQ5)
-      // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
-      const price_request = axios.get(price_endpoint)
+      
+      const price_request = self.make_price_request(dest_id, dates)
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
       });
@@ -298,7 +365,13 @@ export default {
 
         self.hotels = response.data.proxy_json;
         self.hotels.sort((hotel1, hotel2) => {
-          return -(hotel1['rating'] - hotel2['rating'])
+          if (hotel1.rating < hotel2.rating) {
+            return 1
+          } else if (hotel1.rating > hotel2.rating) {
+            return -1
+          } else {
+            return 0
+          }
         })
 
         const hotel_mapping = {}
@@ -309,6 +382,8 @@ export default {
 
         console.log('PRICE_RESP', price_resp)
         const price_data = price_resp.data;
+        
+        // const price_data = price_resp.data;
 
         if (price_data === undefined) {
            // pass if proxy_json has no data attribute
@@ -402,6 +477,27 @@ export default {
       }
     })();
 
+    (async () => {
+      // continually set current date
+      // and check if the selected dates in the datepicker
+      // are still valid, and remove the date selection
+      // if they are no longer valid
+      while (true) {
+        await sleep(5 * 1000);
+        const date_now = new Date()
+        if (date_now > self.current_date) {
+          // im only putting it in a if condition
+          // so that this doesn't interfere with the testing
+          // code to inject arbitary dates in the future
+          self.current_date = date_now
+        }
+
+        if (!self.dates_are_valid) {
+          self.dates = []
+        }
+      }
+    })();
+
     const cardsHolder = $(self.$refs.cards_holder)
     self.cardHolderWidth = cardsHolder.width()
     console.log('HOLER WIDTH', self.cardHolderWidth)
@@ -463,7 +559,15 @@ export default {
   },
 
   computed: {
+    dates_are_valid() {
+      if (this.dates.length !== 2) { return false }
+      const start_date = this.dates[0]
+      if (this.should_exclude_date(start_date)) { return false }
+      return true
+    },
+
     allow_search() {
+      if (!this.dates_are_valid) { return false }
       const mappings = this.destinationMappings;
       if (!mappings.hasOwnProperty(this.destinationInput)) {
         return false;
@@ -473,11 +577,13 @@ export default {
 
       if (
         (this.lastDestID === dest_id) &&
+        (_.isEqual(this.searched_dates, this.dates)) &&
         (this.loadError === false)
       ) {
         // skip search if we already searched
         // the same destination previously already
-        // successfully (i.e. no errors)
+        // successfully (i.e. no errors) and in the same
+        // booking date range as previously as well
         return false;
       }
 

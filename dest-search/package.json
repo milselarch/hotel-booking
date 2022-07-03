@@ -35,6 +35,7 @@
     "fuzzysort": "^2.0.1",
     "jquery": "^3.6.0",
     "lodash": "^4.17.21",
+    "moment": "^2.29.3",
     "vue": "^2.5.11",
     "vue-infinite-scroll": "^2.0.2",
     "vue-router": "^3.5.4",
