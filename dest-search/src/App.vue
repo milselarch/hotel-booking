@@ -3,11 +3,11 @@
     <b-modal v-model="modal_active" :width="640" scroll="keep">
       <Login 
         v-show="login_modal_active" ref="login_modal"
-        @open-signup="open_signup()"
+        @open-signup="open_signup"
         @login-done="on_login_complete"
       />
       <SignUp 
-        v-show="signup_modal_active" @open-login="post_signup()"
+        v-show="signup_modal_active" @open-login="post_signup"
       />
     </b-modal>
 
@@ -306,6 +306,15 @@ button.off {
   }
 }
 */
+
+div.drop-side-title {
+  margin: 0px !important;
+  width: 100%;
+
+  & div.field-label {
+    display: none;
+  }
+}
 
 br {
   clear: both;

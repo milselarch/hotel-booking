@@ -15,22 +15,26 @@
           ></b-input>
         </b-field>
 
-        <b-field label="First Name" class="input-field"
-          :type="{ 'is-danger': hasError }"
-          :message="first_name_error">
-          <b-input
-            value="" maxlength="30" placeholder="John"
-            v-model="first_name"
-          ></b-input>
-        </b-field>
+        <b-field class="drop-side-title" horizontal grouped label="">
 
-        <b-field label="Last Name" class="input-field"
-          :type="{ 'is-danger': hasError }"
-          :message="last_name_error">
-          <b-input
-            value="" maxlength="30" placeholder="Doe"
-            v-model="last_name"
-          ></b-input>
+          <b-field label="First Name" class="input-field"
+            :type="{ 'is-danger': hasError }"
+            :message="first_name_error">
+            <b-input
+              value="" maxlength="30" placeholder="John"
+              v-model="first_name"
+            ></b-input>
+          </b-field>
+
+          <b-field label="Last Name" class="input-field"
+            :type="{ 'is-danger': hasError }"
+            :message="last_name_error">
+            <b-input
+              value="" maxlength="30" placeholder="Doe"
+              v-model="last_name"
+            ></b-input>
+          </b-field>
+
         </b-field>
 
         <b-field label="Password" class="input-field"
@@ -60,7 +64,7 @@
         <div class="button-controls">
           <b-button 
             type="is-dark" id="signup" class="fat-button"
-            @click="signup()" :disabled="pending"
+            @click="signup()" :disabled="pending || !allow_signup"
           >
             Sign Up
           </b-button>
@@ -165,6 +169,18 @@
           // setTimeout(() => { self.pending = false }, 1000)
           self.pending = false;
         })
+      }
+    },
+
+    computed: {
+      allow_signup() {
+        return (
+          (this.first_name.trim() !== '') &&
+          (this.last_name.trim() !== '') &&
+          (this.email.trim() !== '') &&
+          (this.password.trim() !== '') &&
+          (this.re_password.trim() !== '')
+        )
       }
     }
   };
