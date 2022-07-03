@@ -24,10 +24,9 @@
         </div>
       </div>
     </div>
-  </div>
-
-  
+  </div>  
 </template>
+
 <script>
 import Roomlistean from '../../json-samples/fullertonean.json';
 import Roomlistbeds from '../../json-samples/fullertonbedscom.json';
@@ -107,6 +106,7 @@ div#room-cards {
     // preserve aspect ratio for card images
     object-fit: cover;
     height: 14rem;
+    // width: 16rem;
     float: left;
   }
 

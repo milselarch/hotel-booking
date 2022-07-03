@@ -41,9 +41,8 @@ export default {
   },
   data(){
     return {
-      roomList: axios.get('https://hotelapi.loyalty.dev/api/hotels/1xUw/price?destination_id=RsBU&checkin=2022-08-31&checkout=2022-09-01&lang=en_US&currency=SGD&partner_id=16&country_code=SG&guests=2').then(resp => {
-        console.log(resp.data);
-      })
+      roomList: [],
+      url: 'https://hotelapi.loyalty.dev/api/hotels/1xUw/price?destination_id=RsBU&checkin=2022-08-31&checkout=2022-09-01&lang=en_US&currency=SGD&partner_id=16&country_code=SG&guests=2'
     }
   },
   methods: {
@@ -90,6 +89,15 @@ export default {
       }
       return cheaper
     }
+  },
+  mounted() {
+    const getRooms = axios.get(this.url, {
+      proxy: {
+        host: 'localhost',
+        port: 8080
+      }
+    })
+    this.roomList = getRooms
   }
 }
 </script>
