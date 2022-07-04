@@ -1,7 +1,6 @@
 {
   "presets": [
-    ["env", { "modules": false }],
-    "stage-3"
+    ["env", { "modules": false }]
   ],
   "plugins": [
     "transform-regenerator", "syntax-dynamic-import"

@@ -34,26 +34,47 @@
           <b-field label="Destination & Hotel Booking Details"
             class="searchbox"
           >
-            <b-autocomplete
-              v-model="destinationInput"
-              :data="filteredDataArray"
-              placeholder="Search Destination e.g. tioman island"
-              clearable icon="search-location"
-              :disabled="isLoading"
-              @select="option => selected = option">
-              <template #empty>{{ searchEmptyMessage }}</template>
-            </b-autocomplete>
+            <b-field>
+              <b-autocomplete
+                v-model="destinationInput"
+                :data="filteredDataArray"
+                placeholder="Search Destination e.g. tioman island"
+                clearable icon="search-location"
+                :disabled="isLoading"
+                @select="option => selected = option">
+                <template #empty>{{ searchEmptyMessage }}</template>
+              </b-autocomplete>
+            </b-field>
           </b-field>
 
-          <b-field>
-            <b-input placeholder="Number of guests"
+          <b-field 
+            :type="{ 'is-danger': !(
+              rooms_valid && is_valid_guests(num_guests)
+            )}" expanded
+          >
+            <b-input placeholder="Guests"
               type="number" icon="user" 
               v-model.number="num_guests"
               min="1" :max="max_num_guests" default="1"
               pattern="[0-9]+" required
-              :disabled="isLoading"
+              :disabled="isLoading" 
             >
             </b-input>
+
+            <div class="mid-buffer"></div>
+
+            <b-select
+              placeholder="Rooms" icon="door-closed"
+              expanded id="room-selector" v-model="num_rooms"
+            >
+              <option 
+                v-for="(num_rooms, index) in allowed_room_choices"
+                v-bind:key="index" :value="num_rooms"
+              >
+                {{ num_rooms }}
+              </option>
+            </b-select>
+
           </b-field>
 
 
@@ -172,6 +193,9 @@ export default {
       current_date: new Date(),
       searched_dates: [],
       dates: [],
+
+      max_num_rooms: 10,
+      num_rooms: 1,
 
       isLoading: false,
       loadError: false,
@@ -611,6 +635,15 @@ export default {
   },
 
   computed: {
+    rooms_valid() {
+      return this.allowed_room_choices.includes(this.num_rooms)
+    },
+    allowed_room_choices() {
+      return Array.from(
+        {length: this.max_num_rooms}, (_, i) => i + 1
+      )
+    },
+
     authenticated() {
       return this.$store.getters.authenticated
     },
@@ -667,7 +700,7 @@ export default {
       }
     
       const dest_name = this.destination
-      console.log('DESTNAME', dest_name)
+      // console.log('DESTNAME', dest_name)
       return dest_name
     },
 
@@ -789,6 +822,10 @@ div#front-cover {
       width: 100%;
       margin-left: auto;
       margin-right: auto;
+    }
+
+    & div.mid-buffer {
+      margin-left: 0.5rem !important;
     }
   }
 }
