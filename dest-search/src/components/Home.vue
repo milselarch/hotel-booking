@@ -139,6 +139,8 @@
       <div id="status" v-show="true">
         <p id="status-text">{{ statusText }}</p>
         <square id="spinner" v-show="isLoading"></square>
+        <p id="search-params" v-show="search_success"
+        >{{ search_params_info }}</p>
       </div>
     </div>
 
@@ -200,7 +202,7 @@ export default {
       cardsPreloaded: false,
 
       num_guests: 2,
-      searched_num_guests: null,
+      searched_num_guests: 0,
       max_num_guests: 20,
       current_date: new Date(),
       searched_dates: [],
@@ -653,6 +655,40 @@ export default {
   },
 
   computed: {
+    search_success() {
+      return (
+        (this.loadError === false) &&
+        (this.isLoading === false) &&
+        (this.searched_num_guests !== 0) &&
+        (this.searched_num_rooms !== 0) &&
+        (this.searched_dates.length === 2)
+      )
+    },
+
+    search_params_info() {
+      let dates = [new Date(), new Date()]
+      if (this.dates_are_valid) {
+        dates = this.dates
+      }
+
+      const [start_date, end_date] = this.searched_dates
+      const start_date_str = moment(start_date).format('DD-MM-YYYY');
+      const end_date_str = moment(end_date).format('DD-MM-YYYY');
+      const date_info = `${start_date_str} to ${end_date_str}`
+      
+      const rooms = this.searched_num_rooms
+      const guests = this.searched_num_guests
+      let rooms_text, guests_text;
+
+      if (rooms > 1) { rooms_text = `${rooms} rooms` }
+      else { rooms_text = `${rooms} room` }
+      if (guests > 1) { guests_text = `${guests} guests` }
+      else { guests_text = `${guests} guest` }
+
+      const guests_info = `${rooms_text}, ${guests_text}`
+      const status = `${date_info}\n${guests_info}`
+      return status
+    },
     rooms_valid() {
       return this.allowed_room_choices.includes(this.num_rooms)
     },
@@ -916,6 +952,12 @@ div#hotel-load-status {
         content:"";
         display:inline-block;
       }
+    }
+
+    & > p#search-params {
+      white-space: pre-wrap;
+      word-break: break-all;
+      text-align: center;
     }
 
     & > #spinner {
