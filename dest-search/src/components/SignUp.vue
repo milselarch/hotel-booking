@@ -15,13 +15,26 @@
           ></b-input>
         </b-field>
 
-        <b-field label="First Name" class="input-field"
-          :type="{ 'is-danger': hasError }"
-          :message="first_name_error">
-          <b-input
-            value="" maxlength="30" placeholder="John Doe"
-            v-model="first_name"
-          ></b-input>
+        <b-field class="drop-side-title" horizontal grouped label="">
+
+          <b-field label="First Name" class="input-field"
+            :type="{ 'is-danger': hasError }"
+            :message="first_name_error">
+            <b-input
+              value="" maxlength="30" placeholder="John"
+              v-model="first_name"
+            ></b-input>
+          </b-field>
+
+          <b-field label="Last Name" class="input-field"
+            :type="{ 'is-danger': hasError }"
+            :message="last_name_error">
+            <b-input
+              value="" maxlength="30" placeholder="Doe"
+              v-model="last_name"
+            ></b-input>
+          </b-field>
+
         </b-field>
 
         <b-field label="Password" class="input-field"
@@ -51,7 +64,7 @@
         <div class="button-controls">
           <b-button 
             type="is-dark" id="signup" class="fat-button"
-            @click="signup()" :disabled="pending"
+            @click="signup()" :disabled="pending || !allow_signup"
           >
             Sign Up
           </b-button>
@@ -71,11 +84,13 @@
     data() {
       return {
         first_name: '',
+        last_name: '',
         email: '',
         password: '',
         re_password: '',
 
         first_name_error: {},
+        last_name_error: {},
         email_error: {},
         password_error: {},
         re_password_error: {},
@@ -87,7 +102,6 @@
       }
     },
     methods: {
-
       signup() {
         const self = this;
         self.pending = true
@@ -95,12 +109,14 @@
         const formdata = {
           email: this.email,
           first_name: this.first_name,
+          last_name: this.last_name,
           password: this.password,
           re_password: this.re_password,
         }
 
         self.hasError = false;
         self.first_name_error = {};
+        self.last_name_error = {};
         self.email_error = {};
         self.password_error = {};
         self.re_password_error = {};
@@ -109,7 +125,7 @@
         axios.post(
           'auth/users/', formdata
         ).then(response => {
-          this.$emit('open-login')
+          this.$emit('open-login', formdata)
   
         }).catch(err_resp => {
           let errors = err_resp.response.data
@@ -124,6 +140,8 @@
             self.email_error = errors['email']
           } if (errors.hasOwnProperty('first_name')) {
             self.first_name_error = errors['first_name']
+          } if (errors.hasOwnProperty('last_name')) {
+            self.last_name_error = errors['last_name']
           } if (errors.hasOwnProperty('password')) {
             self.password_error = errors['password']
           } if (errors.hasOwnProperty('re_password')) {
@@ -151,6 +169,18 @@
           // setTimeout(() => { self.pending = false }, 1000)
           self.pending = false;
         })
+      }
+    },
+
+    computed: {
+      allow_signup() {
+        return (
+          (this.first_name.trim() !== '') &&
+          (this.last_name.trim() !== '') &&
+          (this.email.trim() !== '') &&
+          (this.password.trim() !== '') &&
+          (this.re_password.trim() !== '')
+        )
       }
     }
   };

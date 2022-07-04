@@ -27,17 +27,21 @@
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
-    "@fortawesome/vue-fontawesome": "^2.0.6",
+    "@fortawesome/vue-fontawesome": "^2.0.8",
+    "assert": "^2.0.0",
     "await-sleep": "0.0.1",
     "axios": "^0.27.2",
     "buefy": "^0.9.21",
     "fuzzysort": "^2.0.1",
     "jquery": "^3.6.0",
     "lodash": "^4.17.21",
+    "moment": "^2.29.3",
     "vue": "^2.5.11",
     "vue-infinite-scroll": "^2.0.2",
     "vue-router": "^3.5.4",
-    "vue-spinners": "^1.0.2"
+    "vue-spinners": "^1.0.2",
+    "vuex": "^3.1.0",
+    "vuex-router-sync": "^2.1.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-router": "^4.5.17",

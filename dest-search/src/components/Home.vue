@@ -1,14 +1,5 @@
 <template>
   <div id="home">
-    <b-modal v-model="modalActive" :width="640" scroll="keep">
-      <Login 
-        v-show="loginModalActive" @open-signup="openSignup()"
-      />
-      <SignUp 
-        v-show="signupModalActive" @open-login="postSignup"
-      />
-    </b-modal>
-
     <div id="front-cover">
       <div class="description-wrapper">
         <div class="description">
@@ -20,16 +11,17 @@
             of miles that can be earned elsewhere. That is for booking 
             the same hotel at the same or similar rates.
           </p>
-          <div class="buttons">
+
+          <div class="buttons" v-show="!authenticated">
             <b-button 
-              type="is-primary" id="login" outlined
-              @click="openLogin()"
+              type="is-dark" id="login" outlined
+              @click="open_login()"
             >
               Login
             </b-button>
             <b-button 
-              type="is-primary" id="signup" outlined
-              @click="openSignup()"
+              type="is-dark" id="signup" outlined
+              @click="open_signup()"
             >
               Sign Up
             </b-button>
@@ -39,71 +31,96 @@
 
       <div class="search-options">
         <section>
-          <b-field label="Search for a Destination" class="searchbox">
+          <b-field label="Destination & Hotel Booking Details"
+            class="searchbox"
+          >
             <b-autocomplete
-              v-model="destination"
+              v-model="destinationInput"
               :data="filteredDataArray"
-              placeholder="e.g. tioman island"
-              clearable
+              placeholder="Search Destination e.g. tioman island"
+              clearable icon="search-location"
+              :disabled="isLoading"
               @select="option => selected = option">
               <template #empty>{{ searchEmptyMessage }}</template>
             </b-autocomplete>
           </b-field>
 
+          <b-field>
+            <b-input placeholder="Number of guests"
+              type="number" icon="user" 
+              v-model.number="num_guests"
+              min="1" :max="max_num_guests" default="1"
+              pattern="[0-9]+" required
+              :disabled="isLoading"
+            >
+            </b-input>
+          </b-field>
+
+
+          <!--
           <b-field class="searchbox" label="Name">
             <b-input value="Kevin Garvey"></b-input>
           </b-field>
+          -->
+
+          <b-field>
+            <b-datepicker
+              placeholder="Select check in and checkout dates"
+              v-model="dates" 
+              icon="calendar"
+              :icon-right="dates_are_valid ? 'check': ''"
+              :unselectable-dates="should_exclude_date"
+              :disabled="isLoading"
+              range>
+            </b-datepicker>
+          </b-field>
+
+          <b-button
+            type="is-dark" expanded outlined
+            @click="begin_search"
+            :disabled="!allow_search || isLoading"
+          > Search
+          </b-button>
+
+          <!--
+          {{ [num_guests] }}
+
+          <b-button @click="fast_forward_date"> 
+            fast foward 1 day
+          </b-button>
+
+          <br/>
+          {{ dates }}
+          <br/>
+          {{ current_date }}
+          -->
         </section>
       </div>
 
     </div>
 
     <div 
-      v-infinite-scroll="render_more_hotels" 
-      infinite-scroll-disabled="allHotelsLoaded"
-      infinite-scroll-distance="10"
-      id="hotel-cards" ref="cards_holder"
       v-bind:class="{ bland: isDestinationValid }"
+      id="hotel-load-status"
     >
-      <div id="status" v-show="show_load_status">
+      <div id="status" v-show="true">
         <p id="status-text">{{ statusText }}</p>
         <square id="spinner" v-show="isLoading"></square>
       </div>
+    </div>
 
-      <div
+    <div
+      id="hotel-cards" ref="cards_holder"
+      v-infinite-scroll="render_more_hotels" 
+      infinite-scroll-disabled="allHotelsLoaded"
+      infinite-scroll-distance="100"
+    >
+      <HotelCard
         class="card" style="width: 20rem" 
         v-for="(hotel, key) in hotelsLoaded" v-bind:key="key"
-        ref="cards" @click="selectHotel(hotel)"
-      >
-        <div class="card-image">
-          <figure class="image is-4by3">
-            <img :src="build_image_url(hotel)"
-            class="card-image" 
-            @error="replace_default_image"
-            alt="Hotel image not found">
-          </figure>
-        </div>
-
-        <div class="card-content">
-          <div class="media">
-            <div class="media-content">
-              <p class="title is-4">{{ hotel['name'] }}</p>
-            </div>
-          </div>
-
-          <p class="address subtitle is-6">
-            {{ hotel['address'] }}
-          </p>
-
-          <b-rate 
-            v-model="hotel['rating']" :disabled="true"
-            :spaced="true"
-          />
-
-          <div class="content clipped" >
-          </div>
-        </div>
-      </div>
+        @click.native="selectHotel(hotel)"
+        ref="cards" :hotel="hotel"
+      />
     </div>
 
     <div
@@ -119,14 +136,14 @@
 <script>
 // v-html="hotel['description']"
 import fuzzysort from 'fuzzysort'
+import moment from 'moment'
 import sleep from 'await-sleep'
+import assert from 'assert'
 import axios from 'axios'
 import $ from 'jquery'
 import _ from 'lodash'
 
-import Login from '@/components/Login.vue'
-import SignUp from '@/components/SignUp.vue'
-import BLANK_IMAGE from "@/assets/image_not_found.png"
+import HotelCard from '@/components/HotelCard.vue'
 import { faL } from '@fortawesome/free-solid-svg-icons'
 import router from '../router'
 
@@ -144,20 +161,84 @@ export default {
       hotelsLoaded: [],
       selected: null,
       destination: '',
+      destinationInput: '',
       cardWidth: null,
       cardHolderWidth: null,
       cardsPreloaded: false,
 
+      num_guests: 1,
+      searched_num_guests: null,
+      max_num_guests: 20,
+      current_date: new Date(),
+      searched_dates: [],
+      dates: [],
+
       isLoading: false,
       loadError: false,
+      lastDestID: null,
+      beginSearch: false, 
+      // whether or not we should send a request 
+      // to the backend to search for hotels
 
-      modalActive: false,
-      loginModalActive: false,
-      signupModalActive: false,
-      scrollable: false
+      scrollable: false,
+
+      x: 0,
+      y: 0
     }
   },
+
   methods: {
+    open_login() {
+      this.$emit('open-login')
+    },
+
+    open_signup() {
+      this.$emit('open-signup')
+    },
+
+    load_store() {
+      const self = this;
+      self.x = self.$store.state.Store.count;
+      self.y = self.$store.state.Persistent.persistent_count;
+      console.log('STORE', self.$store);
+      console.log(self.x, self.y)
+    },
+
+    fast_forward_date() {
+      const date_now = moment(this.current_date)
+      const cutoff_date = date_now.add(24, 'h').toDate();
+      this.current_date = cutoff_date
+    },
+
+    should_exclude_date(date) {
+      // prevent days that start less than 12 hours
+      // away from the current timestamp
+      const date_now = moment(this.current_date)
+      const cutoff_date = date_now.add(12, 'h').toDate();
+      // console.log('START DATE CMP', cutoff_date, date)
+      return cutoff_date > date
+    },
+
+    add_x() {
+      this.$store.commit('increment')
+      this.load_store()
+    },
+
+    add_y() {
+      this.$store.commit('presist_increment')
+      this.load_store()
+    },
+
+    begin_search() {
+      if (!this.allow_search) {
+        return false;
+      }
+      
+      this.destination = this.destinationInput;
+      this.beginSearch = true;
+      return true;
+    },
+
     selectHotel(hotel) {
       console.log('SELECTED', hotel, hotel['id'])
       router.push({
@@ -199,7 +280,11 @@ export default {
         smartLoading = false;
       }
 
-      console.log(self.cardHolderWidth, self.cardWidth, smartLoading)
+      /*
+      console.log(
+        'LOAD', self.cardHolderWidth, self.cardWidth, smartLoading
+      )
+      */
 
       if (smartLoading) {
         const numHotelsLoaded = self.hotelsLoaded.length;
@@ -207,9 +292,15 @@ export default {
           self.cardHolderWidth / self.cardWidth
         ))
 
+        // console.log('LOADP', numHotelsLoaded, numToLoad)
+
+        // round off the number of hotel cards to load
+        // so that it fills up the entirety of the last row
         numToLoad += cardsPerRow - (
           (numHotelsLoaded + numToLoad) % cardsPerRow
         )
+        // console.log('NEWLOAD', numToLoad, cardsPerRow)
+        // console.log('LOADH', numHotelsLoaded, numToLoad)
       }
 
       // let numToLoad = 10;
@@ -225,37 +316,49 @@ export default {
       }
     },
 
-    replace_default_image(e) {
-      /*
-      load the image not found image if the original
-      hotel image fails to load. We need this because
-      theres a lot of hotels where the image provided
-      actually does not exist in the server
-      */
-      // https://stackoverflow.com/questions/39009538
-      if (e.target.src === BLANK_IMAGE) { return; }
-      e.target.src = BLANK_IMAGE;
-    },
-    build_image_url(hotel_data) {
-      const image_details = hotel_data.image_details;
-      const prefix = image_details.prefix;
-      const image_no = hotel_data.default_image_index;
-      const suffix = image_details.suffix;
+    make_price_request(dest_id, dates, num_guests) {
+      const [start_date, end_date] = dates
+      const start_date_str = moment(start_date).format('YYYY-MM-DD');
+      const end_date_str = moment(end_date).format('YYYY-MM-DD');
+      console.log('START DATE STR', start_date_str)
+      console.log('END DATE STR', end_date_str)
 
-      const image_count = hotel_data.imageCount;
-      if (image_count === 0) {
-        return BLANK_IMAGE;
-      }
+      const price_endpoint = "proxy/hotels/prices"
+      // pricing api has missing destinations (e.g. TXQ5)
+      // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
+      const get_params = {
+          destination_id: dest_id, partner_id: 1,
+          checkin: start_date_str, checkout: end_date_str,
+          lang: "en_US", currency: "SGD",
+          country_code: "SG", guests: num_guests
+        }
 
-      return `${prefix}${image_no}${suffix}`
+      // keep making the price request
+      // till we get that completed is true
+      const price_request = axios.get(
+        price_endpoint, {params: get_params}
+      )
+
+      return price_request
     },
 
     async load_hotels(dest_id) {
       const self = this;
+      const dates = self.dates
+      
+      if (dates.length !== 2) {
+        return false 
+      } else if (!this.is_valid_guests(this.num_guests)) {
+        return false
+      }
+      
       self.isLoading = true;
       self.hotelsLoaded = [];
       self.loadError = false;
       self.hotels = []
+
+      self.searched_num_guests = self.num_guests
+      self.searched_dates = dates;
 
       // await sleep(10000);
       
@@ -271,11 +374,10 @@ export default {
       (have to add rooms to destinations.json)
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
-
-      const price_endpoint = `mocklabs/destinations/${dest_id}/prices`
-      // pricing api has missing destinations (e.g. TXQ5)
-      // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
-      const price_request = axios.get(price_endpoint)
+      
+      const price_request = self.make_price_request(
+        dest_id, dates, self.num_guests
+      )
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
       });
@@ -295,8 +397,55 @@ export default {
 
         self.hotels = response.data.proxy_json;
         self.hotels.sort((hotel1, hotel2) => {
-          return -(hotel1['rating'] - hotel2['rating'])
+          if (hotel1.rating < hotel2.rating) {
+            return 1
+          } else if (hotel1.rating > hotel2.rating) {
+            return -1
+          } else {
+            return 0
+          }
         })
+
+        const hotel_mapping = {}
+        for (let k=0; k<self.hotels.length; k++) {
+          const hotel = self.hotels[k];
+          hotel_mapping[hotel.id] = k
+        }
+
+        console.log('PRICE_RESP', price_resp)
+        const price_data = price_resp.data;
+        
+        // const price_data = price_resp.data;
+
+        if (price_data === undefined) {
+           // pass if proxy_json has no data attribute
+        } else if (price_data.proxy_json === undefined) {
+          // pass if proxy_json not in price response
+        } else if (price_data.proxy_json.hotels === undefined) {
+          // pass if price response have no hotels
+        } else {
+          // add price as a property to each hotel
+          // in the original hotels api response
+          const hotel_prices = price_data.proxy_json.hotels
+          console.log('HOTEL_PRICES', hotel_prices)
+          console.log('MAPPING', hotel_mapping)
+
+          for (let k=0; k<hotel_prices.length; k++) {
+            const hotel_pricing = hotel_prices[k]
+            const hotel_id = hotel_pricing.id
+            const hotel_index = hotel_mapping[hotel_id]
+
+            if (hotel_index === undefined) {
+              // hotel was not found in original hotels response
+              continue
+            }
+
+            console.log('HOTEL_ID', hotel_id)
+            console.log('HOTEL_INDEX', hotel_index)
+            self.hotels[hotel_index]['price'] = hotel_pricing.price
+            console.log('HOTEL', k, self.hotels[hotel_id])
+          }
+        }
 
         self.hotelsLoaded = []
         self.render_more_hotels();
@@ -308,32 +457,30 @@ export default {
       self.isLoading = false;
     },
 
-    openSignup() {
-      this.loginModalActive = false;
-      this.signupModalActive = true;
-      this.modalActive = true;
-    },
+    is_valid_guests(num_guests) {
+      if (typeof num_guests !== 'number') {
+        return false
+      } else if (!Number.isInteger(num_guests)) {
+        return false
+      } else if (num_guests <= 0) {
+        return false
+      } else if (num_guests > this.max_num_guests) {
+        return false
+      }
 
-    postSignup(name) {
-      const escaped_name = _.escape(name)
-      this.$buefy.toast.open({
-        duration: 5000,
-        message: `Welcome  to Ascenda, ${escaped_name}!`,
-        type: 'is-success',
-        pauseOnHover: true
-      });
-
-      this.openLogin();
-    },
-
-    openLogin() {
-      this.loginModalActive = true;
-      this.signupModalActive = false;
-      this.modalActive = true;
+      return true
     }
   },
+
   mounted: function () {
     const self = this;
+    self.load_store();
+
+    self.current_date = new Date()
+    const date_now = moment(self.current_date)
+    const checkin_date = date_now.add(48, 'h').toDate();
+    const checkout_date = date_now.add(96 , 'h').toDate();
+    self.dates = [checkin_date, checkout_date]
 
     const loader = import('@/assets/destinations.json')
     loader.then(async (destinations) => {
@@ -359,27 +506,53 @@ export default {
       backend once a valid desination is entered into the
       autocomplete search box
       */
-      let last_dest_id = null;
 
       while (true) {
         await sleep(100);
         if (!self.isDestinationValid) {
           continue
         } 
-        
-        const dest_id = self.destinationMappings[self.destination]
-        if (last_dest_id === dest_id) {
+
+        const mappings = self.destinationMappings;
+        if (!mappings.hasOwnProperty(self.destination)) {
+          continue
+        } else if (this.beginSearch === false) {
           continue
         }
+        
+        const dest_id = self.destinationMappings[self.destination]
 
-        last_dest_id = dest_id;
+        self.lastDestID = dest_id;
         console.log('DESTID', dest_id)
         await self.load_hotels(dest_id)
+        self.beginSearch = false;
+      }
+    })();
+
+    (async () => {
+      // continually set current date
+      // and check if the selected dates in the datepicker
+      // are still valid, and remove the date selection
+      // if they are no longer valid
+      while (true) {
+        await sleep(5 * 1000);
+        const date_now = new Date()
+        if (date_now > self.current_date) {
+          // im only putting it in a if condition
+          // so that this doesn't interfere with the testing
+          // code to inject arbitary dates in the future
+          self.current_date = date_now
+        }
+
+        if (!self.dates_are_valid) {
+          self.dates = []
+        }
       }
     })();
 
     const cardsHolder = $(self.$refs.cards_holder)
     self.cardHolderWidth = cardsHolder.width()
+    console.log('HOLER WIDTH', self.cardHolderWidth)
     self.preloadCards()
 
     $(window).resize(() => {
@@ -398,8 +571,10 @@ export default {
         } else if (self.$refs.cards.length === 0) {
           continue;
         }
+
+        console.log('CARDS', self.$refs.cards)
         
-        const card = self.$refs.cards[0]
+        const card = self.$refs.cards[0].$el
         // get width (+horizontal margin) taken by card
         self.cardWidth = $(card).outerWidth(true)
         console.log('WIDTH', self.cardWidth)
@@ -436,8 +611,52 @@ export default {
   },
 
   computed: {
+    authenticated() {
+      return this.$store.getters.authenticated
+    },
+
+    dates_are_valid() {
+      if (this.dates.length !== 2) { return false }
+      const start_date = this.dates[0]
+      if (this.should_exclude_date(start_date)) { return false }
+      return true
+    },
+
+    allow_search() {
+      if (!this.is_valid_guests(this.num_guests)) {
+        return false
+      }
+
+      if (!this.dates_are_valid) { return false }
+      const mappings = this.destinationMappings;
+      if (!mappings.hasOwnProperty(this.destinationInput)) {
+        return false;
+      }
+
+      const dest_id = this.destinationMappings[this.destinationInput]
+
+      if (
+        (this.lastDestID === dest_id) &&
+        (_.isEqual(this.searched_dates, this.dates)) &&
+        (this.searched_num_guests === this.num_guests) &&
+        (this.loadError === false)
+      ) {
+        // skip search if we already searched
+        // the same destination previously already
+        // successfully (i.e. no errors) and in the same
+        // booking date range and same number of guests 
+        // as previously as well
+        return false;
+      }
+
+      return true;
+    },
+
     show_load_status() {
-      return this.loadError || this.isLoading
+      return (
+        this.loadError || this.isLoading ||
+        (this.lastDestID !== null)
+      )
     },
 
     statusText () {
@@ -446,8 +665,10 @@ export default {
       } else if (this.isLoading) {
         return "loading hotels"
       }
-
-      return ""
+    
+      const dest_name = this.destination
+      console.log('DESTNAME', dest_name)
+      return dest_name
     },
 
     allHotelsLoaded() {
@@ -467,7 +688,7 @@ export default {
 
     filteredDataArray() {
       const matches = fuzzysort.go(
-        this.destination, this.destinationNames
+        this.destinationInput, this.destinationNames
       )
       
       if ((matches.length) === 0) { return [] }
@@ -484,13 +705,13 @@ export default {
 
     isDestinationValid() {
       return this.destinationMappings.hasOwnProperty(
-        this.destination
+        this.destinationInput
       )
     }
   },
 
   components: {
-    Login, SignUp
+    HotelCard
   }
 }
 </script>
@@ -501,7 +722,6 @@ export default {
 }
 
 div#end-bar {
-  margin-top: 3rem;
   margin-bottom: 3rem;
   display: flex;
 
@@ -511,6 +731,11 @@ div#end-bar {
     margin-right: auto;
     font-family: 'Babas Neue';
     font-size: 2rem;
+    color: #e5d390;
+
+    &:hover {
+      color: #7a7561;
+    }
   }
 }
 
@@ -552,15 +777,16 @@ div#front-cover {
   }
 
   & > div.search-options {
-    width: 30rem;
+    width: 40rem;
     margin-left: 0rem;
     margin-right: 10%;
-    background: #EEE;
+    background: white;
+    border: #DDD solid 0.1rem;
     padding: 2rem;
     flex-grow: 0.2;
 
     * .searchbox {
-      width: 20rem;
+      width: 100%;
       margin-left: auto;
       margin-right: auto;
     }
@@ -568,16 +794,15 @@ div#front-cover {
 }
 
 div#hotel-cards {
-  padding: 5rem;
-  background-color: beige;
+  padding-left: 5rem;
+  padding-right: 5rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  background-color: white;
 
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-
-  &.bland {
-    background-color: #e7e6d5;
-  }
 
   & > .card {
     margin: 1rem;
@@ -595,6 +820,15 @@ div#hotel-cards {
       padding-right: 0.5rem;
     }
   }
+}
+
+div#hotel-load-status {
+  padding: 2rem;
+  background-color: #f3eee0;
+
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
 
   & > div#status {
     display: flex;
@@ -605,7 +839,15 @@ div#hotel-cards {
       font-family: 'Babas Neue';
       font-size: 2rem;
       white-space: pre-wrap;
+      word-break: break-all;
       text-align: center;
+
+      &:empty::before {
+        // allow paragraph elemenet to have height
+        // even when it has no content
+        content:"";
+        display:inline-block;
+      }
     }
 
     & > #spinner {
@@ -614,6 +856,10 @@ div#hotel-cards {
       margin-right: auto;
       width: fit-content;
     }
+  }
+
+  &.bland {
+    background-color: #e7e6d5;
   }
 }
 

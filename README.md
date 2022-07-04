@@ -1,5 +1,26 @@
 # hotel-booking
 
+# Backend virtualenv setup
+## Ubuntu 20.04
+
+```shell
+sudo apt-get install python3.10
+# required to build virtualenv
+sudo apt-get install python3.10-distutils python3.10-dev
+# required to setup python3.10 venv
+sudo apt-get install python3.10-venv
+# reqiored by django to access mysql database
+sudo apt-get install libmysqlclient-dev
+
+# install pip for python3.10
+curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+python3.10 -m pip install virtualenv
+
+# go to project folder 
+python3.10 -m pip venv venv 
+source venv/bin/activate
+(venv)$ python -m pip install -r requirements.txt
+```
 
 # DB Install Instructions
 ## Fresh DB Install Instructions:
