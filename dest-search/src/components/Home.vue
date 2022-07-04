@@ -700,7 +700,7 @@ export default {
       }
     
       const dest_name = this.destination
-      console.log('DESTNAME', dest_name)
+      // console.log('DESTNAME', dest_name)
       return dest_name
     },
 

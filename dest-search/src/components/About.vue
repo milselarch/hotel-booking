@@ -3,42 +3,30 @@
     <h1>Testing room details</h1>
     <div id="room-cards">
       <div
-        class="card" style="width: 20rem" 
+        class="card" 
         v-for="(room, key) in rooms.rooms" v-bind:key="key"
       >
         <div class="card-image">
-          <figure class="image is-4by3">
+          <!-- <figure class="image is-4by3"> -->
             <img :src="build_image(room)"
             class="card-image" 
             @error="replace_default_image"
             alt="Room image not found">
-          </figure>
+          <!-- </figure> -->
         </div>
         <div class="card-content">
-          <div class="media">
-            <div class="media-content">
-              <p class="title is-4">{{ room.roomNormalizedDescription }}</p>
-              <!-- <ul>
-                <li v-for="(amenity, key) in room.amenities" v-bind:key="key">{{amenity}}</li>
-              </ul> -->
-              <p>{{ check_breakfast(room) }}</p>
-              <p style="font-size:1.5em">SGD <b>{{ check_price(room) }}</b></p>
-            </div>
-          </div>
-
-          <!-- <p class="address subtitle is-6">
-            {{ hotel['address'] }}
-          </p> -->
-
-          <!-- <div class="content clipped" v-html="hotel['description']">
-          </div> -->
+          <p class="title is-4">{{ room.roomNormalizedDescription }}</p>
+          <!-- <ul>
+            <li v-for="(amenity, key) in room.amenities" v-bind:key="key">{{amenity}}</li>
+          </ul> -->
+          <p>{{ check_breakfast(room) }}</p>
+          <p style="font-size:1.5em">SGD <b>{{ check_price(room) }}</b></p>
         </div>
       </div>
     </div>
-  </div>
-
-  
+  </div>  
 </template>
+
 <script>
 import Roomlistean from '../../json-samples/fullertonean.json';
 import Roomlistbeds from '../../json-samples/fullertonbedscom.json';
@@ -111,18 +99,22 @@ div#room-cards {
 
   & > .card {
     margin: 1rem;
+    width: 55%;
+    height: fit-content;
 
-    & img.card-image {
-      // preserve aspect ratio for card images
-      object-fit: cover;
-    }
+  & img.card-image {
+    // preserve aspect ratio for card images
+    object-fit: cover;
+    height: 14rem;
+    // width: 16rem;
+    float: left;
+  }
 
-    & > .card-content > div.content {
-      text-overflow: ellipsis;
-      max-height: 19rem;
-      overflow-y: scroll;
-      padding-right: 0.5rem;
-    }
+  & > .card-content{
+    text-overflow: ellipsis;
+    max-height: 19rem;
+    overflow-y: scroll;
+  }
   }
 }
 </style>
