@@ -4,7 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from common.models import common_attribute_model, country_code, country_currency
 
 class user_account_manager(BaseUserManager):
-    def create_user(self, email, first_name, password = None):
+    def create_user(self, email, first_name, last_name, password = None):
         if email == None:
             raise ValueError("Users must have an email address")
         if first_name == None:
@@ -16,7 +16,8 @@ class user_account_manager(BaseUserManager):
 
         user = self.model(
             email = email, 
-            first_name = first_name
+            first_name = first_name,
+            last_name = last_name,
         )
 
         user.set_password(password)
@@ -24,7 +25,7 @@ class user_account_manager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email, first_name, password = None):
+    def create_superuser(self, email, first_name, last_name, password = None):
         user = self.create_user
         user.is_superuser = True
         user.save()
@@ -47,11 +48,13 @@ class user_account(AbstractBaseUser, PermissionsMixin, common_attribute_model):
     title = models.CharField(max_length=3, choices=titles, blank=True, null=True)
     phone_country = models.ForeignKey(country_code, on_delete=models.PROTECT, blank=True, null=True)
     display_currency_preference = models.ForeignKey(country_currency, on_delete=models.PROTECT, blank=True, null=True)
+    # format in YYYY-MM-DD HH:MM
+    datetime_created = models.DateTimeField(auto_now_add=True)
 
     objects = user_account_manager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ['first_name']
+    REQUIRED_FIELDS = ['first_name', "last_name"]
 
     def get_fullname(self):
         return self.first_name + " " + self.last_name
