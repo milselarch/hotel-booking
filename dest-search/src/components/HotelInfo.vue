@@ -1,7 +1,7 @@
 <template>
   <div id="hotel-info">
     <p id="test">
-    {{hotel_id}}
+    {{hotel_id}} {{dest_id}}
     </p>
     <div id="room-cards">
       <div
@@ -37,12 +37,16 @@ export default {
     hotel_id: {
       type: String,
       default: "TEST"
+    },
+    dest_id: {
+      type: String,
+      default: "testing"
     }
   },
   data(){
     return {
       roomList: 'a',
-      url: 'https://hotelapi.loyalty.dev/api/hotels/1xUw/price?destination_id=RsBU&checkin=2022-08-31&checkout=2022-09-01&lang=en_US&currency=SGD&partner_id=16&country_code=SG&guests=2'
+      url: 'proxy/hotels/'+ this.hotel_id + '/price'
     }
   },
   methods: {
@@ -92,7 +96,7 @@ export default {
   },
   mounted() {
     // const getRooms = axios.get(this.url)
-    const room_request = axios.get("proxy/hotels/1xUw/price", {
+    const room_request = axios.get(this.url, {
       params: {
         destination_id: 'RsBU',
         checkin: '2022-08-31',

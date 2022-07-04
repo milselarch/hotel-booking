@@ -24,18 +24,22 @@ describe('Home.vue Test', () => {
       propsData: {
         msg: 'Welcome to Your Vue.js App'
       },
-      stubs: {
+      //specify custom components
+      stubs: { 
         transition: false,
         'b-button': true,
         'b-modal': true,
         'b-field': true,
         'b-autocomplete': true,
         'square': true,
+        'b-input': true,
+        'b-select': true,
+        'b-datepicker': true,
       }
     })
 
     // check the msg of the component
-    expect(wrapper.vm.msg).toMatch('Welcome to Your Vue.js App')
+    expect(wrapper.vm.msg).stoMatch('Welcome to Your Vue.js App')
 
     // check that the title is rendered
     expect(wrapper.vm.$options.name).toMatch('Home')
