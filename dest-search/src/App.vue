@@ -307,6 +307,13 @@ button.off {
 }
 */
 
+.flat-progress-bar {
+  & > progress {
+    border-radius: 0px !important;
+    height: 0.5rem !important;
+  }
+}
+
 div.drop-side-title {
   margin: 0px !important;
   width: 100%;
