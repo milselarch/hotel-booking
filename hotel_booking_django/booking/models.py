@@ -29,6 +29,9 @@ class booking_order(common_attribute_model):
     #cost_breaking_Down
     cost_in_sgd  = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True)
 
+    # format in YYYY-MM-DD HH:MM
+    datetime_created = models.DateTimeField(auto_now_add=True)
+
 class secondary_guests(common_attribute_model):
     booking_id =  models.IntegerField(blank=True, null=True)
     titles = (

@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.generic import TemplateView
+from booking import views
 from django.views.decorators.csrf import csrf_exempt
 
 from hotel_booking_django.api_proxy import proxy_view, proxy_mocklabs
@@ -27,6 +28,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
+    path('booking/', views.booking_data.as_view(),),
+    path('booking/<str:pk>/', views.booking_data.as_view(),),
+    path('all_booking/', views.all_booking_data.as_view(),),
 
     path('auth_test', ProfileView.as_view(), name='example'),
     path('profile', ProfileView.as_view(), name='profile'),
