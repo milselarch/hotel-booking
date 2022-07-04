@@ -1,29 +1,29 @@
 <template>
   <div id="hotel-info">
     <p id="test">
-    {{hotel_id}}<br>{{ roomList }}
+    {{hotel_id}}
     </p>
-    <!-- <div id="room-cards">
+    <div id="room-cards">
       <div
         class="card" 
         v-for="(room, key) in roomList.rooms" v-bind:key="key"
-      > -->
-        <!-- <div class="card-image">
+      >
+        <div class="card-image">
             <img :src="build_image(room)"
             class="card-image" 
             @error="replace_default_image"
             alt="Room image not found">
-        </div> -->
-        <!-- <div class="card-content">
-          <p class="title is-4">{{ room.roomNormalizedDescription }}</p> -->
+        </div>
+        <div class="card-content">
+          <p class="title is-4">{{ room.roomNormalizedDescription }}</p>
           <!-- <ul>
             <li v-for="(amenity, key) in room.amenities" v-bind:key="key">{{amenity}}</li>
           </ul> -->
-          <!-- <p>{{ check_breakfast(room) }}</p> -->
-          <!-- <p style="font-size:1.5em">SGD <b>{{ check_price(room) }}</b></p> -->
-        <!-- </div> -->
-      <!-- </div>
-    </div> -->
+          <p>{{ check_breakfast(room) }}</p>
+          <p style="font-size:1.5em">SGD <b>{{ check_price(room) }}</b></p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -41,7 +41,7 @@ export default {
   },
   data(){
     return {
-      roomList: [],
+      roomList: 'a',
       url: 'https://hotelapi.loyalty.dev/api/hotels/1xUw/price?destination_id=RsBU&checkin=2022-08-31&checkout=2022-09-01&lang=en_US&currency=SGD&partner_id=16&country_code=SG&guests=2'
     }
   },
@@ -76,18 +76,18 @@ export default {
       }
     },
     check_price(room){
-      let cheaper = room.price;
-      for (let other in Roomlistbeds.rooms){
-        if (Roomlistbeds.rooms[other].key == room.key){
-          cheaper = Math.min(Roomlistbeds.rooms[other].price, cheaper)
-        }
-      }
-      for (let another in Roomlistwgl.rooms){
-        if (Roomlistwgl.rooms[another].key == room.key){
-          cheaper = Math.min(Roomlistwgl.rooms[another].price, cheaper)
-        }
-      }
-      return cheaper
+      // let cheaper = room.price;
+      // for (let other in Roomlistbeds.rooms){
+      //   if (Roomlistbeds.rooms[other].key == room.key){
+      //     cheaper = Math.min(Roomlistbeds.rooms[other].price, cheaper)
+      //   }
+      // }
+      // for (let another in Roomlistwgl.rooms){
+      //   if (Roomlistwgl.rooms[another].key == room.key){
+      //     cheaper = Math.min(Roomlistwgl.rooms[another].price, cheaper)
+      //   }
+      // }
+      // return cheaper
     }
   },
   mounted() {
@@ -103,8 +103,14 @@ export default {
         country_code: 'SG',
         guests: '2'
       }
-    });
-    this.roomList = room_request.data.proxy_json.rooms;
+    }).then((getResponse) => {
+      console.log("GET Response");
+      console.log(getResponse.data);
+      this.roomList = getResponse.data.proxy_json;
+    })
+    if (room_request.data === undefined){
+      this.roomList = "undefined";
+    }
   }
 }
 </script>
@@ -131,6 +137,7 @@ div#room-cards {
     // preserve aspect ratio for card images
     object-fit: cover;
     height: 14rem;
+    max-width: 18rem;
     float: left;
   }
 
