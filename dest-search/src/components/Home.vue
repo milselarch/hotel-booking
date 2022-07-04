@@ -31,7 +31,7 @@
 
       <div class="search-options">
         <section>
-          <b-field label="Destination & Hotel Booking Details"
+          <b-field label="Destination"
             class="searchbox"
           >
             <b-field>
@@ -52,28 +52,40 @@
               rooms_valid && is_valid_guests(num_guests)
             )}" expanded
           >
-            <b-input placeholder="Guests"
-              type="number" icon="user" 
-              v-model.number="num_guests"
-              min="1" :max="max_num_guests" default="1"
-              pattern="[0-9]+" required
-              :disabled="isLoading" 
+            <b-field 
+              id="guests-field" expanded label="Guests (per room)"
             >
-            </b-input>
+              <b-input placeholder="Guests"
+                label="test" ref="guests_input"
+                type="number" icon="user" 
+                v-model.number="num_guests"
+
+                min="1" :max="max_num_guests" default="1"
+                pattern="[0-9]+" required
+                :disabled="isLoading"
+              >
+              </b-input>
+            </b-field>
 
             <div class="mid-buffer"></div>
 
-            <b-select
-              placeholder="Rooms" icon="door-closed"
-              expanded id="room-selector" v-model="num_rooms"
+            <b-field 
+              id="rooms-field" expanded label="Rooms"
+              :disabled="isLoading"
             >
-              <option 
-                v-for="(num_rooms, index) in allowed_room_choices"
-                v-bind:key="index" :value="num_rooms"
+              <b-select
+                placeholder="Rooms" icon="door-closed"
+                expanded id="room-selector" v-model="num_rooms"
+                :disabled="isLoading"
               >
-                {{ num_rooms }}
-              </option>
-            </b-select>
+                <option 
+                  v-for="(num_rooms, index) in allowed_room_choices"
+                  v-bind:key="index" :value="num_rooms"
+                >
+                  {{ num_rooms }}
+                </option>
+              </b-select>
+            </b-field>
 
           </b-field>
 
@@ -84,7 +96,7 @@
           </b-field>
           -->
 
-          <b-field>
+          <b-field label="Check in, Check out dates">
             <b-datepicker
               placeholder="Select check in and checkout dates"
               v-model="dates" 
@@ -187,7 +199,7 @@ export default {
       cardHolderWidth: null,
       cardsPreloaded: false,
 
-      num_guests: 1,
+      num_guests: 2,
       searched_num_guests: null,
       max_num_guests: 20,
       current_date: new Date(),
@@ -195,6 +207,7 @@ export default {
       dates: [],
 
       max_num_rooms: 10,
+      searched_num_rooms: 0,
       num_rooms: 1,
 
       isLoading: false,
@@ -213,7 +226,7 @@ export default {
 
   methods: {
     open_login() {
-      this.$emit('open-login')
+      this.$emit('open-login')  
     },
 
     open_signup() {
@@ -340,12 +353,14 @@ export default {
       }
     },
 
-    make_price_request(dest_id, dates, num_guests) {
+    make_price_request(dest_id, dates, num_guests, rooms) {
       const [start_date, end_date] = dates
       const start_date_str = moment(start_date).format('YYYY-MM-DD');
       const end_date_str = moment(end_date).format('YYYY-MM-DD');
+      const guests_query = Array(rooms).fill(num_guests).join('|')
       console.log('START DATE STR', start_date_str)
       console.log('END DATE STR', end_date_str)
+      console.log('ROOMS QURY', guests_query)
 
       const price_endpoint = "proxy/hotels/prices"
       // pricing api has missing destinations (e.g. TXQ5)
@@ -354,7 +369,7 @@ export default {
           destination_id: dest_id, partner_id: 1,
           checkin: start_date_str, checkout: end_date_str,
           lang: "en_US", currency: "SGD",
-          country_code: "SG", guests: num_guests
+          country_code: "SG", guests: guests_query
         }
 
       // keep making the price request
@@ -374,6 +389,8 @@ export default {
         return false 
       } else if (!this.is_valid_guests(this.num_guests)) {
         return false
+      } else if (!this.rooms_valid) {
+        return false
       }
       
       self.isLoading = true;
@@ -382,6 +399,7 @@ export default {
       self.hotels = []
 
       self.searched_num_guests = self.num_guests
+      self.searched_num_rooms = self.num_rooms
       self.searched_dates = dates;
 
       // await sleep(10000);
@@ -400,7 +418,7 @@ export default {
       */
       
       const price_request = self.make_price_request(
-        dest_id, dates, self.num_guests
+        dest_id, dates, self.num_guests, self.num_rooms
       )
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
@@ -660,6 +678,7 @@ export default {
         return false
       }
 
+      if (!this.rooms_valid) { return false }
       if (!this.dates_are_valid) { return false }
       const mappings = this.destinationMappings;
       if (!mappings.hasOwnProperty(this.destinationInput)) {
@@ -672,13 +691,14 @@ export default {
         (this.lastDestID === dest_id) &&
         (_.isEqual(this.searched_dates, this.dates)) &&
         (this.searched_num_guests === this.num_guests) &&
+        (this.searched_num_rooms === this.num_rooms) &
         (this.loadError === false)
       ) {
         // skip search if we already searched
         // the same destination previously already
         // successfully (i.e. no errors) and in the same
         // booking date range and same number of guests 
-        // as previously as well
+        // and same number of rooms as previously as well
         return false;
       }
 
@@ -782,10 +802,13 @@ div#front-cover {
 
   & > div.description-wrapper {
     flex-grow: 1;
+    display: flex;
 
     & > div.description {
       margin-left: 20%;
       margin-right: 20%;
+      margin-bottom: auto;
+      margin-top: auto;
 
       & button#signup {
         margin-left: 0.5rem;
@@ -810,7 +833,7 @@ div#front-cover {
   }
 
   & > div.search-options {
-    width: 40rem;
+    width: 45rem;
     margin-left: 0rem;
     margin-right: 10%;
     background: white;
@@ -826,6 +849,14 @@ div#front-cover {
 
     & div.mid-buffer {
       margin-left: 0.5rem !important;
+    }
+
+    & #rooms-field {
+      width: 100%;
+    }
+
+    & #guests-field {
+      width: 100%;
     }
   }
 }
