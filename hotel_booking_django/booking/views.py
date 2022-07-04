@@ -11,10 +11,10 @@ from .serializers import booking_serializer
 
 class booking_data(APIView):
 
-    # # require login to interact with booking data
-    # permission_classes = (IsAuthenticated,)
+    # require login to interact with booking data
+    permission_classes = (IsAuthenticated,)
 
-    # get all the bookings under the user in the Database
+    # get all the bookings under 1 user in the Database
     # pk = user uid
     def get(self, request, pk):
         queryset = booking_order.objects.filter(user_account__exact = pk)
@@ -24,6 +24,8 @@ class booking_data(APIView):
     # create a booking under the user account
     # pass in UID in the user_account field
     def post(self, request):
+        # pre-fill the data of the logged in user
+        request.data["user_account"] = request.user.uid
         serializer = booking_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -43,7 +45,7 @@ class booking_data(APIView):
 class all_booking_data(APIView):
 
     # only admins can use this endpoint
-    # permission_classes = [IsAdminUser]
+    permission_classes = (IsAdminUser,)
 
     # get all the bookings in the Database
     def get(self, request):
