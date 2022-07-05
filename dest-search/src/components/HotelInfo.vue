@@ -1,7 +1,7 @@
 <template>
   <div id="hotel-info">
     <p id="test">
-    {{hotel_id}} {{dest_id}}
+    destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}
     </p>
     <div id="room-cards">
       <div
@@ -20,7 +20,7 @@
             <li v-for="(amenity, key) in room.amenities" v-bind:key="key">{{amenity}}</li>
           </ul> -->
           <p>{{ check_breakfast(room) }}</p>
-          <p style="font-size:1.5em">SGD <b>{{ check_price(room) }}</b></p>
+          <p style="font-size:1.5em">SGD <b>{{ room.price }}</b></p>
         </div>
       </div>
     </div>
@@ -98,7 +98,7 @@ export default {
     // const getRooms = axios.get(this.url)
     const room_request = axios.get(this.url, {
       params: {
-        destination_id: 'RsBU',
+        destination_id: this.dest_id,
         checkin: '2022-08-31',
         checkout: '2022-09-01',
         lang: 'en_US',

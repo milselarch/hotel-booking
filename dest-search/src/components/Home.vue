@@ -279,7 +279,7 @@ export default {
     selectHotel(hotel) {
       console.log('SELECTED', hotel, hotel['id'])
       router.push({
-        path: `/hotels/${self.lastDestID}/${hotel['id']}`
+        path: `/hotels/${this.lastDestID}/${hotel['id']}`
       })
     },
 
