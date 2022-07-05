@@ -2,7 +2,6 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from common.models import common_attribute_model, country_code
 from accounts.models import user_account
-from booking.models import booking_order
 
 class user_payment(common_attribute_model):
     payment_mode = models.PositiveIntegerField(validators=[MinValueValidator(10000000),MaxValueValidator(999999999999999)], blank=True, null=True)
@@ -24,7 +23,7 @@ class user_payment_credit_card_details(common_attribute_model):
 class booking_payment(common_attribute_model):
     name_on_card = models.CharField(max_length=255, blank=True, null=True)
     payment_mode = models.PositiveIntegerField(validators=[MinValueValidator(10000000),MaxValueValidator(999999999999999)], blank=True, null=True)
-    booking_order = models.ForeignKey(booking_order, on_delete=models.CASCADE, blank=True, null=True)
+    # booking_order = models.ForeignKey(booking_order, on_delete=models.CASCADE, blank=True, null=True)
 
 class booking_payment_credit_card_details(common_attribute_model):
     name_on_card = models.CharField(max_length=255, blank=True, null=True)
