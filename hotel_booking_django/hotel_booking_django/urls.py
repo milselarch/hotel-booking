@@ -32,8 +32,6 @@ urlpatterns = [
     path('booking/', views.booking_data.as_view(),),
     path('booking/<str:pk>/', views.booking_data.as_view(),),
     path('all_booking/', views.all_booking_data.as_view(),),
-    path('booking_tnc/', views.BookingTnCView.as_view(),),
-    path('hotel_tnc/', views.HotelTnCView.as_view(),),
 
     path('auth_test', ProfileView.as_view(), name='example'),
     path('profile', ProfileView.as_view(), name='profile'),
