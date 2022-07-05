@@ -1,10 +1,12 @@
 from django.db import models
 from common.models import common_attribute_model, country_code
 from accounts.models import user_account
-from payment.models import booking_payment_credit_card_details
+from payment.models import user_payment_credit_card_details
 
 # Create your models here.
 class booking_order(common_attribute_model):
+
+    # payee id = user id
     user_account = models.ForeignKey(user_account, on_delete=models.PROTECT, blank=True, null=True)
     hotel_id = models.CharField(max_length=255, blank=True, null=True)
     room_type_id = models.CharField(max_length=255, blank=True, null=True)
@@ -34,13 +36,13 @@ class booking_order(common_attribute_model):
     datetime_created = models.DateTimeField(auto_now_add=True)
 
     # the payment details for the booking order
-    payment_id = models.ForeignKey(booking_payment_credit_card_details, on_delete=models.PROTECT, blank=True, null=True)
+    payment_id = models.ForeignKey(user_payment_credit_card_details, on_delete=models.PROTECT, blank=True, null=True)
 
     # to be updated during deployment
-    booking_link = r"https://localhost:8000/booking_tnc"
-    hotel_link = r"https://localhost:8000/hotel_tnc"
-    booking_tnc = models.URLField(max_length = 200, default = booking_link)
-    hotel_tnc = models.URLField(max_length = 200, default = hotel_link)
+    booking_terms_and_condition = "This is a sample booking terms and condition"
+    hotel_terms_and_condition = "This is a sample hotel terms and condition"
+    booking_tnc = models.CharField(max_length = 1000, default = booking_terms_and_condition)
+    hotel_tnc = models.CharField(max_length = 1000, default = hotel_terms_and_condition)
 
 
 class secondary_guests(common_attribute_model):
