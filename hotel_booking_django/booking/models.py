@@ -1,6 +1,7 @@
 from django.db import models
 from common.models import common_attribute_model, country_code
 from accounts.models import user_account
+from payment.models import booking_payment_credit_card_details
 
 # Create your models here.
 class booking_order(common_attribute_model):
@@ -31,6 +32,9 @@ class booking_order(common_attribute_model):
 
     # format in YYYY-MM-DD HH:MM
     datetime_created = models.DateTimeField(auto_now_add=True)
+
+    # the payment details for the booking order
+    payment_id = models.ForeignKey(booking_payment_credit_card_details, on_delete=models.PROTECT, blank=True, null=True)
 
     # to be updated during deployment
     booking_link = r"https://localhost:8000/booking_tnc"
