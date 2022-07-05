@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -52,3 +53,11 @@ class all_booking_data(APIView):
         queryset = booking_order.objects.all()
         serializer = booking_serializer(queryset, many=True)
         return Response(serializer.data)
+
+# generate the html webpage for hotel tnc
+class HotelTnCView(TemplateView):
+    template_name = "hotel_tnc.html"
+
+# generate the html webpage for booking tnc
+class BookingTnCView(TemplateView):
+    template_name = "booking_tnc.html"

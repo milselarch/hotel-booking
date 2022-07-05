@@ -23,6 +23,7 @@ from django.views.decorators.csrf import csrf_exempt
 from hotel_booking_django.api_proxy import proxy_view, proxy_mocklabs
 from rest_framework_simplejwt import views as jwt_views
 from accounts.views import ProfileView
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,6 +32,8 @@ urlpatterns = [
     path('booking/', views.booking_data.as_view(),),
     path('booking/<str:pk>/', views.booking_data.as_view(),),
     path('all_booking/', views.all_booking_data.as_view(),),
+    path('booking_tnc/', views.BookingTnCView.as_view(),),
+    path('hotel_tnc/', views.HotelTnCView.as_view(),),
 
     path('auth_test', ProfileView.as_view(), name='example'),
     path('profile', ProfileView.as_view(), name='profile'),
