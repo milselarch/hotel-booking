@@ -20,7 +20,7 @@ const routes = [{
     name: 'Profile',
     component: Profile
   }, {
-    path: '/hotels/:hotel_id',
+    path: '/hotels/:dest_id/:hotel_id',
     name: 'HotelInfo',
     component: HotelInfo,
     props: true
