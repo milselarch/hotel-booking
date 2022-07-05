@@ -38,8 +38,8 @@ source venv/bin/activate
 
 ```sql
 CREATE DATABASE hotel_booking;  
-CREATE USER 'esc_server'@'localhost' IDENTIFIED BY 'AS12qw34!@';  
-GRANT ALL PRIVILEGES ON hotel_booking . * TO 'esc_server'@'localhost';  
+CREATE USER 'esc_server'@'localhost' IDENTIFIED BY 'AS12qw34!@';
+GRANT ALL PRIVILEGES ON *.* TO 'esc_server'@'localhost';  
 FLUSH PRIVILEGES;
 ```
 	

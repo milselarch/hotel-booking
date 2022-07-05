@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import booking_order
-from .serializers import booking_serializer
+from .serializers import booking_serializer, booking_response_serializer
 
 class booking_data(APIView):
 
@@ -26,7 +26,7 @@ class booking_data(APIView):
     def post(self, request):
         # pre-fill the data of the logged in user
         request.data["user_account"] = request.user.uid
-        serializer = booking_serializer(data=request.data)
+        serializer = booking_response_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

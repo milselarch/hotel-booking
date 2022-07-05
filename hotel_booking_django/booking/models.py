@@ -1,7 +1,7 @@
 from django.db import models
 from common.models import common_attribute_model, country_code
 from accounts.models import user_account
-
+from payment.models import booking_payment
 # Create your models here.
 class booking_order(common_attribute_model):
     user_account = models.ForeignKey(user_account, on_delete=models.PROTECT, blank=True, null=True)
@@ -29,8 +29,18 @@ class booking_order(common_attribute_model):
     #cost_breaking_Down
     cost_in_sgd  = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True)
 
+    # payee id can be accessed under payment_id
+    payment_id = models.ForeignKey(booking_payment, on_delete=models.PROTECT, blank=True, null=True)
+
     # format in YYYY-MM-DD HH:MM
     datetime_created = models.DateTimeField(auto_now_add=True)
+
+    # to be updated during deployment
+    booking_link = r"https://localhost:8000/booking_tnc"
+    hotel_link = r"https://localhost:8000/hotel_tnc"
+    booking_tnc = models.URLField(max_length = 200, default = booking_link)
+    hotel_tnc = models.URLField(max_length = 200, default = hotel_link)
+
 
 class secondary_guests(common_attribute_model):
     booking_id =  models.IntegerField(blank=True, null=True)
