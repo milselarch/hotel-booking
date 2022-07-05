@@ -28,8 +28,9 @@ class booking_data(APIView):
         # pre-fill the data of the logged in user
         request.data["user_account"] = request.user.uid
         serializer = booking_response_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        serializer_db = booking_serializer(data=request.data)
+        if serializer_db.is_valid():
+            serializer_db.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
