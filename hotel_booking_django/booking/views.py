@@ -11,7 +11,6 @@ from .models import booking_order
 from .serializers import booking_serializer
 from payment.serializers import user_payment_credit_card_details_serializer
 import re
-from rest_framework.exceptions import ValidationError, ParseError
 
 # function used to validate credit card number
 # credits: https://linuxconfig.org/regular-expression-to-validate-credit-card-number
@@ -42,14 +41,53 @@ class booking_data(APIView):
     def get(self, request, pk):
         queryset = booking_order.objects.filter(user_account__exact = pk)
         serializer = booking_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
-    # create a booking under the user account
-    # pass in UID in the user_account field
     def post(self, request):
 
-        # check if credit card number is present
+        """
+        Create a booking under the user account
+
+        Args:
+            request: a request that contains a json object in its data field.
+            The json object should contain these information:
+            {
+                "user_account": ,
+                "hotel_id": ,
+                "room_type_id": ,
+                "booking_id": ,
+                "check_in_date": ,
+                "check_out_date": ,
+                "number_of_rooms": ,
+                "number_of_guests_per_rooms": ,
+                "special_request": ,
+                "primary_guest_title": ,
+                "primary_guest_first_name": ,
+                "primary_guest_last_name": ,
+                "primary_guest_phone": ,
+                "primary_guest_phone_country": ,
+                "primary_guest_passport_number": ,
+                "primary_guest_passport_country": ,
+                "cost_in_sgd": ,
+                "datetime_created": ,
+                "name_on_card": ,
+                "card_number": ,
+                "expiry_date": ,
+                "security_code": ,
+                "billing_address_address": ,
+                "billing_address_country": ,
+                "billing_address_city": ,
+                "billing_address_post_code": 
+            }
+
+        Returns:
+            A response that contains all the booking information being saved into the database
+        """
+
+        # remove whitespaces from the credit card number
         card_number = request.data['card_number'].replace(" ", "")
+
+        # check if credit card number is present
         if card_number != None:
 
             # update card number in request with the
@@ -65,6 +103,8 @@ class booking_data(APIView):
                 # save the payment info first to generate the payment id
                 payment_serializer = user_payment_credit_card_details_serializer(data=request.data)
                 if payment_serializer.is_valid():
+
+                    # obtain the user_payment_credit_card_details object
                     payment = payment_serializer.save()
 
                     # update the request with the payment id obtained
@@ -75,10 +115,13 @@ class booking_data(APIView):
 
                     if serializer.is_valid():
                         serializer.save()
-
                         return Response(serializer.data, status=status.HTTP_201_CREATED)
-                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                return Response(payment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                    else:
+                        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                else:
+                    return Response(payment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
             else:
                 return Response({"error: Invalid Credit Card Number"}, status=status.HTTP_400_BAD_REQUEST)
@@ -107,7 +150,7 @@ class all_booking_data(APIView):
     def get(self, request):
         queryset = booking_order.objects.all()
         serializer = booking_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status = status.HTTP_200_OK)
 
 # # generate the html webpage for hotel tnc
 # class HotelTnCView(TemplateView):
