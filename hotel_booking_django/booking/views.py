@@ -13,23 +13,31 @@ from payment.serializers import user_payment_credit_card_details_serializer
 import re
 
 # function used to validate credit card number
-# credits: https://linuxconfig.org/regular-expression-to-validate-credit-card-number
-def valid_credit_card(card_number):
-    cc_list = [
-        '1234 5678 1234 5678',
-        '1234567812345678',
-        '1234-5678-1234-5678',
-        '1234-5678-1234-56786',
-        '1234-55678-1234-5678'
-        ]
-    pattern = '^([0-9]{4}[- ]?){3}[0-9]{4}$'
-    for eachnumber in cc_list:
-        result = re.match(pattern, eachnumber)
-        if result:
-            return True
-        else:
-            return False
-
+# credits: https://www.geeksforgeeks.org/luhn-algorithm/
+def valid_credit_card(cardNo):
+     
+    nDigits = len(cardNo)
+    nSum = 0
+    isSecond = False
+     
+    for i in range(nDigits - 1, -1, -1):
+        d = ord(cardNo[i]) - ord('0')
+     
+        if (isSecond == True):
+            d = d * 2
+  
+        # We add two digits to handle
+        # cases that make two digits after
+        # doubling
+        nSum += d // 10
+        nSum += d % 10
+  
+        isSecond = not isSecond
+     
+    if (nSum % 10 == 0):
+        return True
+    else:
+        return False
 
 class booking_data(APIView):
 
