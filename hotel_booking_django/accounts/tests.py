@@ -30,7 +30,8 @@ class TestAuthentication(TestCase):
 
         self.TEST_USER2_SIGNUP = {
             'email': 'test2@test.com',
-            'name': "Johnny Depp 2",
+            'first_name': "Johnny",
+            "last_name": "Depp 2",
             'password': 'qwe123qwe@!Q',
             're_password': 'qwe123qwe@!Q',
         }
