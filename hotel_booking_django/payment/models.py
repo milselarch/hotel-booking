@@ -11,7 +11,7 @@ class user_payment(common_attribute_model):
 class user_payment_credit_card_details(common_attribute_model):
     name_on_card = models.CharField(max_length=255, blank=True, null=True)
     card_number = models.CharField(max_length=20, blank=True, null=True)
-    expiry_date = models.IntegerField(blank=True, null=True)
+    expiry_date = models.DateField(blank=True, null=True)
     security_code = models.IntegerField(blank=True, null=True)
     billing_address_address = models.CharField(max_length=255, blank=True, null=True)
     billing_address_country = models.ForeignKey(country_code, on_delete=models.PROTECT, blank=True, null=True)
