@@ -60,7 +60,6 @@ class booking_data(APIView):
             request: a request that contains a json object in its data field.
             The json object should contain these information:
             {
-                "user_account": ,
                 "hotel_id": ,
                 "room_type_id": ,
                 "booking_id": ,
@@ -77,7 +76,6 @@ class booking_data(APIView):
                 "primary_guest_passport_number": ,
                 "primary_guest_passport_country": ,
                 "cost_in_sgd": ,
-                "datetime_created": ,
                 "name_on_card": ,
                 "card_number": ,
                 "expiry_date": ,
