@@ -15,7 +15,7 @@ class booking_order(common_attribute_model):
     check_out_date = models.DateField(blank=True, null=True)
     number_of_rooms = models.IntegerField(blank=True, null=True)
     number_of_guests_per_rooms = models.IntegerField(blank=True, null=True)
-    special_request = models.IntegerField(blank=True, null=True)
+    special_request = models.CharField(max_length=500, blank=True, null=True)
     titles = (
         ('MR','Mr.'),
         ('MS', 'Ms.'),
