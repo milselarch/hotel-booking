@@ -2,6 +2,7 @@ from django.test import TestCase
 from accounts.models import user_account
 from booking.models import booking_order
 from booking import serializers as bookingSerializer
+import copy
 
 class TestBooking(TestCase):
 
@@ -129,7 +130,11 @@ class TestBooking(TestCase):
     def test_make_booking_without_login(self):
         booking_endpoint = '/booking/'
 
-        response1 = self.client.post(booking_endpoint, self.TEST_BOOKING_1)
+        response1 = self.client.post(
+            booking_endpoint, 
+            content_type='application/json', 
+            data = self.TEST_BOOKING_1)
+
         status_code1 = response1.status_code
         # check that the booking fails since the user is not logged in
         # Django should return a 401 unauthorized response.
@@ -139,7 +144,7 @@ class TestBooking(TestCase):
         booking_count = booking_order.objects.all().count()
         self.assertEquals(booking_count, 0)
 
-    # check if user can create booking after logging in
+    # check if user can create bookings after logging in
     # expected result: yes
     def test_make_booking_with_login(self):
         # fixed endpoint from Djoser to login
@@ -154,14 +159,80 @@ class TestBooking(TestCase):
             'HTTP_AUTHORIZATION': "JWT " + USER1_ACCESS_TOKEN,
         }
 
-        response2 = self.client.post(booking_endpoint, content_type='application/json', data = self.TEST_BOOKING_1, **auth_header)
+        response2 = self.client.post(
+            booking_endpoint, 
+            content_type='application/json', 
+            data = self.TEST_BOOKING_1, 
+            **auth_header)
+
         status_code2 = response2.status_code
         self.assertEquals(status_code2, 201)
 
+        response3 = self.client.post(
+            booking_endpoint, 
+            content_type='application/json', 
+            data = self.TEST_BOOKING_2, 
+            **auth_header)
 
+        status_code3 = response3.status_code
+        self.assertEquals(status_code3, 201)
 
+        # check if there are 2 bookings in the database
+        # expected number of bookings = 2
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 2)
 
-    
+        # test if the credit card validator works
+        # 5999 9999 9999 9108 is a card number that fails the luhn's test
+        test_booking_3 = copy.deepcopy(self.TEST_BOOKING_2)
+        test_booking_3["card_number"] = "5999 9999 9999 9108"
+
+        response4 = self.client.post(
+            booking_endpoint, 
+            content_type='application/json', 
+            data = test_booking_3, 
+            **auth_header)
+
+        status_code4 = response4.status_code
+        self.assertEquals(status_code4, 400)
+        self.assertEquals(response4.data, {"card_number": "Invalid Credit Card Number"})
+
+        # check if the number of bookings in the database is still 2
+        self.assertEquals(booking_count, 2)
+
+        # check if the post method catches an missing credit card field in the request
+        test_booking_4 = copy.deepcopy(self.TEST_BOOKING_2)
+        test_booking_4.pop("card_number")
+        
+        response5 = self.client.post(
+            booking_endpoint, 
+            content_type='application/json', 
+            data = test_booking_4, 
+            **auth_header)
+
+        status_code5 = response5.status_code
+        self.assertEquals(status_code5, 400)
+        self.assertEquals(response5.data, {"card_number": "Request requires a card number field"})
+
+        # check if the number of bookings in the database is still 2
+        self.assertEquals(booking_count, 2)
+
+        # check if the post method catches an empty credit card field in the request
+        test_booking_5 = copy.deepcopy(self.TEST_BOOKING_2)
+        test_booking_5["card_number"] = ""
+        
+        response6 = self.client.post(
+            booking_endpoint, 
+            content_type='application/json', 
+            data = test_booking_5, 
+            **auth_header)
+
+        status_code6 = response5.status_code
+        self.assertEquals(status_code6, 400)
+        self.assertEquals(response6.data, {"card_number": "Missing Credit Card Number"})
+
+        # check if the number of bookings in the database is still 2
+        self.assertEquals(booking_count, 2)
 
 
 
