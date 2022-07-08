@@ -90,11 +90,17 @@ class booking_data(APIView):
             A response that contains all the booking information being saved into the database
         """
 
-        # remove whitespaces from the credit card number
-        card_number = request.data['card_number'].replace(" ", "")
+        # ensure that the request contains a card_number field in data
+        if 'card_number' in request.data:
+            card_number = request.data['card_number']
+        else:
+            return Response({"card_number": "Request requires a card number field"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # check if credit card number is present
-        if card_number != None:
+        # check if credit card number is present in the request
+
+        if card_number != "" and card_number != None:
+            # remove whitespaces from the credit card number
+            card_number = card_number.replace(" ", "")
 
             # update card number in request with the
             # removed whitespaces credit card number
@@ -130,9 +136,9 @@ class booking_data(APIView):
                     return Response(payment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
             else:
-                return Response({"error: Invalid Credit Card Number"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"card_number": "Invalid Credit Card Number"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"error: Missing Credit Card Number"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"card_number": "Missing Credit Card Number"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
