@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
+from requests import RequestException
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -39,14 +40,14 @@ def valid_credit_card(cardNo):
     else:
         return False
 
-class booking_data(APIView):
+class user_booking_data(APIView):
 
     # require login to interact with booking data
     permission_classes = (IsAuthenticated,)
 
-    # get all the bookings under 1 user in the Database
-    # pk = user uid
-    def get(self, request, pk):
+    # get the bookings of the logged-in user
+    def get(self, request):
+        pk = request.user.uid
         queryset = booking_order.objects.filter(user_account__exact = pk)
         serializer = booking_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -140,20 +141,24 @@ class booking_data(APIView):
         else:
             return Response({"card_number": "Missing Credit Card Number"}, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-
     # modify a user's booking_data
     # pk = booking uid
     def put(self, request, pk):
         instance = get_object_or_404(booking_order.objects.all(), pk=pk)
+
+        # ensure that the user can only update their own booking
+        user = str(request.user.uid)
+        queryset = booking_order.objects.filter(user_account__exact = user)
+        if instance not in queryset:
+            return Response({"user_account": "booking not found under user"}, status=status.HTTP_403_FORBIDDEN)
+            
         serializer = booking_serializer(instance, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class all_booking_data(APIView):
+class admin_booking_data(APIView):
 
     # only admins can use this endpoint
     permission_classes = (IsAdminUser,)
@@ -163,6 +168,17 @@ class all_booking_data(APIView):
         queryset = booking_order.objects.all()
         serializer = booking_serializer(queryset, many=True)
         return Response(serializer.data, status = status.HTTP_200_OK)
+
+
+    # get all the bookings under any 1 user in the Database
+    # pk = user uid
+    def get(self, request, pk):
+        # only admins can use this endpoint
+        permission_classes = (IsAdminUser,)
+        queryset = booking_order.objects.filter(user_account__exact = pk)
+        serializer = booking_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 # # generate the html webpage for hotel tnc
 # class HotelTnCView(TemplateView):
