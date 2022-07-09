@@ -22,6 +22,13 @@ class TestBooking(TestCase):
             'password': 'qwe123qwe@!Q',
         }
 
+        self.TEST_ADMIN = {
+            'email': 'test3@test.com',
+            'first_name': "Johnny",
+            'last_name': "Depp 3",
+            'password': 'qwe123qwe@!Q',
+        }
+
         self.TEST_USER1_SIGNUP = {
             'email': 'test1@test.com',
             'first_name': "Johnny",
@@ -38,6 +45,14 @@ class TestBooking(TestCase):
             're_password': 'qwe123qwe@!Q',
         }
 
+        self.TEST_ADMIN_SIGNUP = {
+            'email': 'test3@test.com',
+            'first_name': "Johnny",
+            'last_name': "Depp 3",
+            'password': 'qwe123qwe@!Q',
+            're_password': 'qwe123qwe@!Q',
+        }
+
         self.TEST_USER1_LOGIN = {
             'email': 'test1@test.com',
             'password': 'qwe123qwe@!Q',
@@ -48,8 +63,14 @@ class TestBooking(TestCase):
             'password': 'qwe123qwe@!Q',
         }
 
+        self.TEST_ADMIN_LOGIN = {
+            'email': 'test3@test.com',
+            'password': 'qwe123qwe@!Q',
+        }
+
         self.user_1 = user_account.objects.create_user(**self.TEST_USER1)
         self.user_2 = user_account.objects.create_user(**self.TEST_USER2)
+        self.adminUser = user_account.objects.create_admin(**self.TEST_ADMIN)
 
         # create 2 booking form data in dict format
         self.TEST_BOOKING_1 = {
@@ -136,6 +157,7 @@ class TestBooking(TestCase):
             data = self.TEST_BOOKING_1)
 
         status_code1 = response1.status_code
+
         # check that the booking fails since the user is not logged in
         # Django should return a 401 unauthorized response.
         self.assertEquals(status_code1, 401)
@@ -152,7 +174,11 @@ class TestBooking(TestCase):
         booking_endpoint = '/booking/'
 
         # generate access token for user1
-        response1 = self.client.post(login_url, self.TEST_USER1_LOGIN)
+        response1 = self.client.post(
+            login_url, 
+            content_type='application/json', 
+            data = self.TEST_USER1_LOGIN)
+
         USER1_ACCESS_TOKEN = response1.data['access']
 
         auth_header = {
@@ -235,21 +261,463 @@ class TestBooking(TestCase):
         self.assertEquals(booking_count, 2)
 
 
-
-    # TODO: check if user can retrieve booking without logging in
+    # check if admin can retrieve booking without logging in
     # expected result: no
+    def test_admin_get_booking_without_login(self):
+        booking_endpoint = '/admin_booking/'
+        get_request = booking_endpoint + str(self.user_1.uid) + '/'
 
-    # TODO: check if user can retrieve  booking after logging in
+        response1 = self.client.get(
+            get_request, 
+            content_type='application/json')
+        
+        status_code1 = response1.status_code
+
+        # check that retrieving the booking fails since the user is 
+        # not logged in Django should return a 401 unauthorized response.
+        self.assertEquals(status_code1, 401)
+
+        # check if number of bookings in the system is 0
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 0)
+
+        # create a booking in the DB to check if the user can get the booking
+        # data if there was a booking in the DB 
+        serializer1 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_1)
+        if serializer1.is_valid():
+            serializer1.save()
+
+        # check if number of bookings in the system is 1
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 1)
+
+        # check that the endpoint still returns http 401
+        response2 = self.client.get(
+            get_request, 
+            content_type='application/json')
+        
+        status_code2 = response2.status_code
+
+        self.assertEquals(status_code2, 401)
+
+    # check if admin can retrieve booking after logging in
     # expected result: yes
+    def test_admin_get_booking_with_login(self):
+        booking_endpoint = '/admin_booking/'
+        get_request = booking_endpoint + str(self.user_1.uid) + '/'
 
-    # TODO: check if user can update booking without logging in
+        login_url = '/auth/jwt/create/'
+
+        # generate access token for admin user
+        response1 = self.client.post(
+            login_url, 
+            content_type='application/json',
+            data = self.TEST_ADMIN_LOGIN)
+
+        ADMIN_ACCESS_TOKEN = response1.data['access']
+
+        auth_header = {
+            'HTTP_AUTHORIZATION': "JWT " + ADMIN_ACCESS_TOKEN,
+        }
+
+        response1 = self.client.get(
+            get_request,
+            content_type='application/json', 
+            **auth_header)
+        
+        status_code1 = response1.status_code
+
+        # check that the booking succeeds since the user is logged in
+        # Django should return a HTTP 200 response.
+        self.assertEquals(status_code1, 200)
+
+        # check if number of bookings in the system is 0
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 0)
+
+        # the data field in the response should be an empty list
+        # since there should be no bookings in the database
+        self.assertEquals(response1.data, [])
+
+        # create a booking in the DB to check if the user can get the booking
+        # data if there was a booking in the DB
+        serializer1 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_1)
+        if serializer1.is_valid():
+            serializer1.save()
+
+        # check if number of bookings in the system is 1
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 1)
+
+        # check that the endpoint returns http 200
+        response2 = self.client.get(
+            get_request,
+            content_type='application/json', 
+            **auth_header)
+        
+        status_code2 = response2.status_code
+
+        self.assertEquals(status_code2, 200)
+
+        # create another booking under user 2
+        serializer2 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_2)
+        if serializer2.is_valid():
+            serializer2.save()
+        
+        # check if number of bookings in the system is 2
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 2)
+
+        # try retrieving the booking info under user 2
+        get_request2 = booking_endpoint+ str(self.user_2.uid) + "/"
+
+        response3 = self.client.get(
+            get_request2, 
+            content_type='application/json',
+            **auth_header)
+
+        # check that the endpoint returns http 200
+        status_code3 = response3.status_code
+        self.assertEquals(status_code3, 200)
+
+        # add another booking under user 1
+        serializer3 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_1)
+        if serializer3.is_valid():
+            serializer3.save()
+
+        # check if number of bookings in the system is 3
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 3)
+
+        response4 = self.client.get(
+            get_request, 
+            content_type='application/json', 
+            **auth_header)
+        # check if the get request is a success
+        status_code4 = response4.status_code
+        self.assertEquals(status_code4, 200)
+        
+        # check if 2 bookings are returned under user 1
+        self.assertEquals(len(response4.data), 2)
+
+    # check if user can retrieve booking without logging in
     # expected result: no
+    def test_get_booking_without_login(self):
+        booking_endpoint = '/booking/'
 
-    # TODO: check if user can update booking after logging in
+        response1 = self.client.get(
+            booking_endpoint, 
+            content_type='application/json')
+        
+        status_code1 = response1.status_code
+
+        # check that retrieving the booking fails since the user is 
+        # not logged in Django should return a 401 unauthorized response.
+        self.assertEquals(status_code1, 401)
+
+        # check if number of bookings in the system is 0
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 0)
+
+        # create a booking in the DB to check if the user can get the booking
+        # data if there was a booking in the DB 
+        serializer1 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_1)
+        if serializer1.is_valid():
+            serializer1.save()
+
+        # check if number of bookings in the system is 1
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 1)
+
+        # check that the endpoint still returns http 401
+        response2 = self.client.get(
+            booking_endpoint, 
+            content_type='application/json')
+        
+        status_code2 = response2.status_code
+
+        self.assertEquals(status_code2, 401)
+
+    # check if user can retrieve booking after logging in
     # expected result: yes
+    def test_get_booking_with_login(self):
+        booking_endpoint = '/booking/'
 
-    # TODO: check if normal user can retrieve all bookings without logging in
-    # expected result: no
+        login_url = '/auth/jwt/create/'
 
-    # TODO: check if normal user can retrieve all bookings after logging in
+        # generate access token for normal user
+        response1 = self.client.post(
+            login_url,
+            content_type='application/json', 
+            data = self.TEST_USER1)
+
+        USER1_ACCESS_TOKEN = response1.data['access']
+
+        auth_header = {
+            'HTTP_AUTHORIZATION': "JWT " + USER1_ACCESS_TOKEN,
+        }
+
+        response1 = self.client.get(
+            booking_endpoint, 
+            content_type='application/json', 
+            **auth_header)
+        
+        status_code1 = response1.status_code
+
+        # check that the booking succeeds since the user is logged in
+        # Django should return a HTTP 200 response.
+        self.assertEquals(status_code1, 200)
+
+        # check if number of bookings in the system is 0
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 0)
+
+        # the data field in the response should be an empty list
+        # since there should be no bookings in the database
+        self.assertEquals(response1.data, [])
+
+        # create a booking in the DB to check if the user can get the booking
+        # data if there was a booking in the DB
+        serializer1 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_1)
+        if serializer1.is_valid():
+            serializer1.save()
+
+        # check if number of bookings in the system is 1
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 1)
+
+        
+        response2 = self.client.get(
+            booking_endpoint, 
+            content_type='application/json',
+            **auth_header)
+        status_code2 = response2.status_code
+
+        # check that the endpoint returns http 200
+        self.assertEquals(status_code2, 200)
+
+        # create another booking under user 2
+        serializer2 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_2)
+        if serializer2.is_valid():
+            serializer2.save()
+        
+        # check if number of bookings in the system is 2
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 2)
+
+        response3 = self.client.get(
+            booking_endpoint, 
+            content_type='application/json', 
+            **auth_header)
+
+        # check that the endpoint returns http 200
+        status_code3 = response3.status_code
+        self.assertEquals(status_code3, 200)
+
+        # add another booking under user 1
+        serializer3 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_1)
+        if serializer3.is_valid():
+            serializer3.save()
+
+        # check if number of bookings in the system is 3
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 3)
+
+        response4 = self.client.get(
+            booking_endpoint, 
+            content_type='application/json',
+            **auth_header)
+
+        # check if the get request is a success
+        status_code4 = response4.status_code
+        self.assertEquals(status_code4, 200)
+        
+        # check if 2 bookings are returned under user 1
+        self.assertEquals(len(response4.data), 2)
+
+
+    # check if user can update booking without logging in
     # expected result: no
+    def test_put_booking_without_login(self):
+        booking_endpoint = '/booking/'
+
+        # create a booking in the system first, 
+        # for the user to update
+        serializer1 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_1)
+        if serializer1.is_valid():
+            booking = serializer1.save()
+
+        # check if number of bookings in the system is 1
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 1)
+
+        # create a set of updated data
+        updated_data = copy.deepcopy(self.TEST_BOOKING_1)
+        updated_data["hotel_id"] = "This id is updated"
+
+        # create the put request
+        put_request = booking_endpoint + str(booking.uid) + "/"
+
+        response1 = self.client.put(
+            put_request, 
+            content_type='application/json',
+            data = updated_data)
+        
+        status_code1 = response1.status_code
+
+        # check that updating the booking fails since the user is 
+        # not logged in Django should return a 401 unauthorized response.
+        self.assertEquals(status_code1, 401)
+
+    # check if user can update booking after logging in
+    # expected result: yes
+    def test_put_booking_with_login(self):
+        booking_endpoint = '/booking/'
+
+        login_url = '/auth/jwt/create/'
+
+        # generate access token for normal user
+        response1 = self.client.post(
+            login_url,
+            content_type='application/json',
+            data = self.TEST_USER1)
+
+        USER1_ACCESS_TOKEN = response1.data['access']
+
+        auth_header = {
+            'HTTP_AUTHORIZATION': "JWT " + USER1_ACCESS_TOKEN,
+        }
+
+        # create a booking in the system first, 
+        # for the user to update
+        serializer1 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_1)
+        if serializer1.is_valid():
+            booking = serializer1.save()
+
+        # check if number of bookings in the system is 1
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 1)
+
+        # create a set of updated data
+        updated_data = copy.deepcopy(self.TEST_BOOKING_1)
+        updated_data["hotel_id"] = "This id is updated"
+
+        # create the put request
+        put_request = booking_endpoint + str(booking.uid) + "/"
+
+        response1 = self.client.put(
+            put_request, 
+            data = updated_data, 
+            content_type='application/json',
+            **auth_header)
+        
+        status_code1 = response1.status_code
+
+        # check that updating the booking fails since the user is 
+        # not logged in Django should return a 202 accepted response.
+        self.assertEquals(status_code1, 202)
+
+        # check that the booking data is updated
+        updated_booking = booking_order.objects.get(pk = str(booking.uid))
+        self.assertEquals(updated_booking.hotel_id, 'This id is updated')
+
+        # create another booking under user 2
+        serializer2 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_2)
+        if serializer2.is_valid():
+            user2_booking = serializer2.save()
+        
+        # check if number of bookings in the system is 2
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 2)
+
+        # create another set of updated data
+        updated_data2 = copy.deepcopy(self.TEST_BOOKING_2)
+        updated_data2["hotel_id"] = "This id is updated 2"
+
+        put_request2 = booking_endpoint + str(user2_booking.uid) + "/"
+
+        # check if a user can update another user's booking
+        response2 = self.client.put(
+            put_request2, 
+            data = updated_data2, 
+            content_type='application/json',
+            **auth_header)
+        
+        status_code2 = response2.status_code
+
+        # check that updating the booking fails since the user is 
+        # updating his own booking. Django should return HTTP 403
+        self.assertEquals(status_code2, 403)
+
+    # check if normal user can retrieve all bookings without logging in
+    # expected result: no
+    def test_get_all_bookings_with_login(self):
+        booking_endpoint = '/admin_booking/'
+
+        login_url = '/auth/jwt/create/'
+
+        # generate access token for normal user
+        response1 = self.client.post(
+            login_url,
+            content_type='application/json',
+            data = self.TEST_USER1)
+
+        USER1_ACCESS_TOKEN = response1.data['access']
+
+        auth_header = {
+            'HTTP_AUTHORIZATION': "JWT " + USER1_ACCESS_TOKEN,
+        }
+
+        response1 = self.client.get(
+            booking_endpoint,
+            content_type='application/json', 
+            **auth_header)
+        
+        status_code1 = response1.status_code
+
+        # check that the booking fails since the user that logged in
+        # is not an admin, Django should return a HTTP 403 response due
+        # to the lack of privilege
+        self.assertEquals(status_code1, 403)
+
+        # check if number of bookings in the system is 0
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 0)
+
+        # create a booking in the DB to check if the user can get the booking
+        # data if there was a booking in the DB
+        serializer1 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_1)
+        if serializer1.is_valid():
+            serializer1.save()
+
+        # check if number of bookings in the system is 1
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 1)
+
+        # check that the endpoint still returns http 401
+        response2 = self.client.get(
+            booking_endpoint,
+            content_type='application/json', 
+            **auth_header)
+        
+        status_code2 = response2.status_code
+
+        self.assertEquals(status_code2, 403)
+
+        # add another booking under user 1
+        serializer2 = bookingSerializer.booking_serializer(data = self.TEST_BOOKING_1)
+        if serializer2.is_valid():
+            serializer2.save()
+
+        # check if number of bookings in the system is 3
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, 2)
+
+        response3 = self.client.get(
+            booking_endpoint, 
+            content_type='application/json', 
+            **auth_header)
+
+        # check if the get request is still unauthorized
+        status_code3 = response3.status_code
+        self.assertEquals(status_code3, 403)
