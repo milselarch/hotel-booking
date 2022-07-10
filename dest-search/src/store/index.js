@@ -5,6 +5,8 @@ import Vuex from 'vuex'
 // import { createSharedMutations } from 'vuex-electron'
 import modules from './modules'
 
+console.log('MODULKES LOADED', modules)
+
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
@@ -33,6 +35,7 @@ const store = new Vuex.Store({
       for (const module_name in local_store) {
         const module = local_store[module_name]
         for (const varname in module) {
+          console.log('MODUKE', module_name, state[module_name], state)
           state[module_name][varname] = module[varname]
         }
       }
