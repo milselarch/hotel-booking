@@ -12,8 +12,10 @@
       </figure>
     </div>
 
+    <!--
     <b-progress class="flat-progress-bar"></b-progress>
-
+    -->
+    
     <div class="card-content">
       <div class="media">
         <div class="media-content">

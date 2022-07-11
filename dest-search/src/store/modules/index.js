@@ -3,7 +3,8 @@
  * in a one-shot manner. There should not be any reason to edit this file.
  */
 
- if (typeof require.context === 'undefined') {
+/*
+if (typeof require.context === 'undefined') {
   const fs = require('fs');
   const path = require('path');
 
@@ -36,6 +37,7 @@
     return Module;
   };
 }
+*/
 
 const files = require.context('.', false, /\.js$/)
 const modules = {}

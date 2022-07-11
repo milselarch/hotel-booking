@@ -412,7 +412,7 @@ export default {
         // in the original hotels api response
         const hotel_prices = price_data.proxy_json.hotels
         console.log('HOTEL_PRICES', hotel_prices)
-        console.log('MAPPING', hotel_mapping)
+        // console.log('MAPPING', hotel_mapping)
 
         for (let k=0; k<hotel_prices.length; k++) {
           const hotel_pricing = hotel_prices[k]
@@ -490,12 +490,9 @@ export default {
       self.hotelsLoaded = [];
       self.loadError = false;
       self.hotels = []
-
-      self.search_stamp = new Date().getTime()
       self.searched_num_guests = self.num_guests
       self.searched_num_rooms = self.num_rooms
       self.searched_dates = dates;
-
       // await sleep(10000);
       
       /*
@@ -511,24 +508,23 @@ export default {
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
       
-      const price_loader = self.load_prices({
-        dest_id: dest_id, dates: dates, 
-        num_guests: self.num_guests, num_rooms: self.num_rooms,
-        search_stamp: self.search_stamp
-      })
+      const price_request = self.make_price_request(
+        dest_id, dates, self.num_guests, self.num_rooms
+      )
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
       });
-
       try {
         // wait for both requests to complete
-        let response = await hotel_request;
-        console.warn('HOTELS RESPONSE', response)
+        const [price_resp, hotel_resp] = await Promise.all([
+          price_request, hotel_request
+        ])
+        let response = await hotel_resp;
+        console.warn('RESPONSE', price_resp, response)
         console.log('CODE', response.data.status_code)
         if (response.status !== 200) {
           throw response.statusText;
         }
-
         self.hotels = response.data.proxy_json;
         self.hotels.sort((hotel1, hotel2) => {
           if (hotel1.rating < hotel2.rating) {
@@ -539,14 +535,47 @@ export default {
             return 0
           }
         })
-
+        const hotel_mapping = {}
+        for (let k=0; k<self.hotels.length; k++) {
+          const hotel = self.hotels[k];
+          hotel_mapping[hotel.id] = k
+        }
+        console.log('PRICE_RESP', price_resp)
+        const price_data = price_resp.data;
+        
+        // const price_data = price_resp.data;
+        if (price_data === undefined) {
+           // pass if proxy_json has no data attribute
+        } else if (price_data.proxy_json === undefined) {
+          // pass if proxy_json not in price response
+        } else if (price_data.proxy_json.hotels === undefined) {
+          // pass if price response have no hotels
+        } else {
+          // add price as a property to each hotel
+          // in the original hotels api response
+          const hotel_prices = price_data.proxy_json.hotels
+          console.log('HOTEL_PRICES', hotel_prices)
+          console.log('MAPPING', hotel_mapping)
+          for (let k=0; k<hotel_prices.length; k++) {
+            const hotel_pricing = hotel_prices[k]
+            const hotel_id = hotel_pricing.id
+            const hotel_index = hotel_mapping[hotel_id]
+            if (hotel_index === undefined) {
+              // hotel was not found in original hotels response
+              continue
+            }
+            console.log('HOTEL_ID', hotel_id)
+            console.log('HOTEL_INDEX', hotel_index)
+            self.hotels[hotel_index]['price'] = hotel_pricing.price
+            console.log('HOTEL', k, self.hotels[hotel_id])
+          }
+        }
         self.hotelsLoaded = []
         self.render_more_hotels();
       } catch (error) {
         self.loadError = true;
         console.error(error);
       }
-
       self.isLoading = false;
     },
 
@@ -772,7 +801,7 @@ export default {
 
       const dest_id = this.destinationMappings[this.destinationInput]
       const params_match = this.search_params_match(
-        dest_id, dates, num_guests, num_rooms
+        dest_id, this.dates, this.num_guests, this.num_rooms
       )
       if (params_match && (this.loadError === false)) {
         // skip search if we already searched

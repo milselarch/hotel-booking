@@ -4,6 +4,9 @@ import Home from '../../src/components/Home.vue'
 // import store from '../../src/store' // you could also mock this out.
 import Vuex from 'vuex'
 import Buefy from 'buefy'
+
+const fs = require('fs');
+
 // import axios from 'axios'
 
 // jest.mock('axios');
@@ -19,7 +22,17 @@ import Buefy from 'buefy'
 //     })
 // })
 
+// console.error("DIRNAME", __dirname);
+console.log("DIR PARSE DONE", __dirname);
+
+const test_folder = 'src/store/modules';
+fs.readdirSync(test_folder).forEach(file => {
+  console.log(file);
+});
+
+const infiniteScroll =  require('vue-infinite-scroll');
 const localVue = createLocalVue();
+localVue.use(infiniteScroll)
 localVue.use(Vuex);
 
 describe('Home.vue Test', () => {
