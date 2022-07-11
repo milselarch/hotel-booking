@@ -285,7 +285,7 @@ export default {
     selectHotel(hotel) {
       console.log('SELECTED', hotel, hotel['id'])
       router.push({
-        path: `/hotels/${hotel['id']}`
+        path: `/hotels/${this.lastDestID}/${hotel['id']}`
       })
     },
 
@@ -726,7 +726,7 @@ export default {
       const date_info = `${start_date_str} to ${end_date_str}`
       
       const rooms = this.searched_num_rooms
-      const guests = this.searched_num_guests
+      const guests = this.searched_num_guests * rooms
       let rooms_text, guests_text;
 
       if (rooms > 1) { rooms_text = `${rooms} rooms` }
@@ -879,6 +879,8 @@ div#front-cover {
   align-items: stretch;
   margin-top: 4rem;
   margin-bottom: 4rem;
+  padding-left: 14%;
+  padding-right: 14%;
   width: 100%;
 
   & > div.description-wrapper {
@@ -886,8 +888,6 @@ div#front-cover {
     display: flex;
 
     & > div.description {
-      margin-left: 20%;
-      margin-right: 20%;
       margin-bottom: auto;
       margin-top: auto;
 
@@ -901,7 +901,7 @@ div#front-cover {
 
       & > p#short-info {
         text-align: left !important;
-        margin-bottom: 2rem;
+        margin-bottom: 0rem;
       }
 
       & > h1 {
@@ -909,14 +909,26 @@ div#front-cover {
         text-align: left !important;
         line-height: 5rem;
         margin-bottom: 1rem;
+        max-width: 40rem;
+      }
+
+      & > div.buttons {
+        margin-top: 2rem;
       }
     }
   }
 
   & > div.search-options {
-    width: 45rem;
-    margin-left: 0rem;
-    margin-right: 10%;
+    width: 28rem;
+    flex-shrink: 0;
+    flex-grow: 1;
+
+    height: fit-content;
+    margin-top: auto;
+    margin-bottom: auto;    
+    margin-left: 11%;
+    margin-right: 0px;
+    
     background: white;
     border: #DDD solid 0.1rem;
     padding: 2rem;
