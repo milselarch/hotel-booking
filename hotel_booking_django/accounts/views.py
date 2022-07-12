@@ -10,8 +10,6 @@ from rest_framework import authentication, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-# Create your views here.
-
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]

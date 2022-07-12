@@ -30,7 +30,8 @@ class TestAuthentication(TestCase):
 
         self.TEST_USER2_SIGNUP = {
             'email': 'test2@test.com',
-            'name': "Johnny Depp 2",
+            'first_name': "Johnny",
+            "last_name": "Depp 2",
             'password': 'qwe123qwe@!Q',
             're_password': 'qwe123qwe@!Q',
         }
@@ -150,8 +151,10 @@ class TestAuthentication(TestCase):
         # check if the response contains the correct information
         user1_email = response1.data['email']
         self.assertEquals(user1_email, self.TEST_USER1['email'])
-        user1_name = response1.data['name']
-        self.assertEquals(user1_name, self.TEST_USER1['name'])
+        user1_first_name = response1.data['first_name']
+        self.assertEquals(user1_first_name, self.TEST_USER1['first_name'])
+        user1_last_name = response1.data['last_name']
+        self.assertEquals(user1_last_name, self.TEST_USER1['last_name'])
         
         # generate access token for user2
         response2 = self.client.post(login_url, self.TEST_USER2_LOGIN)
@@ -170,5 +173,7 @@ class TestAuthentication(TestCase):
         # check if the response contains the correct information
         user2_email = response2.data['email']
         self.assertEquals(user2_email, self.TEST_USER2['email'])
-        user2_name = response2.data['name']
-        self.assertEquals(user2_name, self.TEST_USER2['name'])
+        user2_first_name = response2.data['first_name']
+        self.assertEquals(user2_first_name, self.TEST_USER2['first_name'])
+        user2_last_name = response2.data['last_name']
+        self.assertEquals(user2_last_name, self.TEST_USER2['last_name'])
