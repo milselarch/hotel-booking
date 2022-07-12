@@ -39,7 +39,7 @@ describe('Home.vue Test', () => {
     })
 
     // check the msg of the component
-    expect(wrapper.vm.msg).stoMatch('Welcome to Your Vue.js App')
+    expect(wrapper.vm.msg).toMatch('Welcome to Your Vue.js App')
 
     // check that the title is rendered
     expect(wrapper.vm.$options.name).toMatch('Home')
