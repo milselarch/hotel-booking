@@ -37,7 +37,7 @@
             <b-field>
               <b-autocomplete
                 v-model="destinationInput"
-                :data="filteredDataArray"
+                :data="filtered_search_matches"
                 placeholder="Search Destination e.g. tioman island"
                 clearable icon="search-location"
                 :disabled="isLoading"
@@ -190,7 +190,7 @@ export default {
       msg: 'Welcome to Your Vue.js App',
       destinationsLoaded: false,
       destinationNames: [], // array of destination names
-      destinationMappings: {}, // map destination name to ID
+      destination_mappings: {}, // map destination name to ID
       
       hotels: [],
       hotelsLoaded: [],
@@ -243,7 +243,7 @@ export default {
       const self = this;
       self.x = self.$store.state.Store.count;
       self.y = self.$store.state.Persistent.persistent_count;
-      console.log('STORE', self.$store);
+      // console.log('STORE', self.$store);
       console.log(self.x, self.y)
     },
 
@@ -614,7 +614,7 @@ export default {
         const destinationID = destination["uid"]
         const destinationName = destination["term"]
         self.destinationNames.push(destinationName)
-        self.destinationMappings[destinationName] = destinationID
+        self.destination_mappings[destinationName] = destinationID
       };
 
       self.destinationsLoaded = true;
@@ -635,14 +635,14 @@ export default {
           continue
         } 
 
-        const mappings = self.destinationMappings;
+        const mappings = self.destination_mappings;
         if (!mappings.hasOwnProperty(self.destination)) {
           continue
         } else if (this.beginSearch === false) {
           continue
         }
         
-        const dest_id = self.destinationMappings[self.destination]
+        const dest_id = self.destination_mappings[self.destination]
 
         self.lastDestID = dest_id;
         console.log('DESTID', dest_id)
@@ -794,12 +794,12 @@ export default {
 
       if (!this.rooms_valid) { return false }
       if (!this.dates_are_valid) { return false }
-      const mappings = this.destinationMappings;
+      const mappings = this.destination_mappings;
       if (!mappings.hasOwnProperty(this.destinationInput)) {
         return false;
       }
 
-      const dest_id = this.destinationMappings[this.destinationInput]
+      const dest_id = this.destination_mappings[this.destinationInput]
       const params_match = this.search_params_match(
         dest_id, this.dates, this.num_guests, this.num_rooms
       )
@@ -849,7 +849,7 @@ export default {
       }
     },
 
-    filteredDataArray() {
+    filtered_search_matches() {
       const matches = fuzzysort.go(
         this.destinationInput, this.destinationNames
       )
@@ -867,7 +867,7 @@ export default {
     },
 
     isDestinationValid() {
-      return this.destinationMappings.hasOwnProperty(
+      return this.destination_mappings.hasOwnProperty(
         this.destinationInput
       )
     }
