@@ -48,7 +48,7 @@ export default {
   getters: {
     authenticated (state) {
       const authenticated = state.auth_token !== null
-      console.log('STATEAUTH', state.auth_token, authenticated)
+      // console.log('STATEAUTH', state.auth_token, authenticated)
       return authenticated
     }
   }

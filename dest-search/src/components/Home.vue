@@ -241,7 +241,7 @@ export default {
       self.x = self.$store.state.Store.count;
       self.y = self.$store.state.Persistent.persistent_count;
       // console.log('STORE', self.$store);
-      console.log(self.x, self.y)
+      // console.log(self.x, self.y)
     },
 
     fast_forward_date() {
@@ -270,6 +270,10 @@ export default {
     },
 
     begin_search() {
+      /*
+      returns true if hotels search request
+      was launched, or false if search request is invalid
+      */
       if (!this.allow_search) {
         return false;
       } else if (this.is_loading) {
@@ -288,6 +292,7 @@ export default {
       
       const dest_id = this.destination_mappings[this.destination];
       this.last_dest_id = dest_id;
+      // load_hotels is an async method
       this.load_hotels(dest_id)
       assert(this.is_loading)
       return true;
@@ -619,6 +624,7 @@ export default {
     const checkout_date = date_now.add(96 , 'h').toDate();
     self.dates = [checkin_date, checkout_date]
 
+    // console.log('PROCESS-ENV', process.env.NODE_ENV)
     const loader = import('@/assets/destinations.json')
     loader.then(async (destinations) => {
       // await sleep(10000); // simulate json load delay

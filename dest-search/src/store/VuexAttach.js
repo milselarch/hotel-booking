@@ -121,7 +121,7 @@ class VuexAttach {
     const build_save_state = state_builder(modules);
 
     store.subscribe((mutation, state) => {
-      console.log('MODULKES', modules, mutation)
+      // console.log('MODULKES', modules, mutation)
       const update_store = store_updatable(mutation)
       if (!update_store) { return false }
     
