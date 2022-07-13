@@ -7,15 +7,17 @@
     <!-- TODO: maybe load hotel images? -->
     <div id="descbox">
       <div id="description" v-html="hotelDetails"></div>
-      <div id="amenities">
+      <div id="amenities" v-if="check_amenities">
         <p><font size="4rem"><b>Amenities</b></font></p>
         <ul v-for="(am, key) in this.hotelAmenities" v-bind:key="key">
-          <li><font-awesome-icon icon="fa-solid fa-check" color="green"/>        {{key}}</li>
+          <font-awesome-icon icon="fa-solid fa-check" color="green"/><li>{{formatAmenities(key)}}</li>
         </ul>
+        <!-- <p>{{hotelAmenities}}</p> -->
       </div>
     </div>
     
     <div id="room-cards">
+      <!-- <p v-if="!check_avail"><font size="+2"><b>No rooms available. Try changing specifications.</b></font></p> -->
       <div
         class="card" 
         v-for="(room, key) in roomList.rooms" v-bind:key="key"
@@ -71,8 +73,6 @@ export default {
   data(){
     return {
       roomList: 'a',
-      hotelList: 'def',
-      specHotel: 'spec',
       hotelName: 'name',
       hotelDetails: 'details',
       hotelAmenities: 'amenities',
@@ -109,10 +109,16 @@ export default {
       else {
         return "Breakfast not included"
       }
+    },
+    formatAmenities(am){
+      var str = am
+      str = str[0].toUpperCase() + str.slice(1)
+      str = str.match(/[A-Z]?[a-z]+|[0-9]+|[A-Z]+(?![a-z])/g).join(" ")
+      return str
     }
   },
   mounted() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'auto' });
 
     const room_request = axios.get(this.url, {
       params: {
@@ -137,38 +143,55 @@ export default {
     this.hotelName = this.$store.state.Store.hotelName;
     this.hotelDetails = this.$store.state.Store.hotelDetails;
     this.hotelAmenities = this.$store.state.Store.hotelAmenities;
-    for (let i=0; i<this.hotelAmenities.length; i++){
-
-    }
   },
-  
+  computed: {
+    check_amenities(){  
+      if (Object.keys(this.hotelAmenities).length != 0){
+        console.log(Object.keys(this.hotelAmenities));
+        return true
+      }
+      else {
+        return false
+      }
+    },
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 
 h2#name{
+  padding: 1.5rem;
   text-align: center;
   font-size: 4rem;
+  margin-bottom: 1rem;
 }
 div#descbox {
-  display: inline-block;
+  display: flex;
   width: 80%;
-  border: solid;
   justify-content: center;
+  margin: auto;
+  border-top: solid;
 }
 div#description {
-  width: 60%;
-  margin: 4rem; 
-  float: left;
+  width: 70%;
+  margin-top: 3rem;
   text-align: justify;
 }
 div#amenities {
-  margin: 4rem;
+  padding: 1.5rem;
+  padding-left: 2.5rem;
+  margin-top: 3rem;
+  margin-left: 5rem;
+  width: 35%;
+  background-color: rgb(255, 248, 233);
+  height: max-content;
+  line-height: 2rem;
 }
 div#room-cards {
   padding: 5rem;
-  background-color: beige;
+  margin-top: 5rem;
+  background-color: rgb(255, 248, 233);
 
   display: flex;
   justify-content: center;
