@@ -29,6 +29,7 @@ describe('Home.vue Test', () => {
   let store;
 
   beforeEach(() => {
+    axios.defaults.baseURL = "http://127.0.0.1:8000/"
     const attacher = new VuexAttach(localVue);
     store = attacher.create_store(mock.modules);
     store.commit('initialize_store');
@@ -57,7 +58,6 @@ describe('Home.vue Test', () => {
 
     // check the msg of the component
     expect(wrapper.vm.msg).toMatch('Welcome to Your Vue.js App')
-
     // check that the title is rendered
     expect(wrapper.vm.$options.name).toMatch('Home')
   })
@@ -84,6 +84,9 @@ describe('Home.vue Test', () => {
     })
   
     axios.defaults.baseURL = "http://127.0.0.1:0/"
+    // set the destination search inputs, the others are pre-filled
+    wrapper.vm.destination = "Santander, Spain (SDR)"
+    const hotel_loader = wrapper.vm.load
 
     // check the msg of the component
     expect(wrapper.vm.msg).toMatch('Welcome to Your Vue.js App')

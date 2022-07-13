@@ -42,7 +42,7 @@
                 clearable icon="search-location"
                 :disabled="is_loading"
                 @select="option => selected = option">
-                <template #empty>{{ searchEmptyMessage }}</template>
+                <template #empty>{{ search_empty_message }}</template>
               </b-autocomplete>
             </b-field>
           </b-field>
@@ -137,7 +137,7 @@
       id="hotel-load-status"
     >
       <div id="status" v-show="true">
-        <p id="status-text">{{ statusText }}</p>
+        <p id="status-text">{{ status_text }}</p>
         <square id="spinner" v-show="is_loading"></square>
         <p id="search-params" v-show="search_success"
         >{{ search_params_info }}</p>
@@ -147,7 +147,7 @@
     <div
       id="hotel-cards" ref="cards_holder"
       v-infinite-scroll="render_more_hotels" 
-      infinite-scroll-disabled="allhotels_loaded"
+      infinite-scroll-disabled="all_hotels_loaded"
       infinite-scroll-distance="100"
     >
       <HotelCard
@@ -159,7 +159,7 @@
     </div>
 
     <div
-      id="end-bar" v-show="allhotels_loaded && scrollable"
+      id="end-bar" v-show="all_hotels_loaded && scrollable"
       ref="end_bar"
     >
       <a v-on:click="scrollToTop()">— Go back to top —</a>
@@ -219,9 +219,6 @@ export default {
       is_loading: false,
       load_error: false,
       last_dest_id: null,
-      being_search: false, 
-      // whether or not we should send a request 
-      // to the backend to search for hotels
 
       scrollable: false,
 
@@ -275,10 +272,24 @@ export default {
     begin_search() {
       if (!this.allow_search) {
         return false;
+      } else if (this.is_loading) {
+        return false;
+      }
+
+      if (!this.is_destination_valid) {
+        return false;
       }
       
       this.destination = this.destination_input;
-      this.being_search = true;
+      const mappings = this.destination_mappings;
+      if (!mappings.hasOwnProperty(this.destination)) {
+        return false;
+      }
+      
+      const dest_id = this.destination_mappings[this.destination];
+      this.last_dest_id = dest_id;
+      this.load_hotels(dest_id)
+      assert(this.is_loading)
       return true;
     },
 
@@ -515,6 +526,7 @@ export default {
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
       });
+
       try {
         // wait for both requests to complete
         const [price_resp, hotel_resp] = await Promise.all([
@@ -524,7 +536,7 @@ export default {
         console.warn('RESPONSE', price_resp, response)
         console.log('CODE', response.data.status_code)
         if (response.status !== 200) {
-          throw response.statusText;
+          throw response.status_text;
         }
         self.hotels = response.data.proxy_json;
         self.hotels.sort((hotel1, hotel2) => {
@@ -573,11 +585,13 @@ export default {
         }
         self.hotels_loaded = []
         self.render_more_hotels();
+
       } catch (error) {
         self.load_error = true;
         console.error(error);
+      } finally {
+        self.is_loading = false;
       }
-      self.is_loading = false;
     },
 
     is_valid_guests(num_guests) {
@@ -619,38 +633,7 @@ export default {
       };
 
       self.destinations_loaded = true;
-    })
-
-    const baseSearchURL = "https://hotelapi.loyalty.dev/api/hotels";
-
-    (async () => {
-      /*
-      this async loop will load in hotel data from the 
-      backend once a valid desination is entered into the
-      autocomplete search box
-      */
-
-      while (true) {
-        await sleep(100);
-        if (!self.is_destination_valid) {
-          continue
-        } 
-
-        const mappings = self.destination_mappings;
-        if (!mappings.hasOwnProperty(self.destination)) {
-          continue
-        } else if (this.being_search === false) {
-          continue
-        }
-        
-        const dest_id = self.destination_mappings[self.destination]
-
-        self.last_dest_id = dest_id;
-        console.log('DESTID', dest_id)
-        await self.load_hotels(dest_id)
-        self.being_search = false;
-      }
-    })();
+    });
 
     (async () => {
       // continually set current date
@@ -823,7 +806,7 @@ export default {
       )
     },
 
-    statusText () {
+    status_text () {
       if (this.load_error) {
         return "failed to load hotels\n●︿●"
       } else if (this.is_loading) {
@@ -835,14 +818,14 @@ export default {
       return dest_name
     },
 
-    allhotels_loaded() {
+    all_hotels_loaded() {
       return (
         this.hotels.length ===
         this.hotels_loaded.length
       )
     },
 
-    searchEmptyMessage() {
+    search_empty_message() {
       if (this.destinations_loaded) {
         return 'No results found'
       } else {
