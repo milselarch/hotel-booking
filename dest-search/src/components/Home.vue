@@ -36,13 +36,13 @@
           >
             <b-field>
               <b-autocomplete
-                v-model="destinationInput"
-                :data="filteredDataArray"
+                v-model="destination_input"
+                :data="filtered_search_matches"
                 placeholder="Search Destination e.g. tioman island"
                 clearable icon="search-location"
-                :disabled="isLoading"
+                :disabled="is_loading"
                 @select="option => selected = option">
-                <template #empty>{{ searchEmptyMessage }}</template>
+                <template #empty>{{ search_empty_message }}</template>
               </b-autocomplete>
             </b-field>
           </b-field>
@@ -62,7 +62,7 @@
 
                 min="1" :max="max_num_guests" default="1"
                 pattern="[0-9]+" required
-                :disabled="isLoading"
+                :disabled="is_loading"
               >
               </b-input>
             </b-field>
@@ -71,12 +71,12 @@
 
             <b-field 
               id="rooms-field" expanded label="Rooms"
-              :disabled="isLoading"
+              :disabled="is_loading"
             >
               <b-select
                 placeholder="Rooms" icon="door-closed"
                 expanded id="room-selector" v-model="num_rooms"
-                :disabled="isLoading"
+                :disabled="is_loading"
               >
                 <option 
                   v-for="(num_rooms, index) in allowed_room_choices"
@@ -103,7 +103,7 @@
               icon="calendar"
               :icon-right="dates_are_valid ? 'check': ''"
               :unselectable-dates="should_exclude_date"
-              :disabled="isLoading"
+              :disabled="is_loading"
               range>
             </b-datepicker>
           </b-field>
@@ -111,7 +111,7 @@
           <b-button
             type="is-dark" expanded outlined
             @click="begin_search"
-            :disabled="!allow_search || isLoading"
+            :disabled="!allow_search || is_loading"
           > Search
           </b-button>
 
@@ -133,12 +133,12 @@
     </div>
 
     <div 
-      v-bind:class="{ bland: isDestinationValid }"
+      v-bind:class="{ bland: is_destination_valid }"
       id="hotel-load-status"
     >
       <div id="status" v-show="true">
-        <p id="status-text">{{ statusText }}</p>
-        <square id="spinner" v-show="isLoading"></square>
+        <p id="status-text">{{ status_text }}</p>
+        <square id="spinner" v-show="is_loading"></square>
         <p id="search-params" v-show="search_success"
         >{{ search_params_info }}</p>
       </div>
@@ -147,22 +147,22 @@
     <div
       id="hotel-cards" ref="cards_holder"
       v-infinite-scroll="render_more_hotels" 
-      infinite-scroll-disabled="allHotelsLoaded"
+      infinite-scroll-disabled="all_hotels_loaded"
       infinite-scroll-distance="100"
     >
       <HotelCard
         class="card" style="width: 20rem" 
-        v-for="(hotel, key) in hotelsLoaded" v-bind:key="key"
-        @click.native="selectHotel(hotel)"
+        v-for="(hotel, key) in hotels_loaded" v-bind:key="key"
+        @click.native="select_hotel(hotel)"
         ref="cards" :hotel="hotel"
       />
     </div>
 
     <div
-      id="end-bar" v-show="allHotelsLoaded && scrollable"
+      id="end-bar" v-show="all_hotels_loaded && scrollable"
       ref="end_bar"
     >
-      <a v-on:click="scrollToTop()">— Go back to top —</a>
+      <a v-on:click="scroll_to_top()">— Go back to top —</a>
     </div>
 
   </div>
@@ -182,24 +182,31 @@ import HotelCard from '@/components/HotelCard.vue'
 import { faL } from '@fortawesome/free-solid-svg-icons'
 import router from '../router'
 
+const LOAD_FAIL_MSG = "failed to load hotels\n●︿●";
 
 export default {
   name: 'Home',
+  LOAD_FAIL_MSG: LOAD_FAIL_MSG,
+
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
-      destinationsLoaded: false,
-      destinationNames: [], // array of destination names
-      destinationMappings: {}, // map destination name to ID
+      destinations_loaded: false,
+      destination_names: [], // array of destination names
+      destination_mappings: {}, // map destination name to ID
       
       hotels: [],
-      hotelsLoaded: [],
+      hotels_loaded: [],
       selected: null,
       destination: '',
-      destinationInput: '',
-      cardWidth: null,
-      cardHolderWidth: null,
-      cardsPreloaded: false,
+      destination_input: '',
+      card_width: null,
+      card_holder_width: null,
+      cards_preloaded: false,
+
+      search_stamp: 0,
+      price_mapping: {},
+      pending_search_stamps: [],
 
       num_guests: 2,
       searched_num_guests: 0,
@@ -212,12 +219,9 @@ export default {
       searched_num_rooms: 0,
       num_rooms: 1,
 
-      isLoading: false,
-      loadError: false,
-      lastDestID: null,
-      beginSearch: false, 
-      // whether or not we should send a request 
-      // to the backend to search for hotels
+      is_loading: false,
+      load_error: false,
+      last_dest_id: null,
 
       scrollable: false,
       
@@ -240,8 +244,8 @@ export default {
       const self = this;
       self.x = self.$store.state.Store.count;
       self.y = self.$store.state.Persistent.persistent_count;
-      console.log('STORE', self.$store);
-      console.log(self.x, self.y)
+      // console.log('STORE', self.$store);
+      // console.log(self.x, self.y)
     },
 
     fast_forward_date() {
@@ -270,16 +274,39 @@ export default {
     },
 
     begin_search() {
+      /*
+      returns true if hotels search request
+      was launched, or false if search request is invalid
+      */
       if (!this.allow_search) {
+        // console.log('SEARCH BANNED')
+        return false;
+      } else if (this.is_loading) {
+        // console.log('SEARCH ALR PENDING')
+        return false;
+      }
+
+      if (!this.is_destination_valid) {
+        // console.log('DEST INVALIUD')
         return false;
       }
       
-      this.destination = this.destinationInput;
-      this.beginSearch = true;
+      this.destination = this.destination_input;
+      const mappings = this.destination_mappings;
+      if (!mappings.hasOwnProperty(this.destination)) {
+        // console.log('DEST INVALIUD V2')
+        return false;
+      }
+      
+      const dest_id = this.destination_mappings[this.destination];
+      this.last_dest_id = dest_id;
+      // load_hotels is an async method
+      this.load_hotels(dest_id)
+      assert(this.is_loading)
       return true;
     },
 
-    selectHotel(hotel) {
+    select_hotel(hotel) {
       console.log('SELECTED', hotel, hotel['id']);
       const [start_date, end_date] = this.dates
       const start_date_str = moment(start_date).format('YYYY-MM-DD');
@@ -289,25 +316,29 @@ export default {
       this.$store.commit("getDetails", hotel['description'])
       this.$store.commit("getAmenities", hotel['amenities'])
       router.push({
-        path: `/hotels/${hotel['original_metadata']['country']}/${this.lastDestID}/${hotel['id']}/${this.num_guests}/${start_date_str}/${end_date_str}`
+        path: (
+          `/hotels/${hotel['original_metadata']['country']}` +
+          `/${this.lastDestID}/${hotel['id']}/${this.num_guests}` +
+          `/${start_date_str}/${end_date_str}`
+        )
       })
     },
 
-    scrollToTop() {
+    scroll_to_top() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     
-    preloadCards() {
+    preload_cards() {
       if (
-        (self.cardWidth === null) ||
-        (self.cardHolderWidth === null) ||
-        (self.cardsPreloaded === true)
+        (self.card_width === null) ||
+        (self.card_holder_width === null) ||
+        (self.cards_preloaded === true)
       ) {
         return false;
       }
 
       this.render_more_hotels()
-      this.cardsPreloaded = true
+      this.cards_preloaded = true
       return true
     },
 
@@ -317,50 +348,137 @@ export default {
       of the last row is filled. 
       */
       const self = this;
-      let smartLoading = true;
-      let numToLoad = 9;
+      let smart_loading = true;
+      let num_to_load = 9;
       
       if (
-        (self.cardWidth === null) ||
-        (self.cardHolderWidth === null)
+        (self.card_width === null) ||
+        (self.card_holder_width === null)
       ) {
-        smartLoading = false;
+        smart_loading = false;
       }
 
       /*
       console.log(
-        'LOAD', self.cardHolderWidth, self.cardWidth, smartLoading
+        'LOAD', self.card_holder_width, self.card_width, smart_loading
       )
       */
 
-      if (smartLoading) {
-        const numHotelsLoaded = self.hotelsLoaded.length;
-        const cardsPerRow = Math.max(1, Math.floor(
-          self.cardHolderWidth / self.cardWidth
+      if (smart_loading) {
+        const num_hotels_loaded = self.hotels_loaded.length;
+        const cards_per_row = Math.max(1, Math.floor(
+          self.card_holder_width / self.card_width
         ))
 
-        // console.log('LOADP', numHotelsLoaded, numToLoad)
+        // console.log('LOADP', num_hotels_loaded, num_to_load)
 
         // round off the number of hotel cards to load
         // so that it fills up the entirety of the last row
-        numToLoad += cardsPerRow - (
-          (numHotelsLoaded + numToLoad) % cardsPerRow
+        num_to_load += cards_per_row - (
+          (num_hotels_loaded + num_to_load) % cards_per_row
         )
-        // console.log('NEWLOAD', numToLoad, cardsPerRow)
-        // console.log('LOADH', numHotelsLoaded, numToLoad)
+        // console.log('NEWLOAD', num_to_load, cards_per_row)
+        // console.log('LOADH', num_hotels_loaded, num_to_load)
       }
 
-      // let numToLoad = 10;
-      // numToLoad = 10
+      // let num_to_load = 10;
+      // num_to_load = 10
 
-      for (let k=0; k<numToLoad; k++) {
-        const hotelIndex = this.hotelsLoaded.length;
-        if (hotelIndex >= this.hotels.length) {
+      for (let k=0; k<num_to_load; k++) {
+        const hotel_index = this.hotels_loaded.length;
+        if (hotel_index >= this.hotels.length) {
           return false;
         }
 
-        this.hotelsLoaded.push(this.hotels[hotelIndex])
+        this.hotels_loaded.push(this.hotels[hotel_index])
       }
+    },
+
+    search_params_match(
+      dest_id, dates, num_guests, num_rooms
+    ) {
+      if (
+        (this.last_dest_id === dest_id) &&
+        (_.isEqual(this.searched_dates, dates)) &&
+        (this.searched_num_guests === num_guests) &&
+        (this.searched_num_rooms === num_rooms)
+      ) {
+        // skip price map update if we already searched
+        // the same destination previously already
+        // successfully (i.e. no errors) and in the same
+        // booking date range and same number of guests 
+        // and same number of rooms as previously as well
+        return true;
+      }
+
+      return false
+    },
+
+    async load_prices({
+      dest_id, dates, num_guests, num_rooms,
+      search_stamp
+    }) {
+      assert(typeof search_stamp === 'number')
+      assert(!this.pending_search_stamps.includes(search_stamp))
+      this.pending_search_stamps.push(search_stamp)
+      let price_resp = {}
+
+      try {
+        price_resp = await this.make_price_request(
+          dest_id, dates, num_guests, num_rooms
+        )
+      } catch (e) {
+        console.log('PRICING FAIL', search_stamp)
+      }
+
+      console.log('PRICE_RESP', price_resp)
+      const price_data = price_resp.data;
+      // const price_data = price_resp.data;
+      const price_mapping = {}
+
+      if (price_data === undefined) {
+        // pass if proxy_json has no data attribute
+      } else if (price_data.proxy_json === undefined) {
+        // pass if proxy_json not in price response
+      } else if (price_data.proxy_json.hotels === undefined) {
+        // pass if price response have no hotels
+      } else {
+        // add price as a property to each hotel
+        // in the original hotels api response
+        const hotel_prices = price_data.proxy_json.hotels
+        console.log('HOTEL_PRICES', hotel_prices)
+        // console.log('MAPPING', hotel_mapping)
+
+        for (let k=0; k<hotel_prices.length; k++) {
+          const hotel_pricing = hotel_prices[k]
+          const hotel_id = hotel_pricing.id
+          price_mapping[hotel_id] = hotel_pricing
+        }
+      }
+
+      const search_params_match = this.search_params_match(
+        dest_id, dates, num_guests, num_rooms
+      )
+
+      if (
+        this.search_stamp !== search_stamp ||
+        !search_params_match || 
+        this.load_error
+      ) {
+        // skip price map update if search params
+        // DONT match, or if we had a load error
+        console.log('REJECT MAPPING', dest_id, price_mapping)
+        return false;
+      }
+
+      const index = this.pending_search_stamps.indexOf(search_stamp);
+      if (index !== -1) {
+        this.pending_search_stamps.splice(index, 1);
+      }
+
+      this.price_mapping = {} // clear existing price caches
+      this.price_mapping[search_stamp] = price_mapping
+      console.log('PRICE_MAP', this.price_mapping)
     },
 
     make_price_request(dest_id, dates, num_guests, rooms) {
@@ -403,15 +521,14 @@ export default {
         return false
       }
       
-      self.isLoading = true;
-      self.hotelsLoaded = [];
-      self.loadError = false;
+      self.is_loading = true;
+      self.hotels_loaded = [];
+      self.load_error = false;
       self.hotels = []
-
+      
       self.searched_num_guests = self.num_guests
       self.searched_num_rooms = self.num_rooms
       self.searched_dates = dates;
-
       // await sleep(10000);
       
       /*
@@ -439,14 +556,12 @@ export default {
         const [price_resp, hotel_resp] = await Promise.all([
           price_request, hotel_request
         ])
-
         let response = await hotel_resp;
         console.warn('RESPONSE', price_resp, response)
         console.log('CODE', response.data.status_code)
         if (response.status !== 200) {
-          throw response.statusText;
+          throw response.status_text;
         }
-
         self.hotels = response.data.proxy_json;
         self.hotels.sort((hotel1, hotel2) => {
           if (hotel1.rating < hotel2.rating) {
@@ -457,18 +572,15 @@ export default {
             return 0
           }
         })
-
         const hotel_mapping = {}
         for (let k=0; k<self.hotels.length; k++) {
           const hotel = self.hotels[k];
           hotel_mapping[hotel.id] = k
         }
-
         console.log('PRICE_RESP', price_resp)
         const price_data = price_resp.data;
         
         // const price_data = price_resp.data;
-
         if (price_data === undefined) {
            // pass if proxy_json has no data attribute
         } else if (price_data.proxy_json === undefined) {
@@ -481,32 +593,29 @@ export default {
           const hotel_prices = price_data.proxy_json.hotels
           console.log('HOTEL_PRICES', hotel_prices)
           console.log('MAPPING', hotel_mapping)
-
           for (let k=0; k<hotel_prices.length; k++) {
             const hotel_pricing = hotel_prices[k]
             const hotel_id = hotel_pricing.id
             const hotel_index = hotel_mapping[hotel_id]
-
             if (hotel_index === undefined) {
               // hotel was not found in original hotels response
               continue
             }
-
             console.log('HOTEL_ID', hotel_id)
             console.log('HOTEL_INDEX', hotel_index)
             self.hotels[hotel_index]['price'] = hotel_pricing.price
             console.log('HOTEL', k, self.hotels[hotel_id])
           }
         }
-
-        self.hotelsLoaded = []
+        self.hotels_loaded = []
         self.render_more_hotels();
-      } catch (error) {
-        self.loadError = true;
-        console.error(error);
-      }
 
-      self.isLoading = false;
+      } catch (error) {
+        self.load_error = true;
+        console.error(error);
+      } finally {
+        self.is_loading = false;
+      }
     },
 
     is_valid_guests(num_guests) {
@@ -534,52 +643,56 @@ export default {
     const checkout_date = date_now.add(96 , 'h').toDate();
     self.dates = [checkin_date, checkout_date]
 
-    const loader = import('@/assets/destinations.json')
-    loader.then(async (destinations) => {
+    const on_destinations_loaded = async (destinations) => {
       // await sleep(10000); // simulate json load delay
       // console.log('DESINATIONS JSON LOADED')
+      // console.log('DATA LENGTH', destinations.length)
 
       for (let destination of destinations) {
-        // console.log(destination)
         const destinationID = destination["uid"]
         const destinationName = destination["term"]
-        self.destinationNames.push(destinationName)
-        self.destinationMappings[destinationName] = destinationID
+        self.destination_names.push(destinationName)
+        // console.log(destinationName, destinationID)
+        self.destination_mappings[destinationName] = destinationID
       };
 
-      self.destinationsLoaded = true;
-    })
+      // const length = Object.keys(self.destination_mappings).length
+      // console.log('LENGTH', length)
+      self.destinations_loaded = true;
+    }
 
-    const baseSearchURL = "https://hotelapi.loyalty.dev/api/hotels";
-
-    (async () => {
+    // console.log('NODE ENV', process.env.NODE_ENV)
+    if (process.env.NODE_ENV === 'test') {
       /*
-      this async loop will load in hotel data from the 
-      backend once a valid desination is entered into the
-      autocomplete search box
+      load destinations.js using fs if we're doing unit tests
+      on vue-cli-service. The reason we need to do this instead
+      of just using dynamic imports is because dynamic imports
+      are a webpack feature, and the vue test code is actually
+      running on node.js instead of on the browser
       */
+      // console.log('RUNNING ON: NODEJS')
+      const fs = require('fs');
+      const path = require('path');
 
-      while (true) {
-        await sleep(100);
-        if (!self.isDestinationValid) {
-          continue
-        } 
-
-        const mappings = self.destinationMappings;
-        if (!mappings.hasOwnProperty(self.destination)) {
-          continue
-        } else if (this.beginSearch === false) {
-          continue
-        }
-        
-        const dest_id = self.destinationMappings[self.destination]
-
-        self.lastDestID = dest_id;
-        console.log('DESTID', dest_id)
-        await self.load_hotels(dest_id)
-        self.beginSearch = false;
+      const fs_read_handler = (err, data) => {
+        if (err) { throw err; }
+        data = JSON.parse(data)
+        on_destinations_loaded(data);
       }
-    })();
+
+      const load_path = '../assets/destinations.json'
+      const abs_load_path = path.resolve(__dirname, load_path)
+      fs.readFile(abs_load_path, 'utf8',fs_read_handler)
+
+    } else {
+      /*
+      load destinations.js using dynamic webpack imports
+      if we're actually running the website
+      */
+      // console.log('RUNNING ON: BROWSER')
+      const loader = import('@/assets/destinations.json')
+      loader.then(on_destinations_loaded);
+    }
 
     (async () => {
       // continually set current date
@@ -597,18 +710,20 @@ export default {
         }
 
         if (!self.dates_are_valid) {
+          // clear the UI date selection if it doens't
+          // meet our requirements
           self.dates = []
         }
       }
     })();
 
-    const cardsHolder = $(self.$refs.cards_holder)
-    self.cardHolderWidth = cardsHolder.width()
-    console.log('HOLER WIDTH', self.cardHolderWidth)
-    self.preloadCards()
+    const cards_holder = $(self.$refs.cards_holder)
+    self.card_holder_width = cards_holder.width()
+    // console.log('HOLER WIDTH', self.card_holder_width)
+    self.preload_cards()
 
     $(window).resize(() => {
-      self.cardHolderWidth = cardsHolder.width()
+      self.card_holder_width = cards_holder.width()
     });
 
     (async () => {
@@ -624,13 +739,12 @@ export default {
           continue;
         }
 
-        console.log('CARDS', self.$refs.cards)
-        
+        // console.log('CARDS', self.$refs.cards)
         const card = self.$refs.cards[0].$el
         // get width (+horizontal margin) taken by card
-        self.cardWidth = $(card).outerWidth(true)
-        console.log('WIDTH', self.cardWidth)
-        self.preloadCards()
+        self.card_width = $(card).outerWidth(true)
+        // console.log('WIDTH', self.card_width)
+        self.preload_cards()
         break
       }
     })();
@@ -642,16 +756,16 @@ export default {
       */
       while (true) {
         await sleep(100);
-        const documentHeight = $(document).height()
-        const windowHeight = $(window).height()
-        const endBarHeight = $(self.$refs.end_bar).height()
-        const contentHeight = documentHeight - endBarHeight
+        const document_height = $(document).height()
+        const window_height = $(window).height()
+        const end_bar_height = $(self.$refs.end_bar).height()
+        const content_height = document_height - end_bar_height
 
-        // console.log('DOC HEIGHT', documentHeight)
-        // console.log('WINDOW HEIGHT', windowHeight)
-        // console.log('BAR HEIGHT', endBarHeight)
+        // console.log('DOC HEIGHT', document_height)
+        // console.log('WINDOW HEIGHT', window_height)
+        // console.log('BAR HEIGHT', end_bar_height)
 
-        if (contentHeight > windowHeight) {
+        if (content_height > window_height) {
           self.scrollable = true
         } else {
           self.scrollable = false
@@ -659,14 +773,14 @@ export default {
       }
     })();
 
-    console.log("mount complete")
+    // console.log("mount complete")
   },
 
   computed: {
     search_success() {
       return (
-        (this.loadError === false) &&
-        (this.isLoading === false) &&
+        (this.load_error === false) &&
+        (this.is_loading === false) &&
         (this.searched_num_guests !== 0) &&
         (this.searched_num_rooms !== 0) &&
         (this.searched_dates.length === 2)
@@ -719,25 +833,25 @@ export default {
 
     allow_search() {
       if (!this.is_valid_guests(this.num_guests)) {
+        // console.log('BAD-GEUSTS', this.num_guests)
         return false
       }
 
+      // console.log('BAD-F', this.rooms_valid, this.dates_are_valid)
+
       if (!this.rooms_valid) { return false }
       if (!this.dates_are_valid) { return false }
-      const mappings = this.destinationMappings;
-      if (!mappings.hasOwnProperty(this.destinationInput)) {
+      const mappings = this.destination_mappings;
+      if (!mappings.hasOwnProperty(this.destination_input)) {
+        // console.log('MAP-FAIL', mappings, this.destination_input)
         return false;
       }
 
-      const dest_id = this.destinationMappings[this.destinationInput]
-
-      if (
-        (this.lastDestID === dest_id) &&
-        (_.isEqual(this.searched_dates, this.dates)) &&
-        (this.searched_num_guests === this.num_guests) &&
-        (this.searched_num_rooms === this.num_rooms) &
-        (this.loadError === false)
-      ) {
+      const dest_id = mappings[this.destination_input]
+      const params_match = this.search_params_match(
+        dest_id, this.dates, this.num_guests, this.num_rooms
+      )
+      if (params_match && (this.load_error === false)) {
         // skip search if we already searched
         // the same destination previously already
         // successfully (i.e. no errors) and in the same
@@ -751,15 +865,15 @@ export default {
 
     show_load_status() {
       return (
-        this.loadError || this.isLoading ||
-        (this.lastDestID !== null)
+        this.load_error || this.is_loading ||
+        (this.last_dest_id !== null)
       )
     },
 
-    statusText () {
-      if (this.loadError) {
-        return "failed to load hotels\n●︿●"
-      } else if (this.isLoading) {
+    status_text() {
+      if (this.load_error) {
+        return LOAD_FAIL_MSG
+      } else if (this.is_loading) {
         return "loading hotels"
       }
     
@@ -768,24 +882,24 @@ export default {
       return dest_name
     },
 
-    allHotelsLoaded() {
+    all_hotels_loaded() {
       return (
         this.hotels.length ===
-        this.hotelsLoaded.length
+        this.hotels_loaded.length
       )
     },
 
-    searchEmptyMessage() {
-      if (this.destinationsLoaded) {
+    search_empty_message() {
+      if (this.destinations_loaded) {
         return 'No results found'
       } else {
         return 'Loading avaliable desinations...'
       }
     },
 
-    filteredDataArray() {
+    filtered_search_matches() {
       const matches = fuzzysort.go(
-        this.destinationInput, this.destinationNames
+        this.destination_input, this.destination_names
       )
       
       if ((matches.length) === 0) { return [] }
@@ -800,9 +914,9 @@ export default {
       return names
     },
 
-    isDestinationValid() {
-      return this.destinationMappings.hasOwnProperty(
-        this.destinationInput
+    is_destination_valid() {
+      return this.destination_mappings.hasOwnProperty(
+        this.destination_input
       )
     }
   },

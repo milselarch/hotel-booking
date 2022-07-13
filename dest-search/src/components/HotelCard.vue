@@ -12,6 +12,10 @@
       </figure>
     </div>
 
+    <!--
+    <b-progress class="flat-progress-bar"></b-progress>
+    -->
+    
     <div class="card-content">
       <div class="media">
         <div class="media-content">
@@ -31,9 +35,6 @@
       <p id="price" v-show="show_price">
         SGD <b>{{ hotel['price'] }}</b>
       </p>
-
-      <div class="content clipped" >
-      </div>
     </div>
   </div>
 
