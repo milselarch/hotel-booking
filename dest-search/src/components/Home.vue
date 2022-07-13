@@ -287,7 +287,12 @@ export default {
 
       this.$store.commit("getName", hotel['name'])
       this.$store.commit("getDetails", hotel['description'])
-      this.$store.commit("getAmenities", hotel['amenities'])
+      if (hotel['amenities'].length != 0){
+        this.$store.commit("getAmenities", hotel['amenities'])
+      }
+      else {
+        this.$store.commit("getAmenities", null)
+      }
       router.push({
         path: `/hotels/${hotel['original_metadata']['country']}/${this.lastDestID}/${hotel['id']}/${this.num_guests}/${start_date_str}/${end_date_str}`
       })
