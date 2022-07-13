@@ -1,11 +1,20 @@
 <template>
   <div id="hotel-info">
-    <p id="test">
+    <h2 id="name"><b>{{hotelName}}</b></h2>
+    <!-- <p id="test">
     destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}<br>guests: {{guests}}<br>dates: {{checkin}} to {{checkout}}
-    </p>
-    <p>{{specHotel}}</p>
-    <p>{{hotelList[2]}}</p>
-    <p id="description">DESC</p>
+    </p> -->
+    <!-- TODO: maybe load hotel images? -->
+    <div id="descbox">
+      <div id="description" v-html="hotelDetails"></div>
+      <div id="amenities">
+        <p><font size="4rem"><b>Amenities</b></font></p>
+        <ul v-for="(am, key) in this.hotelAmenities" v-bind:key="key">
+          <li><font-awesome-icon icon="fa-solid fa-check" color="green"/>        {{key}}</li>
+        </ul>
+      </div>
+    </div>
+    
     <div id="room-cards">
       <div
         class="card" 
@@ -64,10 +73,14 @@ export default {
       roomList: 'a',
       hotelList: 'def',
       specHotel: 'spec',
+      hotelName: 'name',
+      hotelDetails: 'details',
+      hotelAmenities: 'amenities',
       url: "proxy/hotels/"+ this.hotel_id + "/price"
     }
   },
   methods: {
+    //TODO: make slideshow image display
     replace_default_image(e) {
       /*
       load the image not found image if the original
@@ -99,6 +112,8 @@ export default {
     }
   },
   mounted() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     const room_request = axios.get(this.url, {
       params: {
         destination_id: this.dest_id,
@@ -119,31 +134,37 @@ export default {
       this.roomList = "undefined";
     }
 
-    const hotel_request = axios.get("proxy/hotels", {
-      params: {
-        destination_id: this.dest_id
-      }
-    }).then((getResponse) => {
-      this.hotelList = getResponse.data.proxy_json;
-    })
+    this.hotelName = this.$store.state.Store.hotelName;
+    this.hotelDetails = this.$store.state.Store.hotelDetails;
+    this.hotelAmenities = this.$store.state.Store.hotelAmenities;
+    for (let i=0; i<this.hotelAmenities.length; i++){
 
-    // console.log("help", hotelList[2]);
-    // for (let i=0; i<this.hotelList.length; i++){
-    //   console.log(this.hotelList[i]['id']);
-    //   if (this.hotelList[i]['id'] == this.hotel_id){
-    //     console.log("loaded hotel", hotelList[i]['id']);
-    //     this.specHotel = hotelList[i];
-    //   }
-    // }
-  }
+    }
+  },
   
 }
 </script>
 
 <style lang="scss" scoped>
 
-p#test {
+h2#name{
+  text-align: center;
+  font-size: 4rem;
+}
+div#descbox {
+  display: inline-block;
+  width: 80%;
+  border: solid;
+  justify-content: center;
+}
+div#description {
+  width: 60%;
   margin: 4rem; 
+  float: left;
+  text-align: justify;
+}
+div#amenities {
+  margin: 4rem;
 }
 div#room-cards {
   padding: 5rem;

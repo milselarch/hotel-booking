@@ -220,9 +220,10 @@ export default {
       // to the backend to search for hotels
 
       scrollable: false,
-
+      
+      // for vuex
       x: 0,
-      y: 0
+      y: 0,
     }
   },
 
@@ -283,6 +284,10 @@ export default {
       const [start_date, end_date] = this.dates
       const start_date_str = moment(start_date).format('YYYY-MM-DD');
       const end_date_str = moment(end_date).format('YYYY-MM-DD');
+
+      this.$store.commit("getName", hotel['name'])
+      this.$store.commit("getDetails", hotel['description'])
+      this.$store.commit("getAmenities", hotel['amenities'])
       router.push({
         path: `/hotels/${hotel['original_metadata']['country']}/${this.lastDestID}/${hotel['id']}/${this.num_guests}/${start_date_str}/${end_date_str}`
       })
