@@ -323,7 +323,7 @@ export default {
       router.push({
         path: (
           `/hotels/${hotel['original_metadata']['country']}` +
-          `/${this.lastDestID}/${hotel['id']}/${this.num_guests}` +
+          `/${this.last_dest_id}/${hotel['id']}/${this.num_guests}` +
           `/${start_date_str}/${end_date_str}`
         )
       })
