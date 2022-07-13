@@ -182,9 +182,12 @@ import HotelCard from '@/components/HotelCard.vue'
 import { faL } from '@fortawesome/free-solid-svg-icons'
 import router from '../router'
 
+const LOAD_FAIL_MSG = "failed to load hotels\n●︿●";
 
 export default {
   name: 'Home',
+  LOAD_FAIL_MSG: LOAD_FAIL_MSG,
+
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
@@ -275,18 +278,22 @@ export default {
       was launched, or false if search request is invalid
       */
       if (!this.allow_search) {
+        // console.log('SEARCH BANNED')
         return false;
       } else if (this.is_loading) {
+        // console.log('SEARCH ALR PENDING')
         return false;
       }
 
       if (!this.is_destination_valid) {
+        // console.log('DEST INVALIUD')
         return false;
       }
       
       this.destination = this.destination_input;
       const mappings = this.destination_mappings;
       if (!mappings.hasOwnProperty(this.destination)) {
+        // console.log('DEST INVALIUD V2')
         return false;
       }
       
@@ -624,22 +631,56 @@ export default {
     const checkout_date = date_now.add(96 , 'h').toDate();
     self.dates = [checkin_date, checkout_date]
 
-    // console.log('PROCESS-ENV', process.env.NODE_ENV)
-    const loader = import('@/assets/destinations.json')
-    loader.then(async (destinations) => {
+    const on_destinations_loaded = async (destinations) => {
       // await sleep(10000); // simulate json load delay
       // console.log('DESINATIONS JSON LOADED')
+      // console.log('DATA LENGTH', destinations.length)
 
       for (let destination of destinations) {
-        // console.log(destination)
         const destinationID = destination["uid"]
         const destinationName = destination["term"]
         self.destination_names.push(destinationName)
+        // console.log(destinationName, destinationID)
         self.destination_mappings[destinationName] = destinationID
       };
 
+      // const length = Object.keys(self.destination_mappings).length
+      // console.log('LENGTH', length)
       self.destinations_loaded = true;
-    });
+    }
+
+    // console.log('NODE ENV', process.env.NODE_ENV)
+    if (process.env.NODE_ENV === 'test') {
+      /*
+      load destinations.js using fs if we're doing unit tests
+      on vue-cli-service. The reason we need to do this instead
+      of just using dynamic imports is because dynamic imports
+      are a webpack feature, and the vue test code is actually
+      running on node.js instead of on the browser
+      */
+      // console.log('RUNNING ON: NODEJS')
+      const fs = require('fs');
+      const path = require('path');
+
+      const fs_read_handler = (err, data) => {
+        if (err) { throw err; }
+        data = JSON.parse(data)
+        on_destinations_loaded(data);
+      }
+
+      const load_path = '../assets/destinations.json'
+      const abs_load_path = path.resolve(__dirname, load_path)
+      fs.readFile(abs_load_path, 'utf8',fs_read_handler)
+
+    } else {
+      /*
+      load destinations.js using dynamic webpack imports
+      if we're actually running the website
+      */
+      // console.log('RUNNING ON: BROWSER')
+      const loader = import('@/assets/destinations.json')
+      loader.then(on_destinations_loaded);
+    }
 
     (async () => {
       // continually set current date
@@ -657,6 +698,8 @@ export default {
         }
 
         if (!self.dates_are_valid) {
+          // clear the UI date selection if it doens't
+          // meet our requirements
           self.dates = []
         }
       }
@@ -664,7 +707,7 @@ export default {
 
     const cards_holder = $(self.$refs.cards_holder)
     self.card_holder_width = cards_holder.width()
-    console.log('HOLER WIDTH', self.card_holder_width)
+    // console.log('HOLER WIDTH', self.card_holder_width)
     self.preload_cards()
 
     $(window).resize(() => {
@@ -684,12 +727,11 @@ export default {
           continue;
         }
 
-        console.log('CARDS', self.$refs.cards)
-        
+        // console.log('CARDS', self.$refs.cards)
         const card = self.$refs.cards[0].$el
         // get width (+horizontal margin) taken by card
         self.card_width = $(card).outerWidth(true)
-        console.log('WIDTH', self.card_width)
+        // console.log('WIDTH', self.card_width)
         self.preload_cards()
         break
       }
@@ -719,7 +761,7 @@ export default {
       }
     })();
 
-    console.log("mount complete")
+    // console.log("mount complete")
   },
 
   computed: {
@@ -779,17 +821,21 @@ export default {
 
     allow_search() {
       if (!this.is_valid_guests(this.num_guests)) {
+        // console.log('BAD-GEUSTS', this.num_guests)
         return false
       }
+
+      // console.log('BAD-F', this.rooms_valid, this.dates_are_valid)
 
       if (!this.rooms_valid) { return false }
       if (!this.dates_are_valid) { return false }
       const mappings = this.destination_mappings;
       if (!mappings.hasOwnProperty(this.destination_input)) {
+        // console.log('MAP-FAIL', mappings, this.destination_input)
         return false;
       }
 
-      const dest_id = this.destination_mappings[this.destination_input]
+      const dest_id = mappings[this.destination_input]
       const params_match = this.search_params_match(
         dest_id, this.dates, this.num_guests, this.num_rooms
       )
@@ -812,9 +858,9 @@ export default {
       )
     },
 
-    status_text () {
+    status_text() {
       if (this.load_error) {
-        return "failed to load hotels\n●︿●"
+        return LOAD_FAIL_MSG
       } else if (this.is_loading) {
         return "loading hotels"
       }
