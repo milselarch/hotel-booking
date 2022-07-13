@@ -279,9 +279,12 @@ export default {
     },
 
     selectHotel(hotel) {
-      console.log('SELECTED', hotel, hotel['id'])
+      console.log('SELECTED', hotel, hotel['id']);
+      const [start_date, end_date] = this.dates
+      const start_date_str = moment(start_date).format('YYYY-MM-DD');
+      const end_date_str = moment(end_date).format('YYYY-MM-DD');
       router.push({
-        path: `/hotels/${this.lastDestID}/${hotel['id']}`
+        path: `/hotels/${hotel['original_metadata']['country']}/${this.lastDestID}/${hotel['id']}/${this.num_guests}/${start_date_str}/${end_date_str}`
       })
     },
 

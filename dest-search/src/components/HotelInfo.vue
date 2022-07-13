@@ -1,8 +1,11 @@
 <template>
   <div id="hotel-info">
     <p id="test">
-    destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}
+    destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}<br>guests: {{guests}}<br>dates: {{checkin}} to {{checkout}}
     </p>
+    <p>{{specHotel}}</p>
+    <p>{{hotelList[2]}}</p>
+    <p id="description">DESC</p>
     <div id="room-cards">
       <div
         class="card" 
@@ -34,6 +37,9 @@ import BLANK_IMAGE from "@/assets/image_not_found.png"
 export default {
   name: 'HotelInfo',
   props: {
+    country_code: {
+      type: String
+    },
     hotel_id: {
       type: String,
       default: "TEST"
@@ -41,12 +47,24 @@ export default {
     dest_id: {
       type: String,
       default: "testing"
+    },
+    guests: {
+      type: String,
+      default: "guests"
+    },
+    checkin: {
+      type: String
+    },
+    checkout: {
+      type: String
     }
   },
   data(){
     return {
       roomList: 'a',
-      url: 'proxy/hotels/'+ this.hotel_id + '/price'
+      hotelList: 'def',
+      specHotel: 'spec',
+      url: "proxy/hotels/"+ this.hotel_id + "/price"
     }
   },
   methods: {
@@ -78,34 +96,19 @@ export default {
       else {
         return "Breakfast not included"
       }
-    },
-    check_price(room){
-      // let cheaper = room.price;
-      // for (let other in Roomlistbeds.rooms){
-      //   if (Roomlistbeds.rooms[other].key == room.key){
-      //     cheaper = Math.min(Roomlistbeds.rooms[other].price, cheaper)
-      //   }
-      // }
-      // for (let another in Roomlistwgl.rooms){
-      //   if (Roomlistwgl.rooms[another].key == room.key){
-      //     cheaper = Math.min(Roomlistwgl.rooms[another].price, cheaper)
-      //   }
-      // }
-      // return cheaper
     }
   },
   mounted() {
-    // const getRooms = axios.get(this.url)
     const room_request = axios.get(this.url, {
       params: {
         destination_id: this.dest_id,
-        checkin: '2022-08-31',
-        checkout: '2022-09-01',
+        checkin: this.checkin,
+        checkout: this.checkout,
         lang: 'en_US',
         currency: 'SGD',
         partner_id: '16',
         country_code: 'SG',
-        guests: '2'
+        guests: this.guests
       }
     }).then((getResponse) => {
       console.log("GET Response");
@@ -115,7 +118,25 @@ export default {
     if (room_request.data === undefined){
       this.roomList = "undefined";
     }
+
+    const hotel_request = axios.get("proxy/hotels", {
+      params: {
+        destination_id: this.dest_id
+      }
+    }).then((getResponse) => {
+      this.hotelList = getResponse.data.proxy_json;
+    })
+
+    // console.log("help", hotelList[2]);
+    // for (let i=0; i<this.hotelList.length; i++){
+    //   console.log(this.hotelList[i]['id']);
+    //   if (this.hotelList[i]['id'] == this.hotel_id){
+    //     console.log("loaded hotel", hotelList[i]['id']);
+    //     this.specHotel = hotelList[i];
+    //   }
+    // }
   }
+  
 }
 </script>
 
