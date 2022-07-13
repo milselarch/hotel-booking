@@ -22,6 +22,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.3",
     "vue": "^2.5.11",
+    "vue-credit-card-validation": "^0.1.11",
     "vue-infinite-scroll": "^2.0.2",
     "vue-router": "^3.5.4",
     "vue-spinners": "^1.0.2",
