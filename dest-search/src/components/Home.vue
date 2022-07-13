@@ -36,11 +36,11 @@
           >
             <b-field>
               <b-autocomplete
-                v-model="destinationInput"
+                v-model="destination_input"
                 :data="filtered_search_matches"
                 placeholder="Search Destination e.g. tioman island"
                 clearable icon="search-location"
-                :disabled="isLoading"
+                :disabled="is_loading"
                 @select="option => selected = option">
                 <template #empty>{{ searchEmptyMessage }}</template>
               </b-autocomplete>
@@ -62,7 +62,7 @@
 
                 min="1" :max="max_num_guests" default="1"
                 pattern="[0-9]+" required
-                :disabled="isLoading"
+                :disabled="is_loading"
               >
               </b-input>
             </b-field>
@@ -71,12 +71,12 @@
 
             <b-field 
               id="rooms-field" expanded label="Rooms"
-              :disabled="isLoading"
+              :disabled="is_loading"
             >
               <b-select
                 placeholder="Rooms" icon="door-closed"
                 expanded id="room-selector" v-model="num_rooms"
-                :disabled="isLoading"
+                :disabled="is_loading"
               >
                 <option 
                   v-for="(num_rooms, index) in allowed_room_choices"
@@ -103,7 +103,7 @@
               icon="calendar"
               :icon-right="dates_are_valid ? 'check': ''"
               :unselectable-dates="should_exclude_date"
-              :disabled="isLoading"
+              :disabled="is_loading"
               range>
             </b-datepicker>
           </b-field>
@@ -111,7 +111,7 @@
           <b-button
             type="is-dark" expanded outlined
             @click="begin_search"
-            :disabled="!allow_search || isLoading"
+            :disabled="!allow_search || is_loading"
           > Search
           </b-button>
 
@@ -133,12 +133,12 @@
     </div>
 
     <div 
-      v-bind:class="{ bland: isDestinationValid }"
+      v-bind:class="{ bland: is_destination_valid }"
       id="hotel-load-status"
     >
       <div id="status" v-show="true">
         <p id="status-text">{{ statusText }}</p>
-        <square id="spinner" v-show="isLoading"></square>
+        <square id="spinner" v-show="is_loading"></square>
         <p id="search-params" v-show="search_success"
         >{{ search_params_info }}</p>
       </div>
@@ -147,19 +147,19 @@
     <div
       id="hotel-cards" ref="cards_holder"
       v-infinite-scroll="render_more_hotels" 
-      infinite-scroll-disabled="allHotelsLoaded"
+      infinite-scroll-disabled="allhotels_loaded"
       infinite-scroll-distance="100"
     >
       <HotelCard
         class="card" style="width: 20rem" 
-        v-for="(hotel, key) in hotelsLoaded" v-bind:key="key"
+        v-for="(hotel, key) in hotels_loaded" v-bind:key="key"
         @click.native="selectHotel(hotel)"
         ref="cards" :hotel="hotel"
       />
     </div>
 
     <div
-      id="end-bar" v-show="allHotelsLoaded && scrollable"
+      id="end-bar" v-show="allhotels_loaded && scrollable"
       ref="end_bar"
     >
       <a v-on:click="scrollToTop()">— Go back to top —</a>
@@ -188,18 +188,18 @@ export default {
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
-      destinationsLoaded: false,
-      destinationNames: [], // array of destination names
+      destinations_loaded: false,
+      destination_names: [], // array of destination names
       destination_mappings: {}, // map destination name to ID
       
       hotels: [],
-      hotelsLoaded: [],
+      hotels_loaded: [],
       selected: null,
       destination: '',
-      destinationInput: '',
-      cardWidth: null,
-      cardHolderWidth: null,
-      cardsPreloaded: false,
+      destination_input: '',
+      card_width: null,
+      card_holder_width: null,
+      cards_preloaded: false,
 
       search_stamp: 0,
       price_mapping: {},
@@ -216,10 +216,10 @@ export default {
       searched_num_rooms: 0,
       num_rooms: 1,
 
-      isLoading: false,
-      loadError: false,
-      lastDestID: null,
-      beginSearch: false, 
+      is_loading: false,
+      load_error: false,
+      last_dest_id: null,
+      being_search: false, 
       // whether or not we should send a request 
       // to the backend to search for hotels
 
@@ -277,15 +277,15 @@ export default {
         return false;
       }
       
-      this.destination = this.destinationInput;
-      this.beginSearch = true;
+      this.destination = this.destination_input;
+      this.being_search = true;
       return true;
     },
 
     selectHotel(hotel) {
       console.log('SELECTED', hotel, hotel['id'])
       router.push({
-        path: `/hotels/${this.lastDestID}/${hotel['id']}`
+        path: `/hotels/${this.last_dest_id}/${hotel['id']}`
       })
     },
 
@@ -293,17 +293,17 @@ export default {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     
-    preloadCards() {
+    preload_cards() {
       if (
-        (self.cardWidth === null) ||
-        (self.cardHolderWidth === null) ||
-        (self.cardsPreloaded === true)
+        (self.card_width === null) ||
+        (self.card_holder_width === null) ||
+        (self.cards_preloaded === true)
       ) {
         return false;
       }
 
       this.render_more_hotels()
-      this.cardsPreloaded = true
+      this.cards_preloaded = true
       return true
     },
 
@@ -313,49 +313,49 @@ export default {
       of the last row is filled. 
       */
       const self = this;
-      let smartLoading = true;
-      let numToLoad = 9;
+      let smart_loading = true;
+      let num_to_load = 9;
       
       if (
-        (self.cardWidth === null) ||
-        (self.cardHolderWidth === null)
+        (self.card_width === null) ||
+        (self.card_holder_width === null)
       ) {
-        smartLoading = false;
+        smart_loading = false;
       }
 
       /*
       console.log(
-        'LOAD', self.cardHolderWidth, self.cardWidth, smartLoading
+        'LOAD', self.card_holder_width, self.card_width, smart_loading
       )
       */
 
-      if (smartLoading) {
-        const numHotelsLoaded = self.hotelsLoaded.length;
-        const cardsPerRow = Math.max(1, Math.floor(
-          self.cardHolderWidth / self.cardWidth
+      if (smart_loading) {
+        const num_hotels_loaded = self.hotels_loaded.length;
+        const cards_per_row = Math.max(1, Math.floor(
+          self.card_holder_width / self.card_width
         ))
 
-        // console.log('LOADP', numHotelsLoaded, numToLoad)
+        // console.log('LOADP', num_hotels_loaded, num_to_load)
 
         // round off the number of hotel cards to load
         // so that it fills up the entirety of the last row
-        numToLoad += cardsPerRow - (
-          (numHotelsLoaded + numToLoad) % cardsPerRow
+        num_to_load += cards_per_row - (
+          (num_hotels_loaded + num_to_load) % cards_per_row
         )
-        // console.log('NEWLOAD', numToLoad, cardsPerRow)
-        // console.log('LOADH', numHotelsLoaded, numToLoad)
+        // console.log('NEWLOAD', num_to_load, cards_per_row)
+        // console.log('LOADH', num_hotels_loaded, num_to_load)
       }
 
-      // let numToLoad = 10;
-      // numToLoad = 10
+      // let num_to_load = 10;
+      // num_to_load = 10
 
-      for (let k=0; k<numToLoad; k++) {
-        const hotelIndex = this.hotelsLoaded.length;
-        if (hotelIndex >= this.hotels.length) {
+      for (let k=0; k<num_to_load; k++) {
+        const hotel_index = this.hotels_loaded.length;
+        if (hotel_index >= this.hotels.length) {
           return false;
         }
 
-        this.hotelsLoaded.push(this.hotels[hotelIndex])
+        this.hotels_loaded.push(this.hotels[hotel_index])
       }
     },
 
@@ -363,7 +363,7 @@ export default {
       dest_id, dates, num_guests, num_rooms
     ) {
       if (
-        (this.lastDestID === dest_id) &&
+        (this.last_dest_id === dest_id) &&
         (_.isEqual(this.searched_dates, dates)) &&
         (this.searched_num_guests === num_guests) &&
         (this.searched_num_rooms === num_rooms)
@@ -428,7 +428,7 @@ export default {
       if (
         this.search_stamp !== search_stamp ||
         !search_params_match || 
-        this.loadError
+        this.load_error
       ) {
         // skip price map update if search params
         // DONT match, or if we had a load error
@@ -486,10 +486,11 @@ export default {
         return false
       }
       
-      self.isLoading = true;
-      self.hotelsLoaded = [];
-      self.loadError = false;
+      self.is_loading = true;
+      self.hotels_loaded = [];
+      self.load_error = false;
       self.hotels = []
+      
       self.searched_num_guests = self.num_guests
       self.searched_num_rooms = self.num_rooms
       self.searched_dates = dates;
@@ -570,13 +571,13 @@ export default {
             console.log('HOTEL', k, self.hotels[hotel_id])
           }
         }
-        self.hotelsLoaded = []
+        self.hotels_loaded = []
         self.render_more_hotels();
       } catch (error) {
-        self.loadError = true;
+        self.load_error = true;
         console.error(error);
       }
-      self.isLoading = false;
+      self.is_loading = false;
     },
 
     is_valid_guests(num_guests) {
@@ -613,11 +614,11 @@ export default {
         // console.log(destination)
         const destinationID = destination["uid"]
         const destinationName = destination["term"]
-        self.destinationNames.push(destinationName)
+        self.destination_names.push(destinationName)
         self.destination_mappings[destinationName] = destinationID
       };
 
-      self.destinationsLoaded = true;
+      self.destinations_loaded = true;
     })
 
     const baseSearchURL = "https://hotelapi.loyalty.dev/api/hotels";
@@ -631,23 +632,23 @@ export default {
 
       while (true) {
         await sleep(100);
-        if (!self.isDestinationValid) {
+        if (!self.is_destination_valid) {
           continue
         } 
 
         const mappings = self.destination_mappings;
         if (!mappings.hasOwnProperty(self.destination)) {
           continue
-        } else if (this.beginSearch === false) {
+        } else if (this.being_search === false) {
           continue
         }
         
         const dest_id = self.destination_mappings[self.destination]
 
-        self.lastDestID = dest_id;
+        self.last_dest_id = dest_id;
         console.log('DESTID', dest_id)
         await self.load_hotels(dest_id)
-        self.beginSearch = false;
+        self.being_search = false;
       }
     })();
 
@@ -672,13 +673,13 @@ export default {
       }
     })();
 
-    const cardsHolder = $(self.$refs.cards_holder)
-    self.cardHolderWidth = cardsHolder.width()
-    console.log('HOLER WIDTH', self.cardHolderWidth)
-    self.preloadCards()
+    const cards_holder = $(self.$refs.cards_holder)
+    self.card_holder_width = cards_holder.width()
+    console.log('HOLER WIDTH', self.card_holder_width)
+    self.preload_cards()
 
     $(window).resize(() => {
-      self.cardHolderWidth = cardsHolder.width()
+      self.card_holder_width = cards_holder.width()
     });
 
     (async () => {
@@ -698,9 +699,9 @@ export default {
         
         const card = self.$refs.cards[0].$el
         // get width (+horizontal margin) taken by card
-        self.cardWidth = $(card).outerWidth(true)
-        console.log('WIDTH', self.cardWidth)
-        self.preloadCards()
+        self.card_width = $(card).outerWidth(true)
+        console.log('WIDTH', self.card_width)
+        self.preload_cards()
         break
       }
     })();
@@ -712,16 +713,16 @@ export default {
       */
       while (true) {
         await sleep(100);
-        const documentHeight = $(document).height()
-        const windowHeight = $(window).height()
-        const endBarHeight = $(self.$refs.end_bar).height()
-        const contentHeight = documentHeight - endBarHeight
+        const document_height = $(document).height()
+        const window_height = $(window).height()
+        const end_bar_height = $(self.$refs.end_bar).height()
+        const content_height = document_height - end_bar_height
 
-        // console.log('DOC HEIGHT', documentHeight)
-        // console.log('WINDOW HEIGHT', windowHeight)
-        // console.log('BAR HEIGHT', endBarHeight)
+        // console.log('DOC HEIGHT', document_height)
+        // console.log('WINDOW HEIGHT', window_height)
+        // console.log('BAR HEIGHT', end_bar_height)
 
-        if (contentHeight > windowHeight) {
+        if (content_height > window_height) {
           self.scrollable = true
         } else {
           self.scrollable = false
@@ -735,8 +736,8 @@ export default {
   computed: {
     search_success() {
       return (
-        (this.loadError === false) &&
-        (this.isLoading === false) &&
+        (this.load_error === false) &&
+        (this.is_loading === false) &&
         (this.searched_num_guests !== 0) &&
         (this.searched_num_rooms !== 0) &&
         (this.searched_dates.length === 2)
@@ -795,15 +796,15 @@ export default {
       if (!this.rooms_valid) { return false }
       if (!this.dates_are_valid) { return false }
       const mappings = this.destination_mappings;
-      if (!mappings.hasOwnProperty(this.destinationInput)) {
+      if (!mappings.hasOwnProperty(this.destination_input)) {
         return false;
       }
 
-      const dest_id = this.destination_mappings[this.destinationInput]
+      const dest_id = this.destination_mappings[this.destination_input]
       const params_match = this.search_params_match(
         dest_id, this.dates, this.num_guests, this.num_rooms
       )
-      if (params_match && (this.loadError === false)) {
+      if (params_match && (this.load_error === false)) {
         // skip search if we already searched
         // the same destination previously already
         // successfully (i.e. no errors) and in the same
@@ -817,15 +818,15 @@ export default {
 
     show_load_status() {
       return (
-        this.loadError || this.isLoading ||
-        (this.lastDestID !== null)
+        this.load_error || this.is_loading ||
+        (this.last_dest_id !== null)
       )
     },
 
     statusText () {
-      if (this.loadError) {
+      if (this.load_error) {
         return "failed to load hotels\n●︿●"
-      } else if (this.isLoading) {
+      } else if (this.is_loading) {
         return "loading hotels"
       }
     
@@ -834,15 +835,15 @@ export default {
       return dest_name
     },
 
-    allHotelsLoaded() {
+    allhotels_loaded() {
       return (
         this.hotels.length ===
-        this.hotelsLoaded.length
+        this.hotels_loaded.length
       )
     },
 
     searchEmptyMessage() {
-      if (this.destinationsLoaded) {
+      if (this.destinations_loaded) {
         return 'No results found'
       } else {
         return 'Loading avaliable desinations...'
@@ -851,7 +852,7 @@ export default {
 
     filtered_search_matches() {
       const matches = fuzzysort.go(
-        this.destinationInput, this.destinationNames
+        this.destination_input, this.destination_names
       )
       
       if ((matches.length) === 0) { return [] }
@@ -866,9 +867,9 @@ export default {
       return names
     },
 
-    isDestinationValid() {
+    is_destination_valid() {
       return this.destination_mappings.hasOwnProperty(
-        this.destinationInput
+        this.destination_input
       )
     }
   },
