@@ -29,9 +29,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
-    path('booking/', views.booking_data.as_view(),),
-    path('booking/<str:pk>/', views.booking_data.as_view(),),
-    path('all_booking/', views.all_booking_data.as_view(),),
+    path('booking/', views.user_booking_data.as_view(),),
+    path('booking/<str:pk>/', views.user_booking_data.as_view(),),
+    path('admin_booking/', views.admin_booking_data.as_view(),),
+    path('admin_booking/<str:pk>/', views.admin_booking_data.as_view(),),
 
     path('auth_test', ProfileView.as_view(), name='example'),
     path('profile', ProfileView.as_view(), name='profile'),
