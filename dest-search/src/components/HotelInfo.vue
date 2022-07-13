@@ -1,8 +1,20 @@
 <template>
   <div id="hotel-info">
-    <p id="test">
-    destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}
-    </p>
+    <h2 id="name"><b>{{hotelName}}</b></h2>
+    <!-- <p id="test">
+    destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}<br>guests: {{guests}}<br>dates: {{checkin}} to {{checkout}}
+    </p> -->
+    <!-- TODO: maybe load hotel images? -->
+    <div id="descbox">
+      <div id="description" v-html="hotelDetails"></div>
+      <div id="amenities">
+        <p><font size="4rem"><b>Amenities</b></font></p>
+        <ul v-for="(am, key) in this.hotelAmenities" v-bind:key="key">
+          <li><font-awesome-icon icon="fa-solid fa-check" color="green"/>        {{key}}</li>
+        </ul>
+      </div>
+    </div>
+    
     <div id="room-cards">
       <div
         class="card" 
@@ -34,6 +46,9 @@ import BLANK_IMAGE from "@/assets/image_not_found.png"
 export default {
   name: 'HotelInfo',
   props: {
+    country_code: {
+      type: String
+    },
     hotel_id: {
       type: String,
       default: "TEST"
@@ -41,15 +56,31 @@ export default {
     dest_id: {
       type: String,
       default: "testing"
+    },
+    guests: {
+      type: String,
+      default: "guests"
+    },
+    checkin: {
+      type: String
+    },
+    checkout: {
+      type: String
     }
   },
   data(){
     return {
       roomList: 'a',
-      url: 'proxy/hotels/'+ this.hotel_id + '/price'
+      hotelList: 'def',
+      specHotel: 'spec',
+      hotelName: 'name',
+      hotelDetails: 'details',
+      hotelAmenities: 'amenities',
+      url: "proxy/hotels/"+ this.hotel_id + "/price"
     }
   },
   methods: {
+    //TODO: make slideshow image display
     replace_default_image(e) {
       /*
       load the image not found image if the original
@@ -78,34 +109,21 @@ export default {
       else {
         return "Breakfast not included"
       }
-    },
-    check_price(room){
-      // let cheaper = room.price;
-      // for (let other in Roomlistbeds.rooms){
-      //   if (Roomlistbeds.rooms[other].key == room.key){
-      //     cheaper = Math.min(Roomlistbeds.rooms[other].price, cheaper)
-      //   }
-      // }
-      // for (let another in Roomlistwgl.rooms){
-      //   if (Roomlistwgl.rooms[another].key == room.key){
-      //     cheaper = Math.min(Roomlistwgl.rooms[another].price, cheaper)
-      //   }
-      // }
-      // return cheaper
     }
   },
   mounted() {
-    // const getRooms = axios.get(this.url)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     const room_request = axios.get(this.url, {
       params: {
         destination_id: this.dest_id,
-        checkin: '2022-08-31',
-        checkout: '2022-09-01',
+        checkin: this.checkin,
+        checkout: this.checkout,
         lang: 'en_US',
         currency: 'SGD',
         partner_id: '16',
         country_code: 'SG',
-        guests: '2'
+        guests: this.guests
       }
     }).then((getResponse) => {
       console.log("GET Response");
@@ -115,14 +133,38 @@ export default {
     if (room_request.data === undefined){
       this.roomList = "undefined";
     }
-  }
+
+    this.hotelName = this.$store.state.Store.hotelName;
+    this.hotelDetails = this.$store.state.Store.hotelDetails;
+    this.hotelAmenities = this.$store.state.Store.hotelAmenities;
+    for (let i=0; i<this.hotelAmenities.length; i++){
+
+    }
+  },
+  
 }
 </script>
 
 <style lang="scss" scoped>
 
-p#test {
+h2#name{
+  text-align: center;
+  font-size: 4rem;
+}
+div#descbox {
+  display: inline-block;
+  width: 80%;
+  border: solid;
+  justify-content: center;
+}
+div#description {
+  width: 60%;
   margin: 4rem; 
+  float: left;
+  text-align: justify;
+}
+div#amenities {
+  margin: 4rem;
 }
 div#room-cards {
   padding: 5rem;

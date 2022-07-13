@@ -153,7 +153,7 @@
       <HotelCard
         class="card" style="width: 20rem" 
         v-for="(hotel, key) in hotels_loaded" v-bind:key="key"
-        @click.native="selectHotel(hotel)"
+        @click.native="select_hotel(hotel)"
         ref="cards" :hotel="hotel"
       />
     </div>
@@ -162,7 +162,7 @@
       id="end-bar" v-show="all_hotels_loaded && scrollable"
       ref="end_bar"
     >
-      <a v-on:click="scrollToTop()">— Go back to top —</a>
+      <a v-on:click="scroll_to_top()">— Go back to top —</a>
     </div>
 
   </div>
@@ -224,9 +224,10 @@ export default {
       last_dest_id: null,
 
       scrollable: false,
-
+      
+      // for vuex
       x: 0,
-      y: 0
+      y: 0,
     }
   },
 
@@ -305,14 +306,25 @@ export default {
       return true;
     },
 
-    selectHotel(hotel) {
-      console.log('SELECTED', hotel, hotel['id'])
+    select_hotel(hotel) {
+      console.log('SELECTED', hotel, hotel['id']);
+      const [start_date, end_date] = this.dates
+      const start_date_str = moment(start_date).format('YYYY-MM-DD');
+      const end_date_str = moment(end_date).format('YYYY-MM-DD');
+
+      this.$store.commit("getName", hotel['name'])
+      this.$store.commit("getDetails", hotel['description'])
+      this.$store.commit("getAmenities", hotel['amenities'])
       router.push({
-        path: `/hotels/${this.last_dest_id}/${hotel['id']}`
+        path: (
+          `/hotels/${hotel['original_metadata']['country']}` +
+          `/${this.lastDestID}/${hotel['id']}/${this.num_guests}` +
+          `/${start_date_str}/${end_date_str}`
+        )
       })
     },
 
-    scrollToTop() {
+    scroll_to_top() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     

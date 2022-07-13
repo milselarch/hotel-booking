@@ -60,7 +60,7 @@ describe('Home.vue Test', () => {
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
-  }); 
+  });
 
   it('check message when component is created', () => {
     // check the default msg of the component
