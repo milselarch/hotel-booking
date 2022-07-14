@@ -85,12 +85,15 @@
                 >
                   Logout
                 </b-dropdown-item>
+
+                <!--
                 <b-dropdown-item 
                   aria-role="listitem"
                   @click="auth_test"
                 >
                   auth test
                 </b-dropdown-item>
+                -->
               </b-dropdown>
 
             </section>
@@ -306,6 +309,13 @@ button.off {
   }
 }
 */
+
+div.field.custom-label {
+  & div.field {
+    display: flex;
+    flex-direction: column;
+  }
+}
 
 .flat-progress-bar {
   & > progress {
