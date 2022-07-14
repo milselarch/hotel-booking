@@ -85,12 +85,15 @@
                 >
                   Logout
                 </b-dropdown-item>
+
+                <!--
                 <b-dropdown-item 
                   aria-role="listitem"
                   @click="auth_test"
                 >
                   auth test
                 </b-dropdown-item>
+                -->
               </b-dropdown>
 
             </section>

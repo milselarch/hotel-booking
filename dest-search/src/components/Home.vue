@@ -186,6 +186,13 @@ import router from '../router'
 
 const LOAD_FAIL_MSG = "failed to load hotels\n●︿●";
 
+const print_error = () => {
+  // print to console if we're not running a unit test
+  if (process.env.NODE_ENV === 'test') { return false }
+  console.error(...arguments);
+  return true;
+}
+
 export default {
   name: 'Home',
   LOAD_FAIL_MSG: LOAD_FAIL_MSG,
@@ -660,11 +667,13 @@ export default {
         })
         self.hotels_loaded = []
         self.render_more_hotels();
+        
       } catch (error) {
         self.load_error = true;
-        console.error(error);
+        print_error(error);
+      } finally {
+        self.is_loading = false;
       }
-      self.is_loading = false;
     },
 
     is_valid_guests(num_guests) {

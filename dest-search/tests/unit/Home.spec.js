@@ -7,6 +7,7 @@ import VuexAttach from '../../src/store/VuexAttach.js'
 import axios from 'axios'
 import Vuex from 'vuex'
 import sleep from 'await-sleep'
+import stubs from './stubs.js'
 
 const segfault_handler = require('segfault-handler');
 const fs = require('fs');
@@ -43,17 +44,7 @@ describe('Home.vue Test', () => {
         msg: 'Welcome to Your Vue.js App'
       },
       //specify custom components
-      stubs: { 
-        transition: false,
-        'b-button': true,
-        'b-modal': true,
-        'b-field': true,
-        'b-autocomplete': true,
-        'square': true,
-        'b-input': true,
-        'b-select': true,
-        'b-datepicker': true,
-      }
+      stubs: stubs
     })
   })
 
