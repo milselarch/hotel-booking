@@ -154,7 +154,9 @@
         class="card" style="width: 20rem" 
         v-for="(hotel, key) in hotels_loaded" v-bind:key="key"
         @click.native="select_hotel(hotel)"
-        ref="cards" :hotel="hotel"
+        ref="cards" :hotel="hotel" :price_map="price_mapping"
+        :is_loading="price_search_loading[search_stamp]"
+        :search_stamp="search_stamp"
       />
     </div>
 
@@ -204,9 +206,9 @@ export default {
       card_holder_width: null,
       cards_preloaded: false,
 
-      search_stamp: 0,
+      search_stamp: -1,
       price_mapping: {},
-      pending_search_stamps: [],
+      price_search_loading: {},
 
       num_guests: 2,
       searched_num_guests: 0,
@@ -424,8 +426,7 @@ export default {
       search_stamp
     }) {
       assert(typeof search_stamp === 'number')
-      assert(!this.pending_search_stamps.includes(search_stamp))
-      this.pending_search_stamps.push(search_stamp)
+      assert(!this.price_search_loading.hasOwnProperty(search_stamp))
       let price_resp = {}
 
       try {
@@ -436,6 +437,7 @@ export default {
         console.log('PRICING FAIL', search_stamp)
       }
 
+      assert(this.price_search_loading.hasOwnProperty(search_stamp))
       console.log('PRICE_RESP', price_resp)
       const price_data = price_resp.data;
       // const price_data = price_resp.data;
@@ -476,11 +478,6 @@ export default {
         return false;
       }
 
-      const index = this.pending_search_stamps.indexOf(search_stamp);
-      if (index !== -1) {
-        this.pending_search_stamps.splice(index, 1);
-      }
-
       this.price_mapping = {} // clear existing price caches
       this.price_mapping[search_stamp] = price_mapping
       console.log('PRICE_MAP', this.price_mapping)
@@ -514,6 +511,91 @@ export default {
       return price_request
     },
 
+    async load_prices({
+      dest_id, dates, num_guests, num_rooms,
+      search_stamp
+    }) {
+      assert(typeof search_stamp === 'number')
+      this.price_search_loading[search_stamp] = true
+      let price_resp = {}
+
+      try {
+        price_resp = await this.make_price_request(
+          dest_id, dates, num_guests, num_rooms
+        )
+      } catch (e) {
+        console.log('PRICING FAIL', search_stamp)
+      } finally {
+        this.price_search_loading[search_stamp] = false
+      }
+
+      console.log('PRICE_RESP', price_resp)
+      const price_data = price_resp.data;
+      // const price_data = price_resp.data;
+      const price_mapping = {}
+      if (price_data === undefined) {
+        // pass if proxy_json has no data attribute
+      } else if (price_data.proxy_json === undefined) {
+        // pass if proxy_json not in price response
+      } else if (price_data.proxy_json.hotels === undefined) {
+        // pass if price response have no hotels
+      } else {
+        // add price as a property to each hotel
+        // in the original hotels api response
+        const hotel_prices = price_data.proxy_json.hotels
+        console.log('HOTEL_PRICES', hotel_prices)
+        for (let k=0; k<hotel_prices.length; k++) {
+          const hotel_pricing = hotel_prices[k]
+          const hotel_id = hotel_pricing.id
+          price_mapping[hotel_id] = hotel_pricing
+        }
+      }
+      
+      const search_params_match = this.search_params_match(
+        dest_id, dates, num_guests, num_rooms
+      )
+
+      if (
+        (this.search_stamp !== search_stamp) ||
+        !search_params_match || this.loadError
+      ) {
+        // skip price map update if search params
+        // DONT match, or if we had a load error
+        console.log('REJECT MAPPING', dest_id, price_mapping)
+        return false;
+      }
+
+      assert(this.search_stamp === search_stamp)
+      this.price_mapping = {} // clear existing price caches
+      this.price_mapping[search_stamp] = price_mapping
+      console.log('PRICE_MAP', this.price_mapping)
+    },
+
+    make_price_request(dest_id, dates, num_guests, rooms) {
+      const [start_date, end_date] = dates
+      const start_date_str = moment(start_date).format('YYYY-MM-DD');
+      const end_date_str = moment(end_date).format('YYYY-MM-DD');
+      const guests_query = Array(rooms).fill(num_guests).join('|')
+      console.log('START DATE STR', start_date_str)
+      console.log('END DATE STR', end_date_str)
+      console.log('ROOMS QURY', guests_query)
+      const price_endpoint = "proxy/hotels/prices"
+      // pricing api has missing destinations (e.g. TXQ5)
+      // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
+      const get_params = {
+          destination_id: dest_id, partner_id: 1,
+          checkin: start_date_str, checkout: end_date_str,
+          lang: "en_US", currency: "SGD",
+          country_code: "SG", guests: guests_query
+        }
+      // keep making the price request
+      // till we get that completed is true
+      const price_request = axios.get(
+        price_endpoint, {params: get_params}
+      )
+      return price_request
+    },
+
     async load_hotels(dest_id) {
       const self = this;
       const dates = self.dates
@@ -530,7 +612,8 @@ export default {
       self.hotels_loaded = [];
       self.load_error = false;
       self.hotels = []
-      
+
+      self.search_stamp = new Date().getTime()
       self.searched_num_guests = self.num_guests
       self.searched_num_rooms = self.num_rooms
       self.searched_dates = dates;
@@ -549,23 +632,21 @@ export default {
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
       
-      const price_request = self.make_price_request(
-        dest_id, dates, self.num_guests, self.num_rooms
-      )
+      const price_loader = self.load_prices({
+        dest_id: dest_id, dates: dates, 
+        num_guests: self.num_guests, num_rooms: self.num_rooms,
+        search_stamp: self.search_stamp
+      })
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
       });
-
       try {
         // wait for both requests to complete
-        const [price_resp, hotel_resp] = await Promise.all([
-          price_request, hotel_request
-        ])
-        let response = await hotel_resp;
-        console.warn('RESPONSE', price_resp, response)
+        let response = await hotel_request;
+        console.warn('HOTELS RESPONSE', response)
         console.log('CODE', response.data.status_code)
         if (response.status !== 200) {
-          throw response.status_text;
+          throw response.statusText;
         }
         self.hotels = response.data.proxy_json;
         self.hotels.sort((hotel1, hotel2) => {
@@ -577,50 +658,13 @@ export default {
             return 0
           }
         })
-        const hotel_mapping = {}
-        for (let k=0; k<self.hotels.length; k++) {
-          const hotel = self.hotels[k];
-          hotel_mapping[hotel.id] = k
-        }
-        console.log('PRICE_RESP', price_resp)
-        const price_data = price_resp.data;
-        
-        // const price_data = price_resp.data;
-        if (price_data === undefined) {
-           // pass if proxy_json has no data attribute
-        } else if (price_data.proxy_json === undefined) {
-          // pass if proxy_json not in price response
-        } else if (price_data.proxy_json.hotels === undefined) {
-          // pass if price response have no hotels
-        } else {
-          // add price as a property to each hotel
-          // in the original hotels api response
-          const hotel_prices = price_data.proxy_json.hotels
-          console.log('HOTEL_PRICES', hotel_prices)
-          console.log('MAPPING', hotel_mapping)
-          for (let k=0; k<hotel_prices.length; k++) {
-            const hotel_pricing = hotel_prices[k]
-            const hotel_id = hotel_pricing.id
-            const hotel_index = hotel_mapping[hotel_id]
-            if (hotel_index === undefined) {
-              // hotel was not found in original hotels response
-              continue
-            }
-            console.log('HOTEL_ID', hotel_id)
-            console.log('HOTEL_INDEX', hotel_index)
-            self.hotels[hotel_index]['price'] = hotel_pricing.price
-            console.log('HOTEL', k, self.hotels[hotel_id])
-          }
-        }
         self.hotels_loaded = []
         self.render_more_hotels();
-
       } catch (error) {
         self.load_error = true;
         console.error(error);
-      } finally {
-        self.is_loading = false;
       }
+      self.is_loading = false;
     },
 
     is_valid_guests(num_guests) {
