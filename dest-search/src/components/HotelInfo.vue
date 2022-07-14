@@ -5,6 +5,16 @@
     destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}<br>guests: {{guests}}<br>dates: {{checkin}} to {{checkout}}
     </p> -->
     <!-- TODO: maybe load hotel images? -->
+    <b-carousel id="carousel" :indicator="true" indicator-custom>
+      <b-carousel-item v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
+        <b-image id="carouselimg" class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
+      </b-carousel-item>
+      <template #indicators="props">
+          <figure id="gallery" :draggable="false">
+              <img :draggable="false" :src="build_carousel(props.i)" :title="props.i">
+          </figure>
+      </template>
+    </b-carousel>
     <div id="descbox">
       <div id="description" v-html="hotelDetails"></div>
       <div id="amenities" v-if="check_amenities">
@@ -76,11 +86,17 @@ export default {
       hotelName: 'name',
       hotelDetails: 'details',
       hotelAmenities: 'amenities',
+      hotelImages: 'images',
       url: "proxy/hotels/"+ this.hotel_id + "/price"
     }
   },
   methods: {
     //TODO: make slideshow image display
+    build_carousel(img) {
+      var prefix = this.hotelImages.prefix
+      var suffix = this.hotelImages.suffix
+      return `${prefix}${img}${suffix}`
+    },
     replace_default_image(e) {
       /*
       load the image not found image if the original
@@ -97,7 +113,6 @@ export default {
       if (images.length === 0) {
         return BLANK_IMAGE;
       }
-
       const url = images[0];
       // console.log(Object.values(url)[0]);
       return Object.values(url)[0];
@@ -143,6 +158,7 @@ export default {
     this.hotelName = this.$store.state.Store.hotelName;
     this.hotelDetails = this.$store.state.Store.hotelDetails;
     this.hotelAmenities = this.$store.state.Store.hotelAmenities;
+    this.hotelImages = this.$store.state.Store.hotelImages;
   },
   computed: {
     check_amenities(){  
@@ -164,7 +180,28 @@ h2#name{
   padding: 1.5rem;
   text-align: center;
   font-size: 4rem;
-  margin-bottom: 1rem;
+  // margin-bottom: 1rem;
+}
+#carousel {
+  margin: auto;
+  margin-bottom: 3rem;
+  // margin-left: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60%;
+  height: 30rem;
+}
+#carouselimg {
+  margin: auto;
+  max-width: 30rem;
+  max-height: 20rem;
+  object-fit: cover;
+  // float: left;
+}
+#gallery{
+  float: right;
+  align-items: right;
 }
 div#descbox {
   display: flex;

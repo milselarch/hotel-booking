@@ -5,7 +5,8 @@ export default {
     count: 0,
     hotelName: null,
     hotelDetails: null,
-    hotelAmenities: null
+    hotelAmenities: null,
+    hotelImages: null,
   },
   mutations: {
     increment(state) {
@@ -19,6 +20,9 @@ export default {
     },
     getAmenities(state, amenities){
       state.hotelAmenities = amenities;
+    },
+    getImages(state, images) {
+      state.hotelImages = images;
     }
   }
 };
