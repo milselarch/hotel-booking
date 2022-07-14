@@ -38,6 +38,7 @@ module.exports = {
         use: [
           'vue-style-loader',
           'css-loader',
+          'resolve-url-loader',
           'sass-loader'
         ],
       },
@@ -91,7 +92,8 @@ module.exports = {
   resolve: {
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
-      '@': path.resolve(__dirname, 'src')
+      '@': path.resolve(__dirname, 'src'),
+      'assets': path.join(__dirname, 'src/assets')
     },
     extensions: ['*', '.js', '.vue', '.json']
   },

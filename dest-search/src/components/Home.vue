@@ -14,13 +14,13 @@
 
           <div class="buttons" v-show="!authenticated">
             <b-button 
-              type="is-dark" id="login" outlined
+              type="is-dark" id="login"
               @click="open_login()"
             >
               Login
             </b-button>
             <b-button 
-              type="is-dark" id="signup" outlined
+              type="is-dark" id="signup"
               @click="open_signup()"
             >
               Sign Up
@@ -31,16 +31,15 @@
 
       <div class="search-options">
         <section>
-          <b-field label="Destination"
-            class="searchbox"
-          >
+          <b-field class="searchbox">
             <b-field>
               <b-autocomplete
                 v-model="destination_input"
                 :data="filtered_search_matches"
                 placeholder="Search Destination e.g. tioman island"
-                clearable icon="search-location"
+                icon="search-location"
                 :disabled="is_loading"
+                :clearable="!is_loading"
                 @select="option => selected = option">
                 <template #empty>{{ search_empty_message }}</template>
               </b-autocomplete>
@@ -53,26 +52,15 @@
             )}" expanded
           >
             <b-field 
-              id="guests-field" expanded label="Guests (per room)"
-            >
-              <b-input placeholder="Guests"
-                label="test" ref="guests_input"
-                type="number" icon="user" 
-                v-model.number="num_guests"
-
-                min="1" :max="max_num_guests" default="1"
-                pattern="[0-9]+" required
-                :disabled="is_loading"
-              >
-              </b-input>
-            </b-field>
-
-            <div class="mid-buffer"></div>
-
-            <b-field 
-              id="rooms-field" expanded label="Rooms"
+              id="rooms-field" expanded class="custom-label"
               :disabled="is_loading"
             >
+              <div class="label-header">
+                <div class="line"></div>
+                <p>Rooms</p>
+                <div class="line"></div>
+              </div>
+
               <b-select
                 placeholder="Rooms" icon="door-closed"
                 expanded id="room-selector" v-model="num_rooms"
@@ -87,6 +75,29 @@
               </b-select>
             </b-field>
 
+            <div class="mid-buffer"></div>
+
+            <b-field 
+              id="guests-field" expanded class="custom-label"
+            >
+              <div class="label-header">
+                <div class="line"></div>
+                <p>Guests per room</p>
+                <div class="line"></div>
+              </div>
+
+              <b-input placeholder="Guests"
+                label="test" ref="guests_input"
+                type="number" icon="user" 
+                v-model.number="num_guests"
+
+                min="1" :max="max_num_guests" default="1"
+                pattern="[0-9]+" required
+                :disabled="is_loading"
+              >
+              </b-input>
+            </b-field>
+
           </b-field>
 
 
@@ -96,7 +107,7 @@
           </b-field>
           -->
 
-          <b-field label="Check in, Check out dates">
+          <b-field>
             <b-datepicker
               placeholder="Select check in and checkout dates"
               v-model="dates" 
@@ -109,7 +120,7 @@
           </b-field>
 
           <b-button
-            type="is-dark" expanded outlined
+            type="is-dark" expanded
             @click="begin_search"
             :disabled="!allow_search || is_loading"
           > Search
@@ -1008,15 +1019,41 @@ div#end-bar {
   }
 }
 
+div.label-header {
+  display: flex;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  
+  & > p {
+    font-family: 'Babas Neue';
+    color: #555;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  & > div.line {
+    background-color: #555;
+    height: 0.1rem;
+    flex-grow: 1;
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+}
+
 div#front-cover {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  margin-top: 4rem;
-  margin-bottom: 4rem;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
   padding-left: 14%;
   padding-right: 14%;
   width: 100%;
+  
+  background-image: url(
+    "~assets/alena-aenami-serenity-1k.jpg"
+  );
 
   & > div.description-wrapper {
     flex-grow: 1;
@@ -1064,7 +1101,8 @@ div#front-cover {
     margin-left: 11%;
     margin-right: 0px;
     
-    background: white;
+    background-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(5px);
     border: #DDD solid 0.1rem;
     padding: 2rem;
     flex-grow: 0.2;
@@ -1080,7 +1118,7 @@ div#front-cover {
     }
 
     & #rooms-field {
-      width: 100%;
+      width: 80%;
     }
 
     & #guests-field {

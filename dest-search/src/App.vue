@@ -310,6 +310,13 @@ button.off {
 }
 */
 
+div.field.custom-label {
+  & div.field {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 .flat-progress-bar {
   & > progress {
     border-radius: 0px !important;
