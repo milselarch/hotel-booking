@@ -12,9 +12,10 @@
       </figure>
     </div>
 
-    <!--
-    <b-progress class="flat-progress-bar"></b-progress>
-    -->
+    <b-progress 
+      class="flat-progress-bar"
+      v-bind:class="{invisible: !is_loading}"
+    ></b-progress>
     
     <div class="card-content">
       <div class="media">
@@ -33,7 +34,7 @@
       />
 
       <p id="price" v-show="show_price">
-        SGD <b>{{ hotel['price'] }}</b>
+        SGD <b>{{ hotel_price }}</b>
       </p>
     </div>
   </div>
@@ -42,6 +43,7 @@
 
 <script>
 import BLANK_IMAGE from "@/assets/image_not_found.png"
+import assert from 'assert'
 
 export default {
   name: 'HotelCard',
@@ -73,10 +75,39 @@ export default {
   },
   computed: {
     show_price() {
-      return this.hotel['price'] !== undefined
+      const hotel_id = this.hotel.id;
+      assert(typeof hotel_id === 'string')
+      if (!this.price_map.hasOwnProperty(this.search_stamp)) {
+        return false
+      }
+
+      const prices = this.price_map[this.search_stamp]
+      console.log('PRICES', this.price_map, this.search_stamp)
+      return prices.hasOwnProperty(hotel_id)
+    },
+
+    hotel_price() {
+      const hotel_id = this.hotel.id;
+      assert(typeof hotel_id === 'string')
+      if (!this.show_price) { return -1 }
+
+      const price_cache = this.price_map[this.search_stamp]
+      const hotel_price = price_cache[hotel_id].price
+      return hotel_price
     }
   },
-  props: ['hotel']
+
+  props: {
+    'hotel': Object,
+    'price_map': Object,
+    'search_stamp': {
+      type: Number,
+      default: -1
+    }, 'is_loading': {
+      type: Boolean,
+      default: false
+    }
+  }
 }
 </script>
 
@@ -89,6 +120,14 @@ p#price {
   font-size: 1.5rem;
 }
 
+.flat-progress-bar {
+  margin: 0px;
+}
+
+.invisible {
+  opacity: 0;
+}
+
 .card {
   margin: 1rem;
   cursor: pointer;
@@ -96,6 +135,11 @@ p#price {
   & img.card-image {
     // preserve aspect ratio for card images
     object-fit: cover;
+  }
+
+  & > .card-content {
+    padding: 1.5rem;
+    padding-top: 1rem;
   }
 
   & > .card-content > div.content {
