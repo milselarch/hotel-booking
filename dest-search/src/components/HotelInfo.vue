@@ -5,13 +5,13 @@
     destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}<br>guests: {{guests}}<br>dates: {{checkin}} to {{checkout}}
     </p> -->
     <!-- TODO: maybe load hotel images? -->
-    <b-carousel id="carousel" :indicator="true" indicator-custom>
-      <b-carousel-item v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
-        <b-image id="carouselimg" class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
+    <b-carousel id="carousel" :indicator="true" indicator-custom indicator-inside="false" pause-text="paused" indicator-custom-size="is-medium">
+      <b-carousel-item id="carouselimg" v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
+        <b-image class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
       </b-carousel-item>
       <template #indicators="props">
-          <figure id="gallery" :draggable="false">
-              <img :draggable="false" :src="build_carousel(props.i)" :title="props.i">
+          <figure :draggable="false">
+              <img id="gallery" :draggable="false" :src="build_carousel(props.i)" :title="props.i">
           </figure>
       </template>
     </b-carousel>
@@ -186,23 +186,28 @@ h2#name{
   margin: auto;
   margin-bottom: 3rem;
   // margin-left: 10%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 60%;
+  display: flex; //grid for columns
+  // grid-template-columns: auto 25%;
+  // justify-content: center;
+  // align-items: center;
+  width: 35%;
   height: 30rem;
+  // border: solid;
 }
 #carouselimg {
   margin: auto;
+  margin-top: 0;
   max-width: 30rem;
   max-height: 20rem;
   object-fit: cover;
-  // float: left;
+  vertical-align: middle;
 }
-#gallery{
-  float: right;
-  align-items: right;
+#gallery {
+  flex-direction: column;
+  vertical-align: bottom;
+  // border: solid;
 }
+
 div#descbox {
   display: flex;
   width: 80%;
