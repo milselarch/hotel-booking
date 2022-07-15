@@ -104,6 +104,9 @@
     methods: {
       signup() {
         const self = this;
+        // disallow signup if current signup
+        // request is still pending
+        if (self.pending) { return false }
         self.pending = true
 
         const formdata = {
@@ -113,6 +116,8 @@
           password: this.password,
           re_password: this.re_password,
         }
+
+        // console.log('FORMDATA', formdata)
 
         self.hasError = false;
         self.first_name_error = {};
@@ -128,6 +133,7 @@
           this.$emit('open-login', formdata)
   
         }).catch(err_resp => {
+          // console.log('ERR-RESP', err_resp)
           let errors = err_resp.response.data
           const other_errors = []
 

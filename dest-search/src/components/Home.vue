@@ -472,7 +472,7 @@ export default {
         // add price as a property to each hotel
         // in the original hotels api response
         const hotel_prices = price_data.proxy_json.hotels
-        console.log('HOTEL_PRICES', hotel_prices)
+        // console.log('HOTEL_PRICES', hotel_prices)
         // console.log('MAPPING', hotel_mapping)
 
         for (let k=0; k<hotel_prices.length; k++) {
@@ -562,7 +562,7 @@ export default {
         // add price as a property to each hotel
         // in the original hotels api response
         const hotel_prices = price_data.proxy_json.hotels
-        console.log('HOTEL_PRICES', hotel_prices)
+        // console.log('HOTEL_PRICES', hotel_prices)
         for (let k=0; k<hotel_prices.length; k++) {
           const hotel_pricing = hotel_prices[k]
           const hotel_id = hotel_pricing.id
