@@ -108,4 +108,50 @@ describe('Signup Test', () => {
     // console.log("ERR-MSG", [wrapper.vm.other_errors])
     expect(wrapper.vm.other_errors).toBe(error_message)
   })
+
+  it('signup success test', async () => {
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+
+    wrapper.vm.email = email
+    wrapper.vm.first_name = first_name
+    wrapper.vm.last_name = last_name
+    wrapper.vm.password = password
+    wrapper.vm.re_password = password
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(true);
+    console.log("SIGNUP-ATTR", signup_button)
+    // make sure the sign up button is not disabled now
+    expect(signup_button.attributes().disabled).toBe(undefined);
+    expect(wrapper.vm.pending).toBe(false)
+
+    await signup_button.vm.$listeners.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+    await wrapper.vm.$nextTick()
+
+    const formdata = {
+      email: email,
+      first_name: first_name,
+      last_name: last_name,
+      password: password,
+      re_password: password,
+    }
+
+    const event_data = wrapper.emitted('open-login')
+    // console.log('EVENT', event_data)
+    expect(event_data).toStrictEqual([[formdata]])
+  })
 })

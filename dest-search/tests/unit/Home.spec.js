@@ -64,6 +64,10 @@ describe('Home.vue Test', () => {
     // this test checks that we fail to load hotels
     // if the backend is down and we do a hotel search
     expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+
+    // trick axios into thinking its running on the browser
+    // otherwise all requests will report with NetworkError
+    axios.defaults.adapter = require('axios/lib/adapters/http');
     axios.defaults.baseURL = "http://127.0.0.1:0/"
 
     // wait for desintations to be loaded
