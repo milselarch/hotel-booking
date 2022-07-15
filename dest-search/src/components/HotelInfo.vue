@@ -5,7 +5,7 @@
     destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}<br>guests: {{guests}}<br>dates: {{checkin}} to {{checkout}}
     </p> -->
     <!-- TODO: maybe load hotel images? -->
-    <b-carousel id="carousel" :indicator="true" indicator-custom indicator-inside="false" pause-text="paused">
+    <b-carousel id="carousel" :indicator="true" indicator-custom indicator-inside="false" pause-text="paused" indicator-custom-size="is-medium">
       <b-carousel-item id="carouselimg" v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
         <b-image class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
       </b-carousel-item>
@@ -188,10 +188,10 @@ h2#name{
   // margin-left: 10%;
   display: flex; //grid for columns
   // grid-template-columns: auto 25%;
-  justify-content: center;
-  align-items: center;
-  width: 60%;
-  height: 25rem;
+  // justify-content: center;
+  // align-items: center;
+  width: 35%;
+  height: 30rem;
   // border: solid;
 }
 #carouselimg {
@@ -200,10 +200,11 @@ h2#name{
   max-width: 30rem;
   max-height: 20rem;
   object-fit: cover;
-  // float: left;
+  vertical-align: middle;
 }
 #gallery {
   flex-direction: column;
+  vertical-align: bottom;
   // border: solid;
 }
 
