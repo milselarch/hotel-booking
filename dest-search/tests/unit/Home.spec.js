@@ -32,7 +32,11 @@ describe('Home.vue Test', () => {
   let wrapper;
 
   beforeEach(() => {
+    // trick axios into thinking its running on the browser
+    // otherwise all requests will report with NetworkError
+    axios.defaults.adapter = require('axios/lib/adapters/http');
     axios.defaults.baseURL = "http://127.0.0.1:8000/"
+
     const attacher = new VuexAttach(localVue);
     store = attacher.create_store(mock.modules);
     store.commit('initialize_store');
@@ -67,16 +71,18 @@ describe('Home.vue Test', () => {
 
     // trick axios into thinking its running on the browser
     // otherwise all requests will report with NetworkError
-    axios.defaults.adapter = require('axios/lib/adapters/http');
     axios.defaults.baseURL = "http://127.0.0.1:0/"
 
-    // wait for desintations to be loaded
+    // wait for desintations.json to be loaded
     while (!wrapper.vm.destinations_loaded) { await sleep(100); }
-    expect(wrapper.vm.destinations_loaded).toBe(true)
+    // before we ever start searching the load fail message 
+    // shouldnt be there sicne we've never even searched before yet
     expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
 
     // set the destination search inputs, the others are pre-filled
     wrapper.vm.destination_input = "Gap, France"
+    // wait for vue to update state
+    await wrapper.vm.$nextTick()
     expect(wrapper.vm.allow_search).toBe(true)
     const search_started = wrapper.vm.begin_search()
     expect(search_started).toBe(true)
@@ -87,5 +93,43 @@ describe('Home.vue Test', () => {
     // expect the backend load error flag to be true
     expect(wrapper.vm.load_error).toBe(true)
     expect(wrapper.vm.status_text).toBe(Home.LOAD_FAIL_MSG);
+    // we should still be allowed to search if previous search fails
+    expect(wrapper.vm.allow_search).toBe(true)
+  })
+
+  // attempt a valid search now
+  it('check valid hotel search status text', async () => {
+    // wait for desintations.json to be loaded
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+
+    // this test checks that we fail to load hotels
+    // if the backend is down and we do a hotel search
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+
+    const search_destination = "Gap, France"
+    wrapper.vm.destination_input = search_destination
+    // wait for vue to update state
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.allow_search).toBe(true)
+
+    // attempt to search on the correct endpoint
+    const search_started = wrapper.vm.begin_search()
+    expect(search_started).toBe(true)
+    // wait for the backend request to complete
+    while (wrapper.vm.is_loading) { await sleep(100); }
+    expect(wrapper.vm.is_loading).toBe(false)
+    // expect the backend load error flag to be false
+    expect(wrapper.vm.load_error).toBe(false)
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+    // check that we disallow searching on the same params
+    expect(wrapper.vm.allow_search).toBe(false)
+    const status_text = wrapper.vm.status_text;
+    expect(wrapper.vm.allow_search).toBe(false)
+    expect(status_text).toBe(search_destination)
+
+    await wrapper.vm.$nextTick()
+    const cards = wrapper.find('.card')
+    expect(cards.exists()).toBe(true)
+    console.log("CARDS", cards, cards.length)
   })
 })

@@ -8,5 +8,7 @@ export default {
   'b-input': true,
   'b-select': true,
   'b-datepicker': true,
-  'b-message': true
+  'b-message': true,
+  'b-progress': true,
+  'b-rate': true
 }
