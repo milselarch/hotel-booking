@@ -18,6 +18,8 @@ import router from './router'
 
 import axios from 'axios'
 
+import VueCardFormat from 'vue-credit-card-validation';
+
 const infiniteScroll =  require('vue-infinite-scroll');
 
 axios.defaults.baseURL = "http://127.0.0.1:8000/"
@@ -51,6 +53,9 @@ Vue.use(Buefy, {
 */
 Vue.use(infiniteScroll)
 Vue.use(VueRouter);
+
+//For credit card validation
+Vue.use(VueCardFormat);
 
 new Vue({
   el: '#app',
