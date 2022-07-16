@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import BookingHistory from '../components/BookingHistory.vue'
+import Booking from '../components/Booking.vue'
 import Home from '../components/Home.vue'
 import About from '../components/About.vue'
 import Profile from '../components/Profile.vue'
@@ -24,6 +26,14 @@ const routes = [{
     name: 'HotelInfo',
     component: HotelInfo,
     props: true
+  }, {
+    path: '/booking',
+    name: 'Booking',
+    component: Booking,
+  }, {
+    path: '/bookinghistory',
+    name: 'BookingHistory',
+    component: BookingHistory,
   }
 ]
 
