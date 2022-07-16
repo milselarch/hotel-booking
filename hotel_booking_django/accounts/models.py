@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.core.validators import MaxValueValidator, MinValueValidator
-from common.models import common_attribute_model, country_code, country_currency
+from common.models import common_attribute_model
 import uuid
 
 
@@ -57,8 +57,7 @@ class user_account(AbstractBaseUser, PermissionsMixin, common_attribute_model):
         ('MRS', 'Mrs.'),
     )
     title = models.CharField(max_length=3, choices=titles, blank=True, null=True)
-    phone_country = models.ForeignKey(country_code, on_delete=models.PROTECT, blank=True, null=True)
-    display_currency_preference = models.ForeignKey(country_currency, on_delete=models.PROTECT, blank=True, null=True)
+    phone_country = models.CharField(max_length=200, blank=True, null=True)
     # format in YYYY-MM-DD HH:MM
     datetime_created = models.DateTimeField(auto_now_add=True)
 
