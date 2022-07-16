@@ -452,7 +452,6 @@
                   value="" 
                   placeholder="5555-5555-5555-5555"
                   maxlength="19"
-                  minlength="16"
                   v-model="cc_number"
                   v-cardformat:formatCardNumber                 
                 ></b-input>
@@ -861,7 +860,6 @@
 <script>
 import AuthRequester from '@/AuthRequester'
 import axios from 'axios';
-import sleep from 'await-sleep'
 import router from '../router'
 
 export default {
