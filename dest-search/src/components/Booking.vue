@@ -934,6 +934,9 @@ name: 'Booking',
         
     }
   },
+  mounted() {
+    this.hotel_name = this.$store.state.Store.hotelName;
+  },
   methods: {
     makeBooking: function (e){
       const self = this;
