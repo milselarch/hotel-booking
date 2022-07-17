@@ -331,16 +331,29 @@ export default {
       const [start_date, end_date] = this.dates
       const start_date_str = moment(start_date).format('YYYY-MM-DD');
       const end_date_str = moment(end_date).format('YYYY-MM-DD');
+      console.log(this.selected);
 
-      this.$store.commit("getName", hotel['name'])
-      this.$store.commit("getDetails", hotel['description'])
-      this.$store.commit("getImages", hotel['image_details'])
+      var hotelinfo = {
+        desc: hotel['description'], 
+        dest: this.selected,
+        name: hotel['name'],
+        hotelid: hotel['id'],
+        images: hotel['image_details'],
+        checkin: start_date_str,
+        checkout: end_date_str,
+        numrooms: this.num_rooms,
+        numguests: this.num_guests,
+        destid: this.last_dest_id
+        }
+      this.$store.commit("getDetails", hotelinfo)
+
       if (hotel['amenities'].length != 0){
         this.$store.commit("getAmenities", hotel['amenities'])
       }
       else {
         this.$store.commit("getAmenities", null)
       }
+
       router.push({
         path: (
           `/hotels/${hotel['original_metadata']['country']}` +

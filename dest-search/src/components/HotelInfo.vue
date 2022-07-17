@@ -5,7 +5,7 @@
     destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}<br>guests: {{guests}}<br>dates: {{checkin}} to {{checkout}}
     </p> -->
     <!-- TODO: maybe load hotel images? -->
-    <b-carousel id="carousel" :indicator="true" indicator-custom indicator-inside="false" pause-text="paused" indicator-custom-size="is-medium">
+    <b-carousel id="carousel" :indicator=true indicator-custom indicator-inside=false pause-text="paused" indicator-custom-size="is-medium">
       <b-carousel-item id="carouselimg" v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
         <b-image class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
       </b-carousel-item>
@@ -31,6 +31,7 @@
       <div
         class="card" 
         v-for="(room, key) in roomList.rooms" v-bind:key="key"
+        @click="select_room(room)" style="cursor:pointer;"
       >
         <div class="card-image">
             <img :src="build_image(room)"
@@ -38,14 +39,17 @@
             @error="replace_default_image"
             alt="Room image not found">
         </div>
+        <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
         <div class="card-content">
-          <p class="title is-4">{{ room.roomNormalizedDescription }}</p>
           <!-- <ul>
             <li v-for="(amenity, key) in room.amenities" v-bind:key="key">{{amenity}}</li>
           </ul> -->
           <p>{{ check_breakfast(room) }}</p>
-          <p style="font-size:1.5em">SGD <b>{{ room.price }}</b></p>
+          <ul v-for="(am, key) in room.amenities" v-bind:key="key">
+            <li>{{am}}</li>
+          </ul>
         </div>
+        <div class="price" style="font-size:1.8em">SGD <b>{{ room.price }}</b></div>
       </div>
     </div>
   </div>
@@ -54,6 +58,7 @@
 <script>
 import axios from 'axios'
 import BLANK_IMAGE from "@/assets/image_not_found.png"
+import router from '../router'
 
 export default {
   name: 'HotelInfo',
@@ -130,6 +135,19 @@ export default {
       str = str[0].toUpperCase() + str.slice(1)
       str = str.match(/[A-Z]?[a-z]+|[0-9]+|[A-Z]+(?![a-z])/g).join(" ")
       return str
+    },
+    select_room(room){
+      console.log("room select:", room.roomNormalizedDescription);
+      var roominfo = {
+        name: room.roomNormalizedDescription,
+        price: room.price
+      }
+      this.$store.commit("getRoomDetails", roominfo)
+      router.push({
+        path: (
+          `/booking`
+        )
+      })
     }
   },
   mounted() {
@@ -230,6 +248,11 @@ div#amenities {
   height: max-content;
   line-height: 2rem;
 }
+#roomname {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  padding-left: 19rem;
+}
 div#room-cards {
   padding: 5rem;
   margin-top: 5rem;
@@ -241,21 +264,30 @@ div#room-cards {
 
   & > .card {
     margin: 1rem;
-    width: 55%;
+    width: 60%;
     height: fit-content;
 
   & img.card-image {
     // preserve aspect ratio for card images
     object-fit: cover;
-    height: 14rem;
-    max-width: 18rem;
+    height: 15.5rem;
+    width: 18rem;
     float: left;
   }
 
   & > .card-content{
     text-overflow: ellipsis;
-    max-height: 19rem;
+    height: 9rem;
     overflow-y: scroll;
+    padding: 0;
+    padding-left: 1rem;
+  }
+
+  & > .price{
+    float: right;
+    padding-right: 2rem;
+    margin-bottom: 0.5rem;
+    // align-items: baseline;
   }
   }
 }
