@@ -7,22 +7,38 @@ export default {
     hotelDetails: null,
     hotelAmenities: null,
     hotelImages: null,
+    hotelId: null,
+    destination: null,
+    roomName: null,
+    roomprice: null,
+    checkindate: null,
+    checkoutdate: null,
+    numrooms: null,
+    numguests: null,
+    destid: null
   },
   mutations: {
     increment(state) {
       state.count++;
     },
-    getName(state, name){
-      state.hotelName = name;
-    },
-    getDetails(state, details){
-      state.hotelDetails = details;
+    getDetails(state, hotelinfo){
+      state.hotelDetails = hotelinfo.desc;
+      state.destination = hotelinfo.dest;
+      state.hotelName = hotelinfo.name;
+      state.hotelImages = hotelinfo.images;
+      state.checkindate = hotelinfo.checkin;
+      state.checkoutdate = hotelinfo.checkout;
+      state.numrooms = hotelinfo.numrooms;
+      state.numguests = hotelinfo.numguests;
+      state.destid = hotelinfo.destid;
+      state.hotelId = hotelinfo.hotelid;
     },
     getAmenities(state, amenities){
       state.hotelAmenities = amenities;
     },
-    getImages(state, images) {
-      state.hotelImages = images;
+    getRoomDetails(state, roominfo) {
+      state.roomName = roominfo.name;
+      state.roomprice = roominfo.price;
     }
   }
 };

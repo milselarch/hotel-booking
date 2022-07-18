@@ -934,6 +934,22 @@ name: 'Booking',
         
     }
   },
+  mounted() {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+
+    this.hotel_name = this.$store.state.Store.hotelName;
+    this.room_type = this.$store.state.Store.roomName;
+    this.destination_region = this.$store.state.Store.destination;
+    this.check_in_date = this.$store.state.Store.checkindate;
+    this.check_out_date = this.$store.state.Store.checkoutdate;
+    this.number_of_rooms = this.$store.state.Store.numrooms;
+    this.number_of_guests = this.$store.state.Store.numguests;
+    this.total_cost = (this.$store.state.Store.roomprice) * this.number_of_rooms;
+    this.destination_id = this.$store.state.Store.destid;
+    this.hotel_id = this.$store.state.Store.hotelId;
+
+
+  },
   methods: {
     makeBooking: function (e){
       const self = this;

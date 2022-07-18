@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 from django.core.validators import MaxValueValidator, MinValueValidator
 from common.models import common_attribute_model
 import uuid
+from django_cryptography.fields import encrypt
 
 
 class user_account_manager(BaseUserManager):
@@ -43,14 +44,16 @@ class user_account_manager(BaseUserManager):
 
 class user_account(AbstractBaseUser, PermissionsMixin, common_attribute_model):
     email = models.EmailField(max_length=100, unique = True)
-    #name = models.CharField(max_length=100)
-    first_name = models.CharField(max_length=100, blank=True, null=True)
-    last_name = models.CharField(max_length=100, blank=True, null=True)
+
+    first_name = encrypt(models.CharField(max_length=100, blank=True, null=True))
+    last_name = encrypt(models.CharField(max_length=100, blank=True, null=True))
     is_active = models.BooleanField(default = True)
     is_staff = models.BooleanField(default = False)
     is_superuser = models.BooleanField(default = False)
     
-    phone = models.PositiveIntegerField(validators=[MinValueValidator(10000000),MaxValueValidator(999999999999999)], blank=True, null=True)
+    # ITU imposes a maximum length of 15 digits to telephone numbers
+    phone = encrypt(models.CharField(max_length=15, blank=True, null=True))
+
     titles = (
         ('MR','Mr.'),
         ('MS', 'Ms.'),
