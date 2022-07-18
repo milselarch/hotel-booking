@@ -6,7 +6,7 @@
         <hr id="breakline"/>
 
         <b-field label="Email" class="input-field"
-          :type="{ 'is-danger': hasError }"
+          :type="{ 'is-danger': has_error }"
           :message="email_error">
           <b-input
             type="email" value=""
@@ -18,7 +18,7 @@
         <b-field class="drop-side-title" horizontal grouped label="">
 
           <b-field label="First Name" class="input-field"
-            :type="{ 'is-danger': hasError }"
+            :type="{ 'is-danger': has_error }"
             :message="first_name_error">
             <b-input
               value="" maxlength="30" placeholder="John"
@@ -27,7 +27,7 @@
           </b-field>
 
           <b-field label="Last Name" class="input-field"
-            :type="{ 'is-danger': hasError }"
+            :type="{ 'is-danger': has_error }"
             :message="last_name_error">
             <b-input
               value="" maxlength="30" placeholder="Doe"
@@ -38,7 +38,7 @@
         </b-field>
 
         <b-field label="Password" class="input-field"
-          :type="{ 'is-danger': hasError }"
+          :type="{ 'is-danger': has_error }"
           :message="password_error">
           <b-input 
             value="" type="password" maxlength="30"
@@ -47,7 +47,7 @@
         </b-field>
 
         <b-field label="Confirm Password" class="input-field"
-          :type="{ 'is-danger': hasError }"
+          :type="{ 'is-danger': has_error }"
           :message="re_password_error">
           <b-input 
             value="" type="password" maxlength="30"
@@ -96,7 +96,7 @@
         re_password_error: {},
         other_errors: '',
 
-        hasError: false,
+        has_error: false,
         // used to check if form is being processed
         pending: false 
       }
@@ -119,7 +119,7 @@
 
         // console.log('FORMDATA', formdata)
 
-        self.hasError = false;
+        self.has_error = false;
         self.first_name_error = {};
         self.last_name_error = {};
         self.email_error = {};
@@ -168,7 +168,7 @@
           }
 
           self.other_errors = other_errors.join('\n');
-          self.hasError = true;
+          self.has_error = true;
 
         }).finally(() => {
           // simulate a delay for loading a response

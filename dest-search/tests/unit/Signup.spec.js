@@ -1,6 +1,8 @@
 import {createLocalVue, shallowMount, mount} from '@vue/test-utils'
 import SignUp from '../../src/components/SignUp.vue'
+import Login from '../../src/components/Login.vue'
 import VuexAttach from '../../src/store/VuexAttach.js'
+import Buefy from 'buefy'
 
 // import store from '../../src/store' 
 // you could also mock this out.
@@ -10,6 +12,8 @@ import Vuex from 'vuex'
 import sleep from 'await-sleep'
 import stubs from './stubs.js'
 import { assert, time } from 'console'
+import { wrap } from 'lodash'
+import { start } from 'repl'
 
 const crypto = require("crypto");
 const segfault_handler = require('segfault-handler');
@@ -28,12 +32,15 @@ fs.readdirSync(test_folder).forEach(file => {
 const infiniteScroll =  require('vue-infinite-scroll');
 const localVue = createLocalVue();
 localVue.use(infiniteScroll)
-localVue.use(Vuex);
+localVue.use(Vuex)
+localVue.use(Buefy)
 
 describe('Signup Test', () => {
   let timestamp, date_stamp;
   let username, password;
   let email, first_name, last_name;
+
+  let signed_up = false;
   let store;
 
   beforeEach(() => {
@@ -152,6 +159,50 @@ describe('Signup Test', () => {
 
     const event_data = wrapper.emitted('open-login')
     // console.log('EVENT', event_data)
+    expect(event_data).toStrictEqual([[formdata]])
+    console.log('SIGNUP COMPLETE')
+    signed_up = true;
+  })
+
+  it('login success test', async () => {
+    const start_stamp = (new Date()).getTime() / 1000
+    while (!signed_up) {
+      // wait for the signup test to complete
+      // and ensure there exists a user account in the backend
+      // from which we can login into
+      await sleep(100);
+    }
+
+    const end_stamp = (new Date()).getTime() / 1000
+    const duration = end_stamp - start_stamp
+    console.log('WAIT DURATION', duration)
+
+    const wrapper = mount(Login, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const login_button = wrapper.find('#login');
+    expect(login_button.exists()).toBe(true);
+    // const email_field = wrapper.find('#email-field')
+    // const password_field = wrapper.find('#password-field')
+    wrapper.vm.email = email
+    wrapper.vm.password = password
+    await wrapper.vm.$nextTick()
+    const formdata = {
+      email: email,
+      password: password
+    }
+
+    expect(wrapper.vm.pending).toBe(false)
+    await login_button.vm.$listeners.click()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+
+    // ensure login-done event is emitted
+    const event_data = wrapper.emitted('login-done')
     expect(event_data).toStrictEqual([[formdata]])
   })
 })
