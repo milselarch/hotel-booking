@@ -92,7 +92,10 @@ export default {
       hotelDetails: 'details',
       hotelAmenities: 'amenities',
       hotelImages: 'images',
-      url: "proxy/hotels/"+ this.hotel_id + "/price"
+      url: "proxy/hotels/"+ this.hotel_id + "/price",
+
+      is_loading: true,
+
     }
   },
   methods: {
@@ -168,10 +171,8 @@ export default {
       console.log("GET Response");
       console.log(getResponse.data);
       this.roomList = getResponse.data.proxy_json;
+      this.is_loading = false;
     })
-    if (room_request.data === undefined){
-      this.roomList = "undefined";
-    }
 
     this.hotelName = this.$store.state.Store.hotelName;
     this.hotelDetails = this.$store.state.Store.hotelDetails;
