@@ -54,6 +54,7 @@
     "file-loader": "^1.1.11",
     "happy-dom": "^6.0.2",
     "jest": "^27.0.5",
+    "jest-localstorage-mock": "^2.4.21",
     "node-sass": "^4.5.3",
     "sass-loader": "^6.0.6",
     "url-loader": "^4.1.1",
@@ -83,6 +84,10 @@
       "vueify",
       "babelify"
     ]
+  },
+  "jest": {
+    "resetMocks": false,
+    "setupFiles": ["jest-localstorage-mock"]
   },
   "license": "GPLV3"
 }

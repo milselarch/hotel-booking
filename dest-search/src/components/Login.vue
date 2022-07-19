@@ -31,12 +31,17 @@
 
         <div class="button-controls">
           <b-button 
-            type="is-dark" id="login" class="fat-button" @click="login()"
+            type="is-dark" id="login" class="fat-button"
+            @click="login()"
           >
             Login
           </b-button>
-          <a href="#" id="signup" @click="open_signup_modal()">Sign Up</a>
-          <a target="_blank" href="https://youtu.be/dQw4w9WgXcQ">Forgot Password</a>
+          <a href="#" id="signup" @click="open_signup_modal()">
+            Sign Up
+          </a>
+          <a target="_blank" href="https://youtu.be/dQw4w9WgXcQ">
+            Forgot Password
+          </a>
         </div>
       </section>
 

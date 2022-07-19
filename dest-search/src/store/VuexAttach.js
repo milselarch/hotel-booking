@@ -128,6 +128,7 @@ class VuexAttach {
       const save_state = build_save_state(state)
       localStorage.setItem('store', JSON.stringify(save_state))
       console.log('STORE', mutation, save_state)
+      console.log('UPDATED LOCALSTORAGE', localStorage.getItem('store'))
     })
     
     return store;

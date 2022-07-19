@@ -1,10 +1,12 @@
 export default {
   modules: {},
   persistent: true,
-  state: {
-    persistent_count: 0,
-    auth_token: null,
-    refresh_token: null
+  state: () => { 
+    return {
+      persistent_count: 0,
+      auth_token: null,
+      refresh_token: null
+    }
   },
   mutations: {
     presist_increment(state) {

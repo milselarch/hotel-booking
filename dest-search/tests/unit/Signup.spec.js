@@ -6,7 +6,7 @@ import Buefy from 'buefy'
 
 // import store from '../../src/store' 
 // you could also mock this out.
-import moment from 'moment'
+import User from './User.js'
 import axios from 'axios'
 import Vuex from 'vuex'
 import sleep from 'await-sleep'
@@ -14,8 +14,8 @@ import stubs from './stubs.js'
 import { assert, time } from 'console'
 import { wrap } from 'lodash'
 import { start } from 'repl'
+import Persistent from '../../src/store/modules/Persistent'
 
-const crypto = require("crypto");
 const segfault_handler = require('segfault-handler');
 const fs = require('fs');
 const mock = require('./mock.js');
@@ -29,6 +29,7 @@ fs.readdirSync(test_folder).forEach(file => {
   console.log(file);
 });
 
+const crypto = require("crypto");
 const infiniteScroll =  require('vue-infinite-scroll');
 const localVue = createLocalVue();
 localVue.use(infiniteScroll)
@@ -36,22 +37,7 @@ localVue.use(Vuex)
 localVue.use(Buefy)
 
 describe('Signup Test', () => {
-  const date_now = new Date()
-  const timestamp = date_now.getTime();
-  const date_stamp = moment(date_now).format(
-    'YYMMDD-hhmmss-SSS'
-  );
-  
-  // generate form data for signup and login tests
-  const username = `test-user-${date_stamp}`
-  const email = `test-email-${date_stamp}@testmail.com`
-  const password = crypto.randomBytes(6).toString('hex');
-  const first_name = crypto.randomBytes(2).toString('hex');
-  const last_name = crypto.randomBytes(2).toString('hex');
-
-  console.log('DATE_STAMP', date_stamp)
-  console.log('PASSWROD', password, first_name, last_name)
-
+  const user = new User()
   let signed_up = false;
   let store;
 
@@ -77,8 +63,8 @@ describe('Signup Test', () => {
     expect(signup_button.exists()).toBe(true);
     expect(signup_button.attributes().disabled).toBe('true');
 
-    let false_password = password
-    while (false_password === password) {
+    let false_password = user.password
+    while (false_password === user.password) {
       // keep generating random differing passwords
       // the while loop makes sure the regenerated password
       // does not end up marching the original password
@@ -86,11 +72,11 @@ describe('Signup Test', () => {
       false_password = crypto.randomBytes(6).toString('hex');
     }
 
-    assert(false_password !== password)
-    wrapper.vm.email = email
-    wrapper.vm.first_name = first_name
-    wrapper.vm.last_name = last_name
-    wrapper.vm.password = password
+    assert(false_password !== user.password)
+    wrapper.vm.email = user.email
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = user.password
     wrapper.vm.re_password = false_password
     
     // wait for vuejs component to update
@@ -124,12 +110,13 @@ describe('Signup Test', () => {
     const signup_button = wrapper.find('#signup');
     expect(signup_button.exists()).toBe(true);
     expect(signup_button.attributes().disabled).toBe('true');
+    expect(store.getters.authenticated).toBe(false)
 
-    wrapper.vm.email = email
-    wrapper.vm.first_name = first_name
-    wrapper.vm.last_name = last_name
-    wrapper.vm.password = password
-    wrapper.vm.re_password = password
+    wrapper.vm.email = user.email
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = user.password
+    wrapper.vm.re_password = user.password
     
     // wait for vuejs component to update
     await wrapper.vm.$nextTick()
@@ -148,11 +135,11 @@ describe('Signup Test', () => {
     await wrapper.vm.$nextTick()
 
     const formdata = {
-      email: email,
-      first_name: first_name,
-      last_name: last_name,
-      password: password,
-      re_password: password,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      password: user.password,
+      re_password: user.password,
     }
 
     const event_data = wrapper.emitted('open-login')
@@ -160,6 +147,8 @@ describe('Signup Test', () => {
     expect(event_data).toStrictEqual([[formdata]])
     console.log('SIGNUP COMPLETE', formdata)
     signed_up = true;
+
+    expect(store.getters.authenticated).toBe(false)
   })
 
   it('login success test', async () => {
@@ -168,6 +157,7 @@ describe('Signup Test', () => {
     email and correct password
     */
 
+    expect(store.getters.authenticated).toBe(false)
     const start_stamp = (new Date()).getTime() / 1000
     while (!signed_up) {
       // wait for the signup test to complete
@@ -190,12 +180,12 @@ describe('Signup Test', () => {
     expect(login_button.exists()).toBe(true);
     // const email_field = wrapper.find('#email-field')
     // const password_field = wrapper.find('#password-field')
-    wrapper.vm.email = email
-    wrapper.vm.password = password
+    wrapper.vm.email = user.email
+    wrapper.vm.password = user.password
     await wrapper.vm.$nextTick()
     const formdata = {
-      email: email,
-      password: password
+      email: user.email,
+      password: user.password
     }
 
     expect(wrapper.vm.pending).toBe(false)
@@ -207,6 +197,26 @@ describe('Signup Test', () => {
     // ensure login-done event is emitted
     const event_data = wrapper.emitted('login-done')
     expect(event_data).toStrictEqual([[formdata]])
+
+    // ensure that login JWT token is saved to localstorage
+    const persistent_key = 'Persistent'
+    const saved_storage = JSON.parse(localStorage.getItem('store'))
+    expect(saved_storage.hasOwnProperty(persistent_key)).toBe(true)
+
+    // ensure that localstorage contains newly created
+    // auth token and refresh token
+    const persistent = saved_storage[persistent_key]
+    expect(persistent.hasOwnProperty('auth_token'))
+    expect(persistent.hasOwnProperty('refresh_token'))
+    const auth_token = persistent['auth_token']
+    const refresh_token = persistent['refresh_token']
+    
+    expect(typeof auth_token === 'string')
+    expect(typeof refresh_token === 'string')
+    
+    expect(auth_token.trim().length > 10)
+    expect(refresh_token.trim().length > 10)
+    expect(store.getters.authenticated).toBe(true)
   })
 
   it('login password failure test', async () => {
@@ -239,8 +249,8 @@ describe('Signup Test', () => {
     // const email_field = wrapper.find('#email-field')
     // const password_field = wrapper.find('#password-field')
 
-    let false_password = password
-    while (false_password === password) {
+    let false_password = user.password
+    while (false_password === user.password) {
       // keep generating random differing passwords
       // the while loop makes sure the regenerated password
       // does not end up marching the original password
@@ -248,7 +258,7 @@ describe('Signup Test', () => {
       false_password = crypto.randomBytes(6).toString('hex');
     }
 
-    wrapper.vm.email = email
+    wrapper.vm.email = user.email
     wrapper.vm.password = false_password
     await wrapper.vm.$nextTick()
 
