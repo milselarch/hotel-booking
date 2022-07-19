@@ -5,11 +5,13 @@
         <div class="description">
           <h1>The Bestest Hotels in the Multiverse</h1>
           <p id="short-info">
-            Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
-            both veterans of the lifestyle and loyalty space, have 
-            found a way to credit customers up to ten times the volume 
-            of miles that can be earned elsewhere. That is for booking 
-            the same hotel at the same or similar rates.
+            <span>
+              Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
+              both veterans of the lifestyle and loyalty space, have 
+              found a way to credit customers up to ten times the volume 
+              of miles that can be earned elsewhere. That is for booking 
+              the same hotel at the same or similar rates.
+            </span>
           </p>
 
           <div class="buttons" v-show="!authenticated">
@@ -485,7 +487,7 @@ export default {
         // add price as a property to each hotel
         // in the original hotels api response
         const hotel_prices = price_data.proxy_json.hotels
-        console.log('HOTEL_PRICES', hotel_prices)
+        // console.log('HOTEL_PRICES', hotel_prices)
         // console.log('MAPPING', hotel_mapping)
 
         for (let k=0; k<hotel_prices.length; k++) {
@@ -575,7 +577,7 @@ export default {
         // add price as a property to each hotel
         // in the original hotels api response
         const hotel_prices = price_data.proxy_json.hotels
-        console.log('HOTEL_PRICES', hotel_prices)
+        // console.log('HOTEL_PRICES', hotel_prices)
         for (let k=0; k<hotel_prices.length; k++) {
           const hotel_pricing = hotel_prices[k]
           const hotel_id = hotel_pricing.id
@@ -1088,6 +1090,16 @@ div#front-cover {
       & > p#short-info {
         text-align: left !important;
         margin-bottom: 0rem;
+        $highlight: rgba(233,246,244, 0.7);
+
+        & > span {
+          background-color: $highlight;
+          line-height: 0px;
+          box-shadow: 10px 0 0 $highlight, -10px 0 0 $highlight;
+          backdrop-filter: blur(5px);
+          padding-top: 0.4rem;
+          padding-bottom: 0.4rem;
+        }
       }
 
       & > h1 {
