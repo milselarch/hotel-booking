@@ -34,6 +34,7 @@
           <b-field class="searchbox">
             <b-field>
               <b-autocomplete
+                id="dest_search_field"
                 v-model="destination_input"
                 :data="filtered_search_matches"
                 placeholder="Search Destination e.g. tioman island"
@@ -120,6 +121,7 @@
           </b-field>
 
           <b-button
+            id="search_button"
             type="is-dark" expanded
             @click="begin_search"
             :disabled="!allow_search || is_loading"
