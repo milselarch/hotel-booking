@@ -6,7 +6,7 @@
         <hr id="breakline"/>
 
         <b-field label="Email" class="input-field"
-          :type="{ 'is-danger': hasError }"
+          :type="{ 'is-danger': has_error }" id="email-field"
           :message="email_error">
           <b-input
             type="email" value="" v-model="email"
@@ -15,7 +15,7 @@
         </b-field>
 
         <b-field label="Password" class="input-field"
-          :type="{ 'is-danger': hasError }"
+          :type="{ 'is-danger': has_error }" id="password-field"
           :message="password_error">
           <b-input 
             value="" type="password" maxlength="30"
@@ -35,7 +35,7 @@
           >
             Login
           </b-button>
-          <a href="#" id="signup" @click="openSignupModal()">Sign Up</a>
+          <a href="#" id="signup" @click="open_signup_modal()">Sign Up</a>
           <a target="_blank" href="https://youtu.be/dQw4w9WgXcQ">Forgot Password</a>
         </div>
       </section>
@@ -59,14 +59,14 @@
         password_error: {},
         other_errors: '',
 
-        hasError: false,
+        has_error: false,
         pending: false
       }
     },
 
     methods: {
-      openSignupModal() {
-        this.$emit('open-signup', this.name)
+      open_signup_modal() {
+        this.$emit('open-signup', true)
       },
 
       set_email(email) {
@@ -83,7 +83,8 @@
           password: this.password,
         }
 
-        self.hasError = false;
+        console.log('LOGIN FORM', formdata)
+        self.has_error = false;
         self.email_error = {};
         self.password_error = {};
         self.other_errors = ''
@@ -102,7 +103,7 @@
           // const refresh_token = response.data.refresh
           // axios.defaults.headers.common["Authorization"] = 'Bearer ' + access_token
         
-        }).catch(err_resp =>{
+        }).catch(err_resp => {
           // console.log('ERR_RESP', err_resp)
           let errors = err_resp.response.data
           const other_errors = []
@@ -133,7 +134,7 @@
 
           console.log('OERRROS-LKOGIN', other_errors)
           self.other_errors = other_errors.join('\n');
-          this.hasError = true;
+          this.has_error = true;
         
         }).finally(() => {
           // simulate a delay for loading a response
