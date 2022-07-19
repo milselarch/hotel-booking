@@ -15,6 +15,7 @@ import { assert, time } from 'console'
 import { wrap } from 'lodash'
 import { start } from 'repl'
 import Persistent from '../../src/store/modules/Persistent'
+import { type } from 'jquery'
 
 const segfault_handler = require('segfault-handler');
 const fs = require('fs');
@@ -206,16 +207,25 @@ describe('Signup Test', () => {
     // ensure that localstorage contains newly created
     // auth token and refresh token
     const persistent = saved_storage[persistent_key]
-    expect(persistent.hasOwnProperty('auth_token'))
-    expect(persistent.hasOwnProperty('refresh_token'))
+    console.log('STORE PERSISTEN', persistent)
+    console.log(
+      'SAVE STORE', saved_storage, 
+      localStorage.getItem('store'),
+      typeof localStorage.getItem('store')
+    )
+    
+    expect(persistent.hasOwnProperty('auth_token')).toBe(true)
+    expect(persistent.hasOwnProperty('refresh_token')).toBe(true)
     const auth_token = persistent['auth_token']
     const refresh_token = persistent['refresh_token']
     
-    expect(typeof auth_token === 'string')
-    expect(typeof refresh_token === 'string')
+    expect(typeof auth_token === 'string').toBe(true)
+    expect(typeof refresh_token === 'string').toBe(true)
+    console.log('TEST AUTH TOKEN', auth_token)
+    console.log('TEST REFRESH TOKEN', refresh_token)
     
-    expect(auth_token.trim().length > 10)
-    expect(refresh_token.trim().length > 10)
+    expect(auth_token.trim().length > 10).toBe(true)
+    expect(refresh_token.trim().length > 10).toBe(true)
     expect(store.getters.authenticated).toBe(true)
   })
 
