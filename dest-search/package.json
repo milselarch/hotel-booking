@@ -17,6 +17,7 @@
     "await-sleep": "0.0.1",
     "axios": "^0.27.2",
     "buefy": "^0.9.21",
+    "crypto": "^1.0.1",
     "fuzzysort": "^2.0.1",
     "jquery": "^3.6.0",
     "lodash": "^4.17.21",

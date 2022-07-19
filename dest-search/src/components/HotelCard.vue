@@ -82,7 +82,7 @@ export default {
       }
 
       const prices = this.price_map[this.search_stamp]
-      console.log('PRICES', this.price_map, this.search_stamp)
+      // console.log('PRICES', this.price_map, this.search_stamp)
       return prices.hasOwnProperty(hotel_id)
     },
 
