@@ -45,7 +45,8 @@
             aria-modal>
             <DeleteAccount 
               v-show="isDeleteAccountModalActive"
-              @confirm_delete="delete_account"
+              @deleted="account_deleted"
+              @close_delete_modal = "isDeleteAccountModalActive = false"
             />
         </b-modal>
     </div>
@@ -149,11 +150,20 @@ export default {
 
       return true;
     },
-    
-    delete_account() {
-      console.log("delete")
-  }
 
+    account_deleted(){
+      // redirect to home page after deleting account
+      this.$router.push("/")
+      // clear authentication tokens
+      this.logout()
+      this.$buefy.toast.open({
+                    duration: 5000,
+                    message: `Sad to see you go :( Your account has been deleted`,
+                    type: 'is-link',
+                    pauseOnHover: true
+                })
+
+    }
   },
 
   mounted: function () {
