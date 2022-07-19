@@ -1,23 +1,55 @@
 <template>
   <div class="profile">
-    <div id="load-status">
-      <div id="status" v-show="true">
-        <p id="status-text">{{ status_text }}</p>
-        <square id="spinner" v-show="is_loading"></square>
-        <b-button 
-          type="is-dark" id="login" outlined
-          @click="load()" icon-right="sync"
-          v-show="!(is_loading || load_success)"
-        >
-          try again
-        </b-button>
+    <div class="container is-fluid">
+      <div class="notification is-primary">
+        <div id="load-status">
+          <div id="status" v-show="true">
+            <p id="status-text">{{ status_text }}</p>
+            <square id="spinner" v-show="is_loading"></square>
+            <b-button 
+              type="is-dark" id="login" outlined
+              @click="load()" icon-right="sync"
+              v-show="!(is_loading || load_success)"
+            >
+              try again
+            </b-button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div id="profile-info">
-      <p> {{ email }} </p>
-      <p> {{ first_name }} {{ last_name }} </p>
+    <div class="container is-fluid">
+      <div class="notification is-info">
+        <div id="profile-info">
+          <p> {{ email }} </p>
+          <p> {{ first_name }} {{ last_name }} </p>
+        </div>
+      </div>
     </div>
+
+    <div id="account_delete_button">
+      <b-button
+            label="Delete account"
+            type="is-danger"
+            size="is-medium"
+            @click="isDeleteAccountModalActive = true" />
+
+      <b-modal
+            v-model="isDeleteAccountModalActive"
+            has-modal-card
+            trap-focus
+            :destroy-on-hide="false"
+            aria-role="dialog"
+            aria-label="Example Modal"
+            close-button-aria-label="Close"
+            aria-modal>
+            <DeleteAccount 
+              v-show="isDeleteAccountModalActive"
+              @confirm_delete="delete_account"
+            />
+        </b-modal>
+    </div>
+
   </div>
 </template>
 
@@ -25,9 +57,15 @@
 import AuthRequester from '@/AuthRequester'
 import sleep from 'await-sleep'
 import router from '../router'
+import DeleteAccount from '@/components/DeleteAccount.vue'
 
 export default {
   name: 'Profile',
+
+  components: {
+    DeleteAccount
+  },
+
   data () {
     return {
       status_text: 'loading profile',
@@ -37,7 +75,9 @@ export default {
       load_success: false,
       first_name: null,
       last_name: null,
-      email: null
+      email: null,
+
+      isDeleteAccountModalActive: false,
     }
   },
 
@@ -100,7 +140,7 @@ export default {
           return false;
         }
 
-        console.log('RESPIBSE', response);
+        console.log('RESPONSE', response);
         self.status_text = 'profile info'
         self.first_name = response.data.first_name
         self.last_name = response.data.last_name
@@ -108,7 +148,12 @@ export default {
       })();
 
       return true;
-    }
+    },
+    
+    delete_account() {
+      console.log("delete")
+  }
+
   },
 
   mounted: function () {
@@ -132,6 +177,7 @@ export default {
   unmounted() {
     self.is_mounted = false;
   }
+
 }
 
 </script>
@@ -139,7 +185,6 @@ export default {
 <style lang='scss' scoped>
 div#load-status {
   padding: 2rem;
-  background-color: #f3eee0;
 
   display: flex;
   justify-content: center;
@@ -192,6 +237,7 @@ div.profile {
     flex-direction: column;
     align-items: center;
     margin-top: 2rem;
+    justify-content: center;
   }
 }
 
@@ -204,4 +250,5 @@ h1 {
   display: inline;
   margin: 0px;
 }
+
 </style>
