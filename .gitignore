@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+**/package-lock.json
 # get rid of accidental node modules
 node_modules/
 
