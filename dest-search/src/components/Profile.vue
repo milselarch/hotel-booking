@@ -1,6 +1,94 @@
 <template>
-  <div class="profile">
-    <div class="container is-fluid">
+  <div class="tile is-ancestor">
+
+    <div class="tile is-parent">
+      <article class="tile is-child notification is-primary">
+        <div class="content">
+          <p class="title">Profile Info</p>
+          <p class="subtitle"></p>
+          <div class="content">
+            <div id="load-status">
+              <div id="status" v-show="is_loading">
+                <p id="status-text">{{ status_text }}</p>
+                <square id="spinner" v-show="is_loading"></square>
+                <b-button 
+                  type="is-dark" id="login" outlined
+                  @click="load()" icon-right="sync"
+                  v-show="!(is_loading || load_success)"
+                >
+                  try again
+                </b-button>
+              </div>
+            </div>
+          </div>
+          <div id="account_data">
+            <p> {{ email }} </p>
+            <p> {{ first_name }} {{ last_name }} </p>
+          </div>
+
+        </div>
+      </article>
+    </div>
+    
+    <div class="tile is-vertical is-8">
+      <div class="tile">
+
+        <div class="tile is-parent is-vertical">
+          <article class="tile is-child notification is-success">
+
+          </article>
+          <article class="tile is-child notification is-warning">
+            <b-button
+              label="Delete account"
+              type="is-danger"
+              size="is-medium"
+              @click="isDeleteAccountModalActive = true" />
+
+            <b-modal
+              v-model="isDeleteAccountModalActive"
+              has-modal-card
+              trap-focus
+              :destroy-on-hide="false"
+              aria-role="dialog"
+              aria-label="Example Modal"
+              close-button-aria-label="Close"
+              aria-modal>
+              <DeleteAccount 
+                v-show="isDeleteAccountModalActive"
+                @deleted="account_deleted"
+                @close_delete_modal = "isDeleteAccountModalActive = false"
+              />
+            </b-modal>
+          </article>
+        </div>
+
+        <div class="tile is-parent">
+          <article class="tile is-child notification is-info">
+            <p class="title">Middle tile</p>
+            <p class="subtitle">With an image</p>
+            <figure class="image is-4by3">
+              <img src="https://bulma.io/images/placeholders/640x480.png">
+            </figure>
+          </article>
+        </div>
+
+      </div>
+
+      <div class="tile is-parent">
+        <article class="tile is-child notification is-danger">
+          <p class="title">Warning</p>
+          <p class="subtitle">Account deletion is a non-reversible process. All information associated with the account will be deleted from the database.</p>
+          <div class="content">
+            <!-- Content -->
+          </div>
+        </article>
+      </div>
+
+    </div>
+
+    
+
+    <!-- <div class="container is-fluid">
       <div class="notification is-primary">
         <div id="load-status">
           <div id="status" v-show="true">
@@ -16,18 +104,9 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
-    <div class="container is-fluid">
-      <div class="notification is-info">
-        <div id="profile-info">
-          <p> {{ email }} </p>
-          <p> {{ first_name }} {{ last_name }} </p>
-        </div>
-      </div>
-    </div>
-
-    <div id="account_delete_button">
+    <!-- <div id="account_delete_button">
       <b-button
             label="Delete account"
             type="is-danger"
@@ -49,7 +128,7 @@
               @close_delete_modal = "isDeleteAccountModalActive = false"
             />
         </b-modal>
-    </div>
+    </div> -->
 
   </div>
 </template>
