@@ -146,6 +146,47 @@ class AuthRequester {
       }
     }
   }
+
+  async delete(endpoint, data, options={}) {
+    const self = this;
+    assert(!self.auth_failed)
+
+    const headers = self.build_headers()
+    options = Object.assign(options, headers)
+    options["data"] = data
+    console.log(options)
+    
+    try {
+      return await axios.delete(endpoint, options)
+    } catch (access_error) {
+      const status_code = access_error.response.status
+      console.warn('FAIL STATUS CODE', status_code)
+      console.warn('FAIL ERR', access_error)
+
+      if (status_code === 401) {
+        let refresh_success = false
+
+        try {
+          refresh_success = await self.refresh()
+        } catch (refresh_error) {
+          console.error('REFRESH FAILED', refresh_error)
+        }
+
+        if (!refresh_success) { throw access_error }
+        
+        assert(refresh_success)
+        const headers = self.build_headers()
+        options = Object.assign(options, headers)
+        // call endpoint again with the new access token
+        return await axios.get(endpoint, options)
+      } else {
+        // rethrow error if its not a 401
+        // (401 means access token expired)
+        throw access_error
+      }
+    }
+  }
+
 }
 
 export default AuthRequester

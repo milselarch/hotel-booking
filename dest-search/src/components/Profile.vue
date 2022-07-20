@@ -130,7 +130,7 @@ export default {
           } else {
             self.status_text = 'profile load failed'
             response = error.response;
-            console.log('LAOD ERR', error);
+            console.log('LOAD ERR', error);
           }
         } finally {
           console.log('LOAD END');
@@ -155,7 +155,7 @@ export default {
       // redirect to home page after deleting account
       this.$router.push("/")
       // clear authentication tokens
-      this.logout()
+      this.$store.commit('clear_credentials')
       this.$buefy.toast.open({
                     duration: 5000,
                     message: `Sad to see you go :( Your account has been deleted`,

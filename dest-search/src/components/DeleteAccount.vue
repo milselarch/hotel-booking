@@ -36,7 +36,7 @@
 </template>
 
 <script>
-  import axios from 'axios';
+  import AuthRequester from '@/AuthRequester';
 
   export default {
     name: 'DeleteAccount',
@@ -50,31 +50,88 @@
     }, 
 
     methods: {
-      delete_account() {
-        console.log("deletion test")
+        logout(toast=false) {
+            const self = this
 
-        this.password_error = ""
-        this.hasError = false
-        
-        const formdata = {
-          current_password: this.password,
+            if (toast) {
+                self.$buefy.toast.open({
+                duration: 5000,
+                message: `User not logged in`,
+                type: 'is-danger',
+                pauseOnHover: true
+                });
+            }
+
+            self.status_text = 'login required'
+            self.load_success = false
+            self.first_name = null
+            self.last_name = null
+            self.email = null
+            router.push('/')
+        },
+
+        delete_account() {
+            console.log("deleting account")
+
+            this.password_error = ""
+            this.hasError = false
+
+            const formdata = {
+                current_password: this.password
+            }
+
+            this.deleted = false;
+            const requester = new AuthRequester(this)
+            let response;
+            
+            (async () => {
+                console.log('LOAD REQ START')
+
+                try {
+                response = await requester.delete('auth/users/me/', formdata)
+                this.deleted = true
+                this.$emit("deleted")
+
+                } catch (error) {
+                    console.log(error)
+                    const status_code = error.response.status;
+                    if (status_code === 401) {
+                    this.logout(true)
+                    } else {
+                        this.status_text = 'profile load failed'
+                        response = error.response;
+                        console.log('LOAD ERR', error);
+                        this.hasError = true
+                        this.password_error = error.response.data["current_password"]
+                    }
+
+                }
+
+                if (!this.deleted) {
+                return false;
+                }
+
+                console.log('Account Deleted');
+            })();
+
+            return true;
+            
+            // axios.delete(
+            //     'auth/users/me/', 
+            //     formdata,
+            //     config
+            // ).then(response => {
+            //     console.log('Account deleted')
+            //     // console.log(response.data);
+            //     this.$emit("deleted")
+            
+            // }).catch(err =>{
+            //     console.log(err.response.data)
+            //     this.password_error = "Wrong password provided"
+            //     this.hasError = true
+            // })
+
         }
-
-        axios.delete(
-            'auth/users/me/', 
-            formdata
-
-        ).then(response => {
-            console.log('Account deleted')
-            // console.log(response.data);
-            this.$emit("deleted")
-        
-        }).catch(err =>{
-            console.log(err.response.data)
-            this.password_error = "Wrong password provided"
-            this.hasError = true
-        })
-      }
     }
-  }
+}
 </script>
