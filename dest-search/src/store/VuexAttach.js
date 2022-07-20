@@ -1,6 +1,17 @@
 import Vuex from 'vuex';
 
 const state_builder = (modules) => {
+  // module_var_mapping contains a list of all the state
+  // variable names for each vuex module we're using
+  const module_var_mapping = {}
+  
+  for (const module_name in modules) {
+    const module = modules[module_name];
+    const fresh_state = module.state()
+    const module_vars = Object.keys(fresh_state)
+    module_var_mapping[module_name] = module_vars
+  }
+
   const build_save_state = (state) => {
     // build a json object that contains
     // all the values for all the modules in vuex
@@ -11,8 +22,7 @@ const state_builder = (modules) => {
       const module = modules[module_name];
       // ignore module stores that aren't flagged as persistent
       if (module.persistent !== true) { continue }
-
-      const module_vars = Object.keys(module.state)
+      const module_vars = module_var_mapping[module_name]
       save_state[module_name] = {}
 
       for (let k=0; k<module_vars.length; k++) {
@@ -34,12 +44,12 @@ const state_builder = (modules) => {
 }
 
 const store_updator = (modules) => {
+  // console.log('STORE_UPDATOR', modules)
   const store_updatable = (mutation) => {
     // check if the mutation is changing the value of
     // a vuex state variable for a variable under 
     // a vuex module that is persistent
     const mutate_name = mutation.type
-    let update_store = false
 
     for (const module_name in modules) {
       const module = modules[module_name]
@@ -48,13 +58,12 @@ const store_updator = (modules) => {
       const mutations = module.mutations
       const is_module_mutation = mutations.hasOwnProperty(mutate_name)
       if (is_module_mutation) {
-        update_store = true
-        break
+        return true
       }
     }
 
     // console.log('UPDATE STORE', update_store)
-    return update_store
+    return false
   }
 
   return store_updatable
@@ -109,7 +118,7 @@ class VuexAttach {
           for (const module_name in local_store) {
             const module = local_store[module_name]
             for (const varname in module) {
-              console.log('MODUKE', module_name, state[module_name], state)
+              // console.log('MODUKE', module_name, state[module_name], state)
               state[module_name][varname] = module[varname]
             }
           }
@@ -127,7 +136,8 @@ class VuexAttach {
     
       const save_state = build_save_state(state)
       localStorage.setItem('store', JSON.stringify(save_state))
-      console.log('STORE', mutation, save_state)
+      // console.log('STORE', mutation, save_state)
+      // console.log('UPDATED LOCALSTORE', localStorage.getItem('store'))
     })
     
     return store;
