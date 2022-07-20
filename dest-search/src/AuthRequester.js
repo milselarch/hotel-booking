@@ -3,8 +3,11 @@ import assert from 'assert'
 
 class AuthRequester {
   /*
-  sends requests with JWT header info filled in,
-  and in the event that the JWT request fails
+  wrapper to sends requests with JWT header info filled in,
+  and in the event that the JWT request fails, refresh
+  the auth_token and retry. If retry fails or refresh fails,
+  clear auth credentials from vuex storage, and raise the 
+  error in the initial request
   */
   constructor(component) {
     const store = component.$store;
@@ -15,15 +18,16 @@ class AuthRequester {
     self.load_credentials()
   }
 
-  load_credentials() {
+  load_credentials = () => this._load_credentials()
+  _load_credentials() {
     const self = this;
     const state = self.store.state
     self.auth_token = state.Persistent.auth_token
     self.refresh_token = state.Persistent.refresh_token
-  }
+  };
 
-  // build_headers = () => this._build_headers()
-  build_headers() {
+  build_headers = () => this._build_headers()
+  _build_headers() {
     if (this.auth_token === null) {
       // server will give 400 (BAD REQUEST) with a null token
       return {}
@@ -32,10 +36,10 @@ class AuthRequester {
     return {
       headers: { Authorization: 'JWT ' + this.auth_token }
     }
-  }
+  };
 
-  // refresh = () => this._refresh()
-  async refresh() {
+  refresh = () => this._refresh()
+  async _refresh() {
     const self = this
     assert(!self.auth_failed)
     if (self.refresh_token === null) {
@@ -81,8 +85,8 @@ class AuthRequester {
     return true
   }
 
-  // trigger_fail_handlers = (e) => this._trigger_fail_handlers(e)
-  async trigger_fail_handlers(error) {
+  trigger_fail_handlers = (e) => this._trigger_fail_handlers(e)
+  async _trigger_fail_handlers(error) {
     const self = this;
     for (let k=0; k<self.auth_fail_handlers.length; k++) {
       const auth_fail_handler = self.auth_fail_handlers[k]
@@ -90,8 +94,13 @@ class AuthRequester {
     }
   }
 
-  // get = (endpoint) => this._get(endpoint)
-  async get(endpoint, options={}) {
+  wrap_request = (...args) => this._wrap_request(...args)
+  async _wrap_request(request_func, endpoint, options={}) {
+    const self = this;
+  }
+
+  get = (...args) => this._get(...args)
+  async _get(endpoint, options={}) {
     const self = this;
     assert(!self.auth_failed)
 

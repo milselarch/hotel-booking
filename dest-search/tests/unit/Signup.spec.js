@@ -1,7 +1,9 @@
-import {createLocalVue, shallowMount, mount} from '@vue/test-utils'
+import {createLocalVue, mount} from '@vue/test-utils'
 import SignUp from '../../src/components/SignUp.vue'
 import Login from '../../src/components/Login.vue'
 import VuexAttach from '../../src/store/VuexAttach.js'
+import AuthRequester from '../../src/AuthRequester.js'
+import App from '../../src/App.vue'
 import Buefy from 'buefy'
 
 // import store from '../../src/store' 
@@ -12,10 +14,6 @@ import Vuex from 'vuex'
 import sleep from 'await-sleep'
 import stubs from './stubs.js'
 import { assert, time } from 'console'
-import { wrap } from 'lodash'
-import { start } from 'repl'
-import Persistent from '../../src/store/modules/Persistent'
-import { type } from 'jquery'
 
 const segfault_handler = require('segfault-handler');
 const fs = require('fs');
@@ -210,8 +208,12 @@ describe('Signup Test', () => {
 
   it('login success test', async () => {
     /*
-    test that login is successfull if we enter the correct
+    1. test that login is successful if we enter the correct
     email and correct password
+    2. check that JWT access and refresh tokens are saved in
+    localStorage after a  successful login
+    3. test that the JWT acquired post-login tokens actually work
+    by sending an authenticated request to the backend
     */
 
     expect(store.getters.authenticated).toBe(false)
@@ -254,14 +256,13 @@ describe('Signup Test', () => {
     // ensure login-done event is emitted
     const event_data = wrapper.emitted('login-done')
     expect(event_data).toStrictEqual([[formdata]])
-
     // ensure that login JWT token is saved to localstorage
     const persistent_key = 'Persistent'
     const saved_storage = JSON.parse(localStorage.getItem('store'))
     expect(saved_storage.hasOwnProperty(persistent_key)).toBe(true)
 
-    // ensure that localstorage contains newly created
-    // auth token and refresh token
+    // load presistent vuex store module
+    // this is the one that contains the auth + refresh tokens
     const persistent = saved_storage[persistent_key]
     console.log('STORE PERSISTEN', persistent)
     console.log(
@@ -270,18 +271,53 @@ describe('Signup Test', () => {
       typeof localStorage.getItem('store')
     )
     
-    expect(persistent.hasOwnProperty('auth_token')).toBe(true)
-    expect(persistent.hasOwnProperty('refresh_token')).toBe(true)
-    const auth_token = persistent['auth_token']
-    const refresh_token = persistent['refresh_token']
+    // ensure that localstorage contains newly created
+    // auth token and refresh token
+    const auth_key = 'auth_token'
+    const refresh_key = 'refresh_token'
+    expect(persistent.hasOwnProperty(auth_key)).toBe(true)
+    expect(persistent.hasOwnProperty(refresh_key)).toBe(true)
+    const auth_token = persistent[auth_key]
+    const refresh_token = persistent[refresh_key]
     
+    // check that the saved tokens are strings with length > 10
     expect(typeof auth_token === 'string').toBe(true)
     expect(typeof refresh_token === 'string').toBe(true)
     console.log('TEST AUTH TOKEN', auth_token)
     console.log('TEST REFRESH TOKEN', refresh_token)
-    
     expect(auth_token.trim().length > 10).toBe(true)
     expect(refresh_token.trim().length > 10).toBe(true)
     expect(store.getters.authenticated).toBe(true)
+
+    // attempt an authenticated request to the backend
+    // to prove that the JWT tokens we've acquired work
+    wrapper.$store = store
+    // TODO: should refactor authrequester to take in the
+    // store directly rather than a vue component
+    const requester = new AuthRequester(wrapper)
+    let status_code, response
+    console.log('PRE-REQUEST')
+    
+    try {
+      response = await requester.get('profile')
+      console.log('PROFILE RESP', response)
+      status_code = response.status
+    } catch (error) {
+      console.log('ERR-RESPONSE', error.response)
+      status_code = error.response.status_code
+    }
+
+    // make sure the authenticated request succeeds
+    expect(status_code).toBe(200)
   })
+
+  /*
+  it('logout success test', async () => {
+    const wrapper = mount(App, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+  })
+  */
 })

@@ -1,8 +1,9 @@
 {
   "presets": [
-    ["env", { "modules": false }]
+    "@babel/preset-env"
   ],
   "plugins": [
-    "transform-regenerator", "syntax-dynamic-import"
+    "transform-regenerator", "syntax-dynamic-import",
+    "@babel/plugin-proposal-class-properties"
   ]
 }

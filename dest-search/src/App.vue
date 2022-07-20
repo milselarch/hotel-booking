@@ -81,7 +81,7 @@
                 </b-dropdown-item>
                 <b-dropdown-item 
                   v-show="authenticated" @click="logout"
-                  aria-role="listitem"
+                  aria-role="listitem" id="logout-button"
                 >
                   Logout
                 </b-dropdown-item>
@@ -193,6 +193,9 @@ export default {
 
     logout() {
       this.$store.commit('clear_credentials')
+      const requester = new AuthRequester(this)
+      // TODO: send logout request
+
       // router.push()
       this.$buefy.toast.open({
         duration: 5000,
