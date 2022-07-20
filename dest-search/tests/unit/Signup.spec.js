@@ -152,6 +152,62 @@ describe('Signup Test', () => {
     expect(store.getters.authenticated).toBe(false)
   })
 
+  it('login password failure test', async () => {
+    /*
+    test that login fails if we enter the correct
+    email but wrong password
+    */
+    const start_stamp = (new Date()).getTime() / 1000
+    while (!signed_up) {
+      // wait for the signup test to complete
+      // and ensure there exists a user account in the backend
+      // from which we can login into
+      await sleep(100);
+    }
+
+    const end_stamp = (new Date()).getTime() / 1000
+    const duration = end_stamp - start_stamp
+    console.log('WAIT DURATION', duration)
+
+    const wrapper = mount(Login, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const login_button = wrapper.find('#login');
+    const errors_box = wrapper.find('#errors_box')
+    expect(login_button.exists()).toBe(true);
+    expect(wrapper.vm.has_error).toBe(false);
+    // const email_field = wrapper.find('#email-field')
+    // const password_field = wrapper.find('#password-field')
+
+    let false_password = user.password
+    while (false_password === user.password) {
+      // keep generating random differing passwords
+      // the while loop makes sure the regenerated password
+      // does not end up marching the original password
+      // I know this is unbelievably improbable, but whatever
+      false_password = crypto.randomBytes(6).toString('hex');
+    }
+
+    wrapper.vm.email = user.email
+    wrapper.vm.password = false_password
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.vm.pending).toBe(false)
+    await login_button.vm.$listeners.click()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+
+    expect(wrapper.vm.has_error).toBe(true);
+    const errors = wrapper.vm.other_errors;
+    const err_msg = 'No active account found with the given credentials'
+    expect(errors).toBe(err_msg)
+    // console.log('LOGIN ERRORS', errors)
+  })
+
   it('login success test', async () => {
     /*
     test that login is successfull if we enter the correct
@@ -227,61 +283,5 @@ describe('Signup Test', () => {
     expect(auth_token.trim().length > 10).toBe(true)
     expect(refresh_token.trim().length > 10).toBe(true)
     expect(store.getters.authenticated).toBe(true)
-  })
-
-  it('login password failure test', async () => {
-    /*
-    test that login fails if we enter the correct
-    email but wrong password
-    */
-    const start_stamp = (new Date()).getTime() / 1000
-    while (!signed_up) {
-      // wait for the signup test to complete
-      // and ensure there exists a user account in the backend
-      // from which we can login into
-      await sleep(100);
-    }
-
-    const end_stamp = (new Date()).getTime() / 1000
-    const duration = end_stamp - start_stamp
-    console.log('WAIT DURATION', duration)
-
-    const wrapper = mount(Login, {
-      store, localVue,
-      //specify custom components
-      stubs: stubs
-    })
-
-    const login_button = wrapper.find('#login');
-    const errors_box = wrapper.find('#errors_box')
-    expect(login_button.exists()).toBe(true);
-    expect(wrapper.vm.has_error).toBe(false);
-    // const email_field = wrapper.find('#email-field')
-    // const password_field = wrapper.find('#password-field')
-
-    let false_password = user.password
-    while (false_password === user.password) {
-      // keep generating random differing passwords
-      // the while loop makes sure the regenerated password
-      // does not end up marching the original password
-      // I know this is unbelievably improbable, but whatever
-      false_password = crypto.randomBytes(6).toString('hex');
-    }
-
-    wrapper.vm.email = user.email
-    wrapper.vm.password = false_password
-    await wrapper.vm.$nextTick()
-
-    expect(wrapper.vm.pending).toBe(false)
-    await login_button.vm.$listeners.click()
-    expect(wrapper.vm.pending).toBe(true)
-    // wait for the sign up axios request to complete
-    while (wrapper.vm.pending) { await sleep(100); }
-
-    expect(wrapper.vm.has_error).toBe(true);
-    const errors = wrapper.vm.other_errors;
-    const err_msg = 'No active account found with the given credentials'
-    expect(errors).toBe(err_msg)
-    // console.log('LOGIN ERRORS', errors)
   })
 })

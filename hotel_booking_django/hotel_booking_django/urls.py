@@ -22,7 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from hotel_booking_django.api_proxy import proxy_view, proxy_mocklabs
 from rest_framework_simplejwt import views as jwt_views
-from accounts.views import ProfileView, LoadTestingView
+from accounts.views import ProfileView, LoadTestingView, LogoutView
 from django.views.generic import TemplateView
 
 urlpatterns = [
