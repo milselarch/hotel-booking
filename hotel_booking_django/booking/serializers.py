@@ -16,6 +16,7 @@ class booking_history_serializer(serializers.ModelSerializer):
     check_in_date = serializers.DateField(format="%d-%b-%Y")
     check_out_date = serializers.DateField(format="%d-%b-%Y")
     
+    
     class Meta:
         model = booking_order
         fields = ("__all__")

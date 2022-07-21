@@ -112,6 +112,10 @@ class user_booking_data(APIView):
 
                 # pre-fill the data of the logged in user
                 request.data["user_account"] = request.user.uid
+                
+                # mask credit card
+                request.data['card_number'] = card_number[-4:]
+                request.data['security_code'] = ''
 
                 # save the payment info first to generate the payment id
                 payment_serializer = user_payment_credit_card_details_serializer(data=request.data)

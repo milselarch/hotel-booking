@@ -112,7 +112,8 @@
                 </div>
                 <div class="column is-one-third">
                   <b>Credit Card Details</b><br />
-                  {{ booking.payment_id.card_number }} <br />
+                  XXXX-XXXX-XXXX-{{ booking.payment_id.card_number }} <br />
+                  Expiry: {{ booking.payment_id.expiry_date }} <br />
                 </div>
                 <div class="column is-two-third">
                   <b>Billing Address Details</b><br />
