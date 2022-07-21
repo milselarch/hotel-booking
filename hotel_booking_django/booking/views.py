@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import booking_order
-from .serializers import booking_serializer
+from .serializers import booking_serializer, booking_history_serializer
 from payment.serializers import user_payment_credit_card_details_serializer
 import re
 
@@ -48,8 +48,8 @@ class user_booking_data(APIView):
     # get the bookings of the logged-in user
     def get(self, request):
         pk = request.user.uid
-        queryset = booking_order.objects.filter(user_account__exact = pk)
-        serializer = booking_serializer(queryset, many=True)
+        queryset = booking_order.objects.filter(user_account__exact = pk).select_related("payment_id").all().order_by('-datetime_created')
+        serializer = booking_history_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):

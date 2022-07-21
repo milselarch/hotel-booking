@@ -2,6 +2,7 @@ from django.db import models
 from common.models import common_attribute_model
 from accounts.models import user_account
 from payment.models import user_payment_credit_card_details
+import uuid
 
 # Create your models here.
 class booking_order(common_attribute_model):
@@ -31,13 +32,13 @@ class booking_order(common_attribute_model):
     did_primary_guest_accept_tnc = models.BooleanField(blank=False, null=False)
     #promotion_json
     #cost_breaking_Down
-    cost_in_sgd  = models.DecimalField(max_digits=10, decimal_places=3, blank=False, null=False)
+    cost_in_sgd  = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
 
     # format in YYYY-MM-DD HH:MM
     datetime_created = models.DateTimeField(auto_now_add=True)
 
     # the payment details for the booking order
-    payment_id = models.ForeignKey(user_payment_credit_card_details, on_delete=models.PROTECT, blank=False, null=False)
+    payment_id = models.ForeignKey(user_payment_credit_card_details, on_delete=models.PROTECT, blank=True, null=True)
 
     # to be updated during deployment
     booking_terms_and_condition = "This is a sample booking terms and condition"

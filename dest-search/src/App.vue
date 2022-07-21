@@ -80,6 +80,12 @@
                   Profile
                 </b-dropdown-item>
                 <b-dropdown-item 
+                  v-show="authenticated" @click="gotto_booking_order_history"
+                  aria-role="listitem"
+                >
+                  Booking Order History
+                </b-dropdown-item>
+                <b-dropdown-item 
                   v-show="authenticated" @click="logout"
                   aria-role="listitem" id="logout-button"
                 >
@@ -189,6 +195,10 @@ export default {
 
     goto_profile_page() {
       router.push({ path: '/profile' })
+    },
+
+    gotto_booking_order_history() {
+      router.push({ path: '/bookinghistory' })
     },
 
     logout() {
