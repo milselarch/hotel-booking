@@ -2,7 +2,7 @@
   <div class="tile is-ancestor details">
 
     <div class="tile is-parent">
-      <article class="tile is-child notification is-primary">
+      <article class="tile is-child">
         <div class="content">
           <p class="title">Profile Info</p>
           <p class="subtitle"></p>
@@ -34,7 +34,7 @@
       <div class="tile">
 
         <div class="tile is-parent">
-          <article class="tile is-child notification is-info">
+          <article class="tile is-child">
             <p class="title">Booking Details</p>
             <p class="subtitle">The most recent booking will be shown</p>
             <div class="content">
@@ -91,11 +91,11 @@
         </div>
 
         <div class="tile is-parent is-vertical">
-          <article class="tile is-child notification is-success">
+          <article class="tile is-child">
             <p class="title">Payment Information</p>
             <p class="subtitle">List of payment methods saved under your account</p>
           </article>
-          <article class="tile is-child notification is-warning">
+          <article class="tile is-child">
             <p class="title">Edit Account</p>
             <b-button
               label="Delete account"
@@ -125,7 +125,7 @@
       </div>
 
       <div class="tile is-parent">
-        <article class="tile is-child notification is-danger">
+        <article class="tile is-child">
           <p class="title">Warning</p>
           <p class="subtitle">Account deletion is a non-reversible process. All information associated with the account will be deleted from the database.</p>
           <div class="content">
