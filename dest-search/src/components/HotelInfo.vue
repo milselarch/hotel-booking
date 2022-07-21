@@ -1,11 +1,8 @@
 <template>
   <div id="hotel-info">
     <h2 id="name"><b>{{hotelName}}</b></h2>
-    <!-- <p id="test">
-    destination ID: {{dest_id}} <br>hotel ID: {{hotel_id}}<br>guests: {{guests}}<br>dates: {{checkin}} to {{checkout}}
-    </p> -->
-    <!-- TODO: maybe load hotel images? -->
-    <b-carousel id="carousel" :indicator=true indicator-custom indicator-inside=false pause-text="paused" indicator-custom-size="is-medium">
+    <div id="figures">
+      <b-carousel id="carousel" :indicator=true indicator-custom indicator-inside=false pause-text="paused" indicator-custom-size="is-medium">
       <b-carousel-item id="carouselimg" v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
         <b-image class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
       </b-carousel-item>
@@ -15,6 +12,9 @@
           </figure>
       </template>
     </b-carousel>
+    <a target="_blank" :href="`https://maps.google.com/?q=${this.latitude},${this.longitude}`"> <img id="map" :src="build_map(this.latitude, this.longitude)"> </a>
+    </div>
+    
     <div id="descbox">
       <div id="description" v-html="hotelDetails"></div>
       <div id="amenities" v-if="check_amenities">
@@ -28,6 +28,8 @@
     
     <div id="room-cards">
       <!-- <p v-if="!check_avail"><font size="+2"><b>No rooms available. Try changing specifications.</b></font></p> -->
+      <square id="spinner" v-show="is_loading"></square>
+      <p>{{status}}</p>
       <div
         class="card" 
         v-for="(room, key) in roomList.rooms" v-bind:key="key"
@@ -95,6 +97,10 @@ export default {
       url: "proxy/hotels/"+ this.hotel_id + "/price",
 
       is_loading: true,
+      status: "",
+
+      latitude: 'lat',
+      longitude: 'long'
 
     }
   },
@@ -124,6 +130,12 @@ export default {
       const url = images[0];
       // console.log(Object.values(url)[0]);
       return Object.values(url)[0];
+    },
+    build_map(lat, long){
+      return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${long}
+      &size=500x400
+      &markers=${lat},${long}
+      &key=AIzaSyAF557v7RJcGzZdlQ3H7dy9lTY6wuSb5mM`
     },
     check_breakfast(room){
       if (room.roomAdditionalInfo.breakfastInfo == "hotel_detail_breakfast_included"){
@@ -172,12 +184,18 @@ export default {
       console.log(getResponse.data);
       this.roomList = getResponse.data.proxy_json;
       this.is_loading = false;
+      if (getResponse.data.proxy_json.completed == true && Object.keys(this.roomList.rooms).length == 0){
+        console.log("NO ROOMS");
+        this.status= "No rooms available."
+      }
     })
 
     this.hotelName = this.$store.state.Store.hotelName;
     this.hotelDetails = this.$store.state.Store.hotelDetails;
     this.hotelAmenities = this.$store.state.Store.hotelAmenities;
     this.hotelImages = this.$store.state.Store.hotelImages;
+    this.latitude = this.$store.state.Store.latitude;
+    this.longitude = this.$store.state.Store.longitude;
   },
   computed: {
     check_amenities(){  
@@ -201,8 +219,14 @@ h2#name{
   font-size: 4rem;
   // margin-bottom: 1rem;
 }
-#carousel {
+#figures{
+  display: flex;
+  width: 80%;
   margin: auto;
+  justify-content: space-around;
+}
+#carousel {
+  // margin: auto;
   margin-bottom: 3rem;
   // margin-left: 10%;
   display: flex; //grid for columns
@@ -225,6 +249,10 @@ h2#name{
   flex-direction: column;
   vertical-align: bottom;
   // border: solid;
+}
+#map{
+  // float: right;
+  margin: auto;
 }
 
 div#descbox {
@@ -292,5 +320,9 @@ div#room-cards {
   }
   }
 }
-
+a {
+  text-align: center;
+  margin: 0;
+  height: fit-content;
+}
 </style>
