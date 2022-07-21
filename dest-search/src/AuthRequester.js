@@ -11,6 +11,7 @@ class AuthRequester {
   */
   constructor(component) {
     const store = component.$store;
+    assert(store !== undefined)
     const self = this;
     
     self.store = store
@@ -97,18 +98,13 @@ class AuthRequester {
   wrap_request = (...args) => this._wrap_request(...args)
   async _wrap_request(request_func, endpoint, options={}) {
     const self = this;
-  }
-
-  get = (...args) => this._get(...args)
-  async _get(endpoint, options={}) {
-    const self = this;
     assert(!self.auth_failed)
 
     const headers = self.build_headers()
     options = Object.assign(options, headers)
     
     try {
-      return await axios.get(endpoint, options)
+      return await request_func(endpoint, options)
     } catch (access_error) {
       const status_code = access_error.response.status
       console.warn('FAIL STATUS CODE', status_code)
@@ -154,6 +150,20 @@ class AuthRequester {
         throw access_error
       }
     }
+  }
+
+  get = (...args) => this._get(...args)
+  async _get(endpoint, options={}) {
+    return await this.wrap_request(
+      axios.get, endpoint, options
+    )
+  }
+
+  post = (...args) => this._post(...args)
+  async _post(endpoint, options={}) {
+    return await this.wrap_request(
+      axios.post, endpoint, options
+    )
   }
 }
 

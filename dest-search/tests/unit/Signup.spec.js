@@ -3,6 +3,7 @@ import SignUp from '../../src/components/SignUp.vue'
 import Login from '../../src/components/Login.vue'
 import VuexAttach from '../../src/store/VuexAttach.js'
 import AuthRequester from '../../src/AuthRequester.js'
+import router from '../../src/router'
 import App from '../../src/App.vue'
 import Buefy from 'buefy'
 
@@ -14,6 +15,7 @@ import Vuex from 'vuex'
 import sleep from 'await-sleep'
 import stubs from './stubs.js'
 import { assert, time } from 'console'
+import { wrap } from 'lodash'
 
 const segfault_handler = require('segfault-handler');
 const fs = require('fs');
@@ -311,13 +313,45 @@ describe('Signup Test', () => {
     expect(status_code).toBe(200)
   })
 
-  /*
   it('logout success test', async () => {
-    const wrapper = mount(App, {
-      store, localVue,
-      //specify custom components
-      stubs: stubs
+    // click the logout button on the navbar to logout
+    const mock_jquery_navbar = new Object({
+      ready(func) { func() },
+      height() { return 500 }
     })
+
+    const wrapper = mount(App, {
+      store, localVue, router,
+      //specify custom components
+      stubs: stubs,
+      methods: {
+        get_navbar() {
+          return mock_jquery_navbar
+        }
+      }
+    })
+
+    // check that the user is logged in and the
+    // auth token works before the test starts
+    wrapper.$store = store
+    const requester = new AuthRequester(wrapper)
+    let status_code, response
+    console.log('PRE-REQUEST')
+    
+    try {
+      response = await requester.get('profile')
+      console.log('PROFILE RESP', response)
+      status_code = response.status
+    } catch (error) {
+      console.log('ERR-RESPONSE', error.response)
+      status_code = error.response.status_code
+    }
+
+    // make sure the authenticated request succeeds
+    expect(status_code).toBe(200)
+
+    const logout_button = wrapper.find('#logout-button')
+    expect(logout_button.exists()).toBe(true);
+    // await logout_button.vm.$listeners.click()
   })
-  */
 })
