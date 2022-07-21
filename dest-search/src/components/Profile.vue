@@ -1,8 +1,8 @@
 <template>
   <div class="tile is-ancestor details">
 
-    <div class="tile is-parent">
-      <article class="tile is-child">
+    <div class="tile is-parent is-vertical">
+      <article class="tile is-child box">
         <div class="content">
           <p class="title">Profile Info</p>
           <p class="subtitle"></p>
@@ -28,13 +28,16 @@
 
         </div>
       </article>
+      <article class="tile is-child box">
+        <p class="title">Payment Information</p>
+        <p class="subtitle">List of payment methods saved under your account</p>
+      </article>
     </div>
     
-    <div class="tile is-vertical is-8">
+    <div class="tile is-8">
       <div class="tile">
-
-        <div class="tile is-parent">
-          <article class="tile is-child">
+        <div class="tile is-parent is-vertical">
+          <article class="tile is-child box">
             <p class="title">Booking Details</p>
             <p class="subtitle">The most recent booking will be shown</p>
             <div class="content">
@@ -88,22 +91,18 @@
               </p>
             </div>
           </article>
-        </div>
-
-        <div class="tile is-parent is-vertical">
-          <article class="tile is-child">
-            <p class="title">Payment Information</p>
-            <p class="subtitle">List of payment methods saved under your account</p>
-          </article>
-          <article class="tile is-child">
+          <article class="tile is-child box">
             <p class="title">Edit Account</p>
             <b-button
               label="Delete account"
               type="is-danger"
               size="is-medium"
               id = "delete_account_button"
-              @click="isDeleteAccountModalActive = true" />
-
+              @click="isDeleteAccountModalActive = true" 
+            />
+            
+            <p class="title is-4"><br>Warning</p>
+            <p class="subtitle">Account deletion is a non-reversible process. All information associated with the account will be deleted from the database.</p>
             <b-modal
               v-model="isDeleteAccountModalActive"
               has-modal-card
@@ -121,19 +120,7 @@
             </b-modal>
           </article>
         </div>
-
       </div>
-
-      <div class="tile is-parent">
-        <article class="tile is-child">
-          <p class="title">Warning</p>
-          <p class="subtitle">Account deletion is a non-reversible process. All information associated with the account will be deleted from the database.</p>
-          <div class="content">
-            <!-- Content -->
-          </div>
-        </article>
-      </div>
-
     </div>
 
     
@@ -412,6 +399,8 @@ div#load-status {
   padding-top: 2rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  width: 70%;
+  margin: auto;
 }
 
 p {
