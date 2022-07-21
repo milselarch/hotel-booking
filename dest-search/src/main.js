@@ -19,6 +19,7 @@ import router from './router'
 import axios from 'axios'
 
 import VueCardFormat from 'vue-credit-card-validation';
+import * as VueGoogleMaps from 'vue2-google-maps';
 
 const infiniteScroll =  require('vue-infinite-scroll');
 
@@ -27,6 +28,12 @@ axios.defaults.baseURL = "http://127.0.0.1:8000/"
 Vue.use(Vuex)
 // const store = new Vuex.Store(VuexStore);
 // sync(store, router);
+
+Vue.use(VueGoogleMaps, {
+  load: {
+    key: 'AIzaSyAF557v7RJcGzZdlQ3H7dy9lTY6wuSb5mM'
+  }
+});
 
 library.add(fas)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
