@@ -33,37 +33,6 @@
     <div class="tile is-vertical is-8">
       <div class="tile">
 
-        <div class="tile is-parent is-vertical">
-          <article class="tile is-child notification is-success">
-            <p class="title">Payment Information</p>
-            <p class="subtitle">List of payment methods saved under your account</p>
-          </article>
-          <article class="tile is-child notification is-warning">
-            <p class="title">Edit Account</p>
-            <b-button
-              label="Delete account"
-              type="is-danger"
-              size="is-medium"
-              @click="isDeleteAccountModalActive = true" />
-
-            <b-modal
-              v-model="isDeleteAccountModalActive"
-              has-modal-card
-              trap-focus
-              :destroy-on-hide="false"
-              aria-role="dialog"
-              aria-label="Example Modal"
-              close-button-aria-label="Close"
-              aria-modal>
-              <DeleteAccount 
-                v-show="isDeleteAccountModalActive"
-                @deleted="account_deleted"
-                @close_delete_modal = "isDeleteAccountModalActive = false"
-              />
-            </b-modal>
-          </article>
-        </div>
-
         <div class="tile is-parent">
           <article class="tile is-child notification is-info">
             <p class="title">Booking Details</p>
@@ -117,7 +86,38 @@
               <p>
                 Hotel terms and condition: <b-tag>{{ hotel_tnc }}</b-tag>
               </p>
-          </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="tile is-parent is-vertical">
+          <article class="tile is-child notification is-success">
+            <p class="title">Payment Information</p>
+            <p class="subtitle">List of payment methods saved under your account</p>
+          </article>
+          <article class="tile is-child notification is-warning">
+            <p class="title">Edit Account</p>
+            <b-button
+              label="Delete account"
+              type="is-danger"
+              size="is-medium"
+              @click="isDeleteAccountModalActive = true" />
+
+            <b-modal
+              v-model="isDeleteAccountModalActive"
+              has-modal-card
+              trap-focus
+              :destroy-on-hide="false"
+              aria-role="dialog"
+              aria-label="Example Modal"
+              close-button-aria-label="Close"
+              aria-modal>
+              <DeleteAccount 
+                v-show="isDeleteAccountModalActive"
+                @deleted="account_deleted"
+                @close_delete_modal = "isDeleteAccountModalActive = false"
+              />
+            </b-modal>
           </article>
         </div>
 
@@ -300,7 +300,6 @@ export default {
         self.email = response.data.email
 
         let last = responseBooking.data.length-1
-        console.log("last", last)
         self.booking_id = responseBooking.data[last].uid
         self.destination_id = responseBooking.data[last].destination_id
         self.hotel_id = responseBooking.data[last].hotel_id

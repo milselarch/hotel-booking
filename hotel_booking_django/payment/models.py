@@ -6,7 +6,7 @@ from django_cryptography.fields import encrypt
 
 class user_payment(common_attribute_model):
     payment_mode = models.PositiveIntegerField(validators=[MinValueValidator(10000000),MaxValueValidator(999999999999999)], blank=True, null=True)
-    user_account = models.ForeignKey(user_account, on_delete=models.PROTECT, blank=False, null=False)
+    user_account = models.ForeignKey(user_account, on_delete=models.SET_NULL, blank=False, null=True)
     is_primary_payment_mode = models.BooleanField(default = False, blank=True, null=True)
 
 class user_payment_credit_card_details(common_attribute_model):

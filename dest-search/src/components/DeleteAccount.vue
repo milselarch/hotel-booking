@@ -88,15 +88,15 @@
                 console.log('LOAD REQ START')
 
                 try {
-                response = await requester.delete('auth/users/me/', formdata)
-                this.deleted = true
-                this.$emit("deleted")
+                    response = await requester.delete('auth/users/me/', formdata)
+                    this.deleted = true
+                    this.$emit("deleted")
 
                 } catch (error) {
                     console.log(error)
                     const status_code = error.response.status;
                     if (status_code === 401) {
-                    this.logout(true)
+                        this.logout(true)
                     } else {
                         this.status_text = 'profile load failed'
                         response = error.response;
@@ -108,7 +108,7 @@
                 }
 
                 if (!this.deleted) {
-                return false;
+                    return false;
                 }
 
                 console.log('Account Deleted');

@@ -7,7 +7,7 @@ from payment.models import user_payment_credit_card_details
 class booking_order(common_attribute_model):
 
     # payee id = user id
-    user_account = models.ForeignKey(user_account, on_delete=models.PROTECT, blank=False, null=False)
+    user_account = models.ForeignKey(user_account, on_delete=models.SET_NULL, blank=False, null=True)
     destination_id = models.CharField(max_length=255, blank=False, null=False)
     hotel_id = models.CharField(max_length=255, blank=False, null=False)
     room_type_id = models.CharField(max_length=255, blank=False, null=False)
