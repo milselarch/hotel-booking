@@ -101,6 +101,7 @@
               label="Delete account"
               type="is-danger"
               size="is-medium"
+              id = "delete_account_button"
               @click="isDeleteAccountModalActive = true" />
 
             <b-modal

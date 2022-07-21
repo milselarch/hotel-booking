@@ -28,6 +28,7 @@
                 <b-button
                     label="Confirm"
                     type="is-danger"
+                    id = "confirm_delete_account_button"
                     @click="delete_account()" />
             </footer>
 
