@@ -137,7 +137,7 @@ export default {
 
   mounted () {
     const self = this
-    const navbar = $(self.$refs.main_navbar.$el)
+    const navbar = self.get_navbar()
     
     // ensure that the navbar's height is being used
     // to offset the rest of the page's content
@@ -150,6 +150,12 @@ export default {
   },
 
   methods: {
+    get_navbar() {
+      // I refactor this into its own method so that
+      // we can mock in jest later when $refs dont work
+      return $(this.$refs.main_navbar.$el)
+    },
+
     on_login_complete() {
       this.$router.push("/about") // TODO: redirect to profile page
       this.login_modal_active = false;
