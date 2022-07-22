@@ -1321,6 +1321,8 @@ export default {
         billing_address_post_code: this.ba_postal_code,
       };
 
+      console.log("formdata",formdata);
+
       (self.first_name_error = {}),
         (self.last_name_error = {}),
         (self.email_error = {}),
