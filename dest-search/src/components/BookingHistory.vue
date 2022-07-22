@@ -60,13 +60,13 @@
               </div>
               <div class="columns is-mobile">
                 <div class="column is-one-third">
-                  <b>Hotel</b><br />{{ booking.hotel_id }}
+                  <b>Hotel</b><br />{{ booking.hotel_name }}
                 </div>
                 <div class="column is-one-third">
-                  <b>Destination</b><br />{{ booking.destination_id }}
+                  <b>Destination</b><br />{{ booking.destination_region }}
                 </div>
                 <div class="column is-one-third">
-                  <b>Room Type</b><br />{{ booking.room_type_id }}
+                  <b>Room Type</b><br />{{ booking.room_type }}
                 </div>
               </div>
               <div class="columns is-mobile">

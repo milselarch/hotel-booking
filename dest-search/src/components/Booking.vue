@@ -1295,6 +1295,11 @@ export default {
         destination_id: this.destination_id,
         hotel_id: this.hotel_id,
         room_type_id: this.room_id,
+
+        destination_region: this.destination_region,
+        hotel_name: this.hotel_name,
+        room_type: this.room_type,
+        
         booking_id: "", //generated_in_backend
         check_in_date: this.check_in_date,
         check_out_date: this.check_out_date,
@@ -1372,6 +1377,16 @@ export default {
           if (errors === undefined) {
             other_errors.push(err_resp.message);
             errors = [];
+          }
+
+          if (errors.hasOwnProperty("destination_region")) {
+            other_errors.push(errors["destination_region"]);
+          }
+          if (errors.hasOwnProperty("hotel_name")) {
+            other_errors.push(errors["hotel_name"]);
+          }
+          if (errors.hasOwnProperty("room_type")) {
+            other_errors.push(errors["room_type"]);
           }
 
           if (errors.hasOwnProperty("destination_id")) {

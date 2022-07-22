@@ -11,7 +11,13 @@ class booking_order(common_attribute_model):
     user_account = models.ForeignKey(user_account, on_delete=models.SET_NULL, blank=False, null=True)
     destination_id = models.CharField(max_length=255, blank=False, null=False)
     hotel_id = models.CharField(max_length=255, blank=False, null=False)
+    
+    hotel_name = models.CharField(max_length=255, blank=True, null=True)
+    room_type = models.CharField(max_length=255, blank=True, null=True)
+    destination_region = models.CharField(max_length=255, blank=True, null=True)
+    
     room_type_id = models.CharField(max_length=255, blank=False, null=False)
+    
     booking_id = models.CharField(max_length=255, blank=True, null=True)
     check_in_date = models.DateField(blank=False, null=False)
     check_out_date = models.DateField(blank=False, null=False)
