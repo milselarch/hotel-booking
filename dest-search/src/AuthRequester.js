@@ -11,6 +11,7 @@ class AuthRequester {
   */
   constructor(component) {
     const store = component.$store;
+    assert(store !== undefined)
     const self = this;
     
     self.store = store
@@ -26,6 +27,16 @@ class AuthRequester {
     self.refresh_token = state.Persistent.refresh_token
   };
 
+  set_auth_token = (...args) => this._set_auth_token(...args)
+  _set_auth_token(auth_token) {
+    this.auth_token = auth_token
+  }
+
+  set_refresh_token = (...args) => this._set_refresh_token(...args)
+  _set_refresh_token(refresh_token) {
+    this.refresh_token = refresh_token
+  }
+
   build_headers = () => this._build_headers()
   _build_headers() {
     if (this.auth_token === null) {
@@ -34,7 +45,7 @@ class AuthRequester {
     }
 
     return {
-      headers: { Authorization: 'JWT ' + this.auth_token }
+      Authorization: 'JWT ' + this.auth_token
     }
   };
 
@@ -95,20 +106,17 @@ class AuthRequester {
   }
 
   wrap_request = (...args) => this._wrap_request(...args)
-  async _wrap_request(request_func, endpoint, options={}) {
-    const self = this;
-  }
-
-  get = (...args) => this._get(...args)
-  async _get(endpoint, options={}) {
+  async _wrap_request(request_func, endpoint, data, options={}) {
     const self = this;
     assert(!self.auth_failed)
 
     const headers = self.build_headers()
-    options = Object.assign(options, headers)
-    
+    if (options.headers === undefined) { options.headers = {} }
+    options.headers = Object.assign(options.headers, headers)
+    console.log('NEW OPTIONS', options)
+
     try {
-      return await axios.get(endpoint, options)
+      return await request_func(endpoint, data, options)
     } catch (access_error) {
       const status_code = access_error.response.status
       console.warn('FAIL STATUS CODE', status_code)
@@ -145,9 +153,9 @@ class AuthRequester {
         
         assert(refresh_success)
         const headers = self.build_headers()
-        options = Object.assign(options, headers)
+        options.headers = Object.assign(options.headers, headers)
         // call endpoint again with the new access token
-        return await axios.get(endpoint, options)
+        return await request_func(endpoint, data, options)
       } else {
         // rethrow error if its not a 401
         // (401 means access token expired)
@@ -156,47 +164,28 @@ class AuthRequester {
     }
   }
 
-  async delete(endpoint, data, options={}) {
-    const self = this;
-    assert(!self.auth_failed)
-
-    const headers = self.build_headers()
-    options = Object.assign(options, headers)
-    options["data"] = data
-    console.log(options)
-    
-    try {
-      let response = await axios.delete(endpoint, options)
-      return response
-    } catch (access_error) {
-      const status_code = access_error.response.status
-      console.warn('FAIL STATUS CODE', status_code)
-      console.warn('FAIL ERR', access_error)
-
-      if (status_code === 401) {
-        let refresh_success = false
-
-        try {
-          refresh_success = await self.refresh()
-        } catch (refresh_error) {
-          console.error('REFRESH FAILED', refresh_error)
-        }
-
-        if (!refresh_success) { throw access_error }
-        
-        assert(refresh_success)
-        const headers = self.build_headers()
-        options = Object.assign(options, headers)
-        // call endpoint again with the new access token
-        return await axios.delete(endpoint, options)
-      } else {
-        // rethrow error if its not a 401
-        // (401 means access token expired)
-        throw access_error
-      }
-    }
+  get = (...args) => this._get(...args)
+  async _get(endpoint, options={}) {
+    return await this.wrap_request(
+      (url, _, config) => {
+        return axios.get(url, config)
+      }, endpoint, undefined, options
+    )
   }
 
+  post = (...args) => this._post(...args)
+  async _post(endpoint, data={}, options={}) {
+    return await this.wrap_request(
+      axios.post, endpoint, data, options
+    )
+  }
+
+  delete = (...args) => this._delete(...args)
+  async _delete(endpoint, data={}, options={}) {
+    return await this.wrap_request(
+      axios.delete, endpoint, data, options
+    )
+  }
 }
 
 export default AuthRequester

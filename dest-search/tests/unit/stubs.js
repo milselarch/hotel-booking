@@ -10,7 +10,8 @@ export default {
   'b-datepicker': true,
   'b-message': true,
   'b-progress': true,
-  'b-rate': true
+  'b-rate': true,
+  'b-dropdown-item': true
 }
 
 /*

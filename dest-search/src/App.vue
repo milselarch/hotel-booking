@@ -79,14 +79,19 @@
                 >
                   Profile
                 </b-dropdown-item>
+                <!-- 
+                needs to be click.native for jest unittests
+                to register click event properly
+                -->
                 <b-dropdown-item 
-                  v-show="authenticated" @click="gotto_booking_order_history"
+                  v-show="authenticated"
+                  @click="gotto_booking_order_history"
                   aria-role="listitem"
                 >
                   Booking Order History
                 </b-dropdown-item>
                 <b-dropdown-item 
-                  v-show="authenticated" @click="logout"
+                  v-show="authenticated" @click.native="logout"
                   aria-role="listitem" id="logout-button"
                 >
                   Logout
@@ -126,8 +131,11 @@ import AuthRequester from './AuthRequester'
 import router from './router'
 import $ from 'jquery'
 
+import 'jquery.cookie'
+import sleep from 'await-sleep'
 import Login from '@/components/Login.vue'
 import SignUp from '@/components/SignUp.vue'
+import axios from 'axios'
 // import router from './router'
 
 export default {
@@ -138,12 +146,14 @@ export default {
       modal_active: false,
       login_modal_active: false,
       signup_modal_active: false,
+      // track logout requests (for jest testing)
+      logout_requests: []
     }
   },
 
   mounted () {
     const self = this
-    const navbar = $(self.$refs.main_navbar.$el)
+    const navbar = self.get_navbar()
     
     // ensure that the navbar's height is being used
     // to offset the rest of the page's content
@@ -152,10 +162,46 @@ export default {
       const height = navbar.height()
       console.log('NAVBAR PAD HEIGHT', height)
       $('body').css("padding-top", height);
-    })
+    });
+
+    /*
+    continuously poll for CSRF token from
+    the backend servers
+    */
+    (async () => {
+      let response = null
+      let sleep_delay = 0
+
+      while (response === null) {
+        await sleep(sleep_delay);
+        sleep_delay = 1000;
+
+        try {
+          response = await axios.post('load-csrf')
+        } catch (error) {
+          console.error('FAILED CSRF REQ', response)
+          continue
+        }
+
+        const csrf_token = response.data.token
+        // $.cookie('csrftoken', csrf_token)
+        // https://stackoverflow.com/questions/71109384
+        axios.defaults.headers.common['X-CSRF-TOKEN'] = csrf_token;
+        axios.defaults.xsrfCookieName = 'csrftoken'
+        axios.defaults.xsrfHeaderName = "X-CSRFToken"
+        axios.defaults.withCredentials = true;
+        break
+      }
+    })();
   },
 
   methods: {
+    get_navbar() {
+      // I refactor this into its own method so that
+      // we can mock in jest later when $refs dont work
+      return $(this.$refs.main_navbar.$el)
+    },
+
     on_login_complete() {
       // this.$router.push("/about") // TODO: redirect to profile page
       // this.$buefy.toast.open({
@@ -211,17 +257,40 @@ export default {
     },
 
     logout() {
-      this.$store.commit('clear_credentials')
-      const requester = new AuthRequester(this)
-      // TODO: send logout request
+      console.log('LOGOUT-AUTH', this.authenticated)
+      if (!this.authenticated) { return false }
 
-      // router.push()
+      const refresh_token = this.$store.getters.refresh_token
+      const requester = new AuthRequester(this)
+      // send logout request to blacklist auth crednentials
+
+      const csrf_token = $.cookie('csrftoken');
+      console.log('CSRF-TOKLEN', csrf_token)
+      const logout_request = requester.post(
+        'token-logout', {
+          refresh_token: refresh_token
+        }, {
+          withCredentials: true, 
+          headers: {
+            'X-CSRF-TOKEN': csrf_token,
+            "X-CSRFTOKEN": csrf_token
+          }
+        }
+      ).catch(error => {
+        console.error('LOGOUT REQUEST FAILED', error)
+      })
+
+      this.logout_requests.push(logout_request)
+      console.log('LOGOUT-REQUESTS', this.logout_requests)
       this.$buefy.toast.open({
         duration: 5000,
         message: `Signed out`,
         type: 'is-dark',
         pauseOnHover: true
-      });
+      })
+
+      this.$store.commit('clear_credentials')
+      return logout_request
     },
 
     async auth_test() {

@@ -1,10 +1,16 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
+from django.utils.decorators import method_decorator
 
+from rest_framework.authentication import (
+    SessionAuthentication, BasicAuthentication
+)
 from rest_framework_simplejwt.authentication import (
     JWTAuthentication, JWTTokenUserAuthentication
 )
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import authentication, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -14,10 +20,15 @@ from rest_framework import status
 
 
 class LogoutView(APIView):
-    permission_classes = (IsAuthenticated,)
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        request.csrf_processing_done = True
+        return super().dispatch(request, *args, **kwargs)
 
-    @staticmethod
-    def post(request):
+    @method_decorator(csrf_exempt)
+    def post(self, request, format=None):
+        print('ENTER COOKIE', request)
+
         try:
             refresh_token = request.data["refresh_token"]
             token = RefreshToken(refresh_token)
@@ -30,6 +41,7 @@ class LogoutView(APIView):
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
+
     # authentication_classes = [JWTAuthentication]
 
     @staticmethod
@@ -47,10 +59,9 @@ class ProfileView(APIView):
         return response
 
 
-
 # a convenient view without the need to authenticate for load testing
 class LoadTestingView(APIView):
     @staticmethod
     def get(request):
-        data = { "status": "ok"}
-        return Response(data, status = status.HTTP_200_OK)
+        data = {"status": "ok"}
+        return Response(data, status=status.HTTP_200_OK)
