@@ -90,6 +90,11 @@
 
                 try {
                     response = await requester.delete('auth/users/me/', formdata)
+                    const status_code = response.status;
+                    if (status_code !== 204){
+                        console.warn("Deletion Failed")
+                        return
+                    }
                     this.deleted = true
                     this.$emit("deleted")
 
@@ -105,7 +110,6 @@
                         this.hasError = true
                         this.password_error = error.response.data["current_password"]
                     }
-
                 }
 
                 if (!this.deleted) {

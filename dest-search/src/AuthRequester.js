@@ -166,7 +166,8 @@ class AuthRequester {
     console.log(options)
     
     try {
-      return await axios.delete(endpoint, options)
+      let response = await axios.delete(endpoint, options)
+      return response
     } catch (access_error) {
       const status_code = access_error.response.status
       console.warn('FAIL STATUS CODE', status_code)
@@ -187,7 +188,7 @@ class AuthRequester {
         const headers = self.build_headers()
         options = Object.assign(options, headers)
         // call endpoint again with the new access token
-        return await axios.get(endpoint, options)
+        return await axios.delete(endpoint, options)
       } else {
         // rethrow error if its not a 401
         // (401 means access token expired)
