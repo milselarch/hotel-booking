@@ -22,8 +22,19 @@
             </div>
           </div>
           <div id="account_data">
-            <p> Email: {{ email }} </p>
-            <p>Name: {{ first_name }} {{ last_name }} </p>
+            <p>
+              Email: <b-tag>{{ email }}</b-tag>
+            </p>
+            <p>
+              Name: <b-tag>{{user_title}} {{ first_name }} {{ last_name }}</b-tag>
+            </p>
+            <p>
+              Phone number: <b-tag>{{ user_phone_country }} {{ user_phone }}</b-tag>
+            </p>
+            <p>
+              User creation date: <b-tag>{{ user_datetime_created }}</b-tag>
+            </p>
+
           </div>
 
         </div>
@@ -190,9 +201,15 @@ export default {
       is_mounted: false,
 
       load_success: false,
+
+      uid: null,
+      email: null,
       first_name: null,
       last_name: null,
-      email: null,
+      user_phone: null,
+      user_title: null,
+      user_phone_country: null,
+      user_datetime_created: null,
 
       isDeleteAccountModalActive: false,
 
@@ -258,7 +275,7 @@ export default {
         console.log('LOAD REQ START')
 
         try {
-          response = await requester.get('profile')
+          response = await requester.get('auth/users/me/')
           responseBooking = await requester.get("booking/")
           self.load_success = true
         } catch (error) {
@@ -283,9 +300,14 @@ export default {
         console.log('RESPONSE', response);
         console.log('Booking Response', responseBooking);
         self.status_text = 'profile info'
+        self.user_title = response.title
         self.first_name = response.data.first_name
         self.last_name = response.data.last_name
         self.email = response.data.email
+        self.user_phone = response.data.phone
+        self.user_phone_country = response.data.phone_country
+        self.user_datetime_created = response.data.datetime_created.split("T")[0]
+        con
 
         let last = responseBooking.data.length-1
         self.booking_id = responseBooking.data[last].uid
