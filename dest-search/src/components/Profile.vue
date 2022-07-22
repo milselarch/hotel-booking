@@ -23,10 +23,12 @@
           </div>
           <div id="account_data">
             <p>
-              Email: <b-tag>{{ email }}</b-tag>
+              Email: <b-tag id="email-info">{{ email }}</b-tag>
             </p>
             <p>
-              Name: <b-tag>{{user_title}} {{ first_name }} {{ last_name }}</b-tag>
+              Name: <b-tag id="name-info">
+                {{user_title}} {{ first_name }} {{ last_name }}
+              </b-tag>
             </p>
             <p>
               Phone number: <b-tag>{{ user_phone_country }} {{ user_phone }}</b-tag>
@@ -309,6 +311,8 @@ export default {
         self.user_datetime_created = response.data.datetime_created.split("T")[0]
 
         let last = responseBooking.data.length-1
+        if (last === -1) { return false }
+
         self.booking_id = responseBooking.data[last].uid
         self.destination_id = responseBooking.data[last].destination_id
         self.hotel_id = responseBooking.data[last].hotel_id
@@ -340,12 +344,11 @@ export default {
       // clear authentication tokens
       this.$store.commit('clear_credentials')
       this.$buefy.toast.open({
-                    duration: 5000,
-                    message: `Sad to see you go :( Your account has been deleted`,
-                    type: 'is-link',
-                    pauseOnHover: true
-                })
-
+        duration: 5000,
+        message: `Sad to see you go :( Your account has been deleted`,
+        type: 'is-link',
+        pauseOnHover: true
+      })
     }
   },
 
@@ -370,7 +373,6 @@ export default {
   unmounted() {
     self.is_mounted = false;
   }
-
 }
 
 </script>

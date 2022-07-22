@@ -318,6 +318,28 @@ describe('Signup Test', () => {
     // make sure the authenticated request succeeds
     expect(status_code).toBe(200)
   })
+
+  it ('profile load test', async () => {
+    // check that profile page can load profile info
+    // when user is authenticated
+    const wrapper = mount(Profile, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    expect(store.getters.authenticated).toBe(true)
+    while (wrapper.vm.is_loading) { await sleep(100); }
+    const email_component = wrapper.find('#email-info')
+    const name_component = wrapper.find('#name-info')
+    const profile_email = email_component.text()
+    const profile_name = name_component.text()
+
+    const full_name = `${user.first_name} ${user.last_name}`
+    expect(profile_email).toBe(user.email)
+    expect(profile_name).toBe(full_name)
+    console.log('EMAIL_COMPONENT', email_component.text())
+  })
   
   it('logout success test', async () => {
     // click the logout button on the navbar to logout
