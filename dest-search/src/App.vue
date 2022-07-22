@@ -157,7 +157,14 @@ export default {
 
   methods: {
     on_login_complete() {
-      this.$router.push("/about") // TODO: redirect to profile page
+      // this.$router.push("/about") // TODO: redirect to profile page
+      // this.$buefy.toast.open({
+      //   duration: 5000,
+      //   message: `Login Succesful! Welcome back!`,
+      //   type: 'is-success',
+      //   pauseOnHover: true
+      // });
+      
       this.login_modal_active = false;
       this.signup_modal_active = false;
       this.modal_active = false;
@@ -182,12 +189,14 @@ export default {
       const name = `${first_name} ${last_name}`
       const escaped_name = _.escape(name)
 
-      this.$buefy.toast.open({
-        duration: 5000,
-        message: `Welcome  to Ascenda, ${escaped_name}!`,
-        type: 'is-success',
-        pauseOnHover: true
-      });
+      if (!escaped_name) {
+        this.$buefy.toast.open({
+          duration: 5000,
+          message: `Welcome  to Ascenda, ${escaped_name}!`,
+          type: 'is-success',
+          pauseOnHover: true
+        });
+      }
 
       this.$refs.login_modal.set_email(email)
       this.open_login();

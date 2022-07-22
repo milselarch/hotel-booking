@@ -157,12 +157,25 @@ export default {
         name: room.roomNormalizedDescription,
         price: room.price
       }
-      this.$store.commit("getRoomDetails", roominfo)
-      router.push({
-        path: (
-          `/booking`
-        )
-      })
+      
+      //if user logged in 
+        if (this.$store.getters.authenticated) {
+          this.$store.commit("getRoomDetails", roominfo)
+          router.push("/booking");
+        }
+      
+      //if not logged in 
+        if (!this.$store.getters.authenticated) {
+          // toast
+          this.$buefy.toast.open({
+            duration: 5000,
+            message: `Please sign up or login to proceed with booking!`,
+            type: 'is-danger',
+            pauseOnHover: true
+          });
+          this.$emit('open-signup', true)
+        }
+      
     }
   },
   mounted() {
