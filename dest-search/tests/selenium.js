@@ -34,9 +34,18 @@ async function example(){
     }
     await driver.sleep(3000);
     await driver.executeScript("window.scrollTo({ top: 700, behavior: 'smooth'})");
+    await driver.sleep(1000);
 
     // await driver.wait(until.elementIsVisible(el),100);
+    driver.findElement(By.id("hotel-cards")).click();
 
+    for (let i=0; i<3; i++){
+        await driver.sleep(1500);
+        await driver.executeScript("window.scrollBy({top: 800, behavior: 'smooth'})");
+    }
+
+    await driver.sleep(3000);
+    await driver.executeScript("window.scrollTo({ top: 0, behavior: 'smooth'})");
 
     //It is always a safe practice to quit the browser after execution
     await driver.sleep(3000);
