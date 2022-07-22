@@ -59,12 +59,24 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
 ]
+# set CSRF hosts allowed to be the same as for CORS
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+CSRF_COOKIE_NAME = "csrftoken"
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_HTTPONLY = False
+# CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
 
 CORS_ALLOW_HEADERS = [
-    'HTTP_AUTHORIZATION', 'content-type', 'Authorization'
+    'HTTP_AUTHORIZATION', 'content-type', 'Authorization',
+    'x-csrf-token', "X-CSRFToken", "refresh_token"
 ]
 
 ROOT_URLCONF = 'hotel_booking_django.urls'

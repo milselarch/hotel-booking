@@ -131,8 +131,11 @@ import AuthRequester from './AuthRequester'
 import router from './router'
 import $ from 'jquery'
 
+import 'jquery.cookie'
+import sleep from 'await-sleep'
 import Login from '@/components/Login.vue'
 import SignUp from '@/components/SignUp.vue'
+import axios from 'axios'
 // import router from './router'
 
 export default {
@@ -159,7 +162,37 @@ export default {
       const height = navbar.height()
       console.log('NAVBAR PAD HEIGHT', height)
       $('body').css("padding-top", height);
-    })
+    });
+
+    /*
+    continuously poll for CSRF token from
+    the backend servers
+    */
+    (async () => {
+      let response = null
+      let sleep_delay = 0
+
+      while (response === null) {
+        await sleep(sleep_delay);
+        sleep_delay = 1000;
+
+        try {
+          response = await axios.post('load-csrf')
+        } catch (error) {
+          console.error('FAILED CSRF REQ', response)
+          continue
+        }
+
+        const csrf_token = response.data.token
+        // $.cookie('csrftoken', csrf_token)
+        // https://stackoverflow.com/questions/71109384
+        axios.defaults.headers.common['X-CSRF-TOKEN'] = csrf_token;
+        axios.defaults.xsrfCookieName = 'csrftoken'
+        axios.defaults.xsrfHeaderName = "X-CSRFToken"
+        axios.defaults.withCredentials = true;
+        break
+      }
+    })();
   },
 
   methods: {
@@ -230,9 +263,18 @@ export default {
       const refresh_token = this.$store.getters.refresh_token
       const requester = new AuthRequester(this)
       // send logout request to blacklist auth crednentials
+
+      const csrf_token = $.cookie('csrftoken');
+      console.log('CSRF-TOKLEN', csrf_token)
       const logout_request = requester.post(
-        'logout', {
-          'refresh_token': refresh_token
+        'token-logout', {
+          refresh_token: refresh_token
+        }, {
+          withCredentials: true, 
+          headers: {
+            'X-CSRF-TOKEN': csrf_token,
+            "X-CSRFTOKEN": csrf_token
+          }
         }
       ).catch(error => {
         console.error('LOGOUT REQUEST FAILED', error)
