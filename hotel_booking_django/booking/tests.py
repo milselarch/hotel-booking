@@ -87,8 +87,8 @@ class TestBooking(TestCase):
             "primary_guest_first_name": "Johnny",
             "primary_guest_last_name": "Depp",
             "primary_guest_phone": "95068345",
-            # "primary_guest_phone_country": "",
-            "primary_guest_passport_number": "E28401J",
+            "primary_guest_phone_country": "Singapore +65",
+            #"primary_guest_passport_number": "E28401J",
             # "primary_guest_passport_country": "",
             "cost_in_sgd": "99",
             "name_on_card": "Daniel",
@@ -96,9 +96,17 @@ class TestBooking(TestCase):
             "expiry_date": "2024-08-01",
             "security_code": "233",
             "billing_address_address": "59 Changi South Avenue 1",
-            # "billing_address_country": "",
+            "billing_address_country": "Singapore",
             "billing_address_city": "Singapore",
-            "billing_address_post_code": "485999"
+            "billing_address_post_code": "485999",
+            
+            "destination_id": "RsBU",
+            "did_primary_guest_accept_tnc": "true",
+            "primary_guest_email": "joebaarath@hotmail.com",
+            
+            "hotel_name": "Shangri-La Hotel Singapore",
+            "room_type": "Tower Wing, Deluxe Room, 1 King Bed",
+            "destination_region": "Merlion, Singapore"
         }
 
         self.TEST_BOOKING_2 = {
@@ -115,8 +123,8 @@ class TestBooking(TestCase):
             "primary_guest_first_name": "Johnny 2",
             "primary_guest_last_name": "Depp 2",
             "primary_guest_phone": "80000000",
-            # "primary_guest_phone_country": "",
-            "primary_guest_passport_number": "E28401G",
+            "primary_guest_phone_country": "Singapore +65",
+            #"primary_guest_passport_number": "E28401G",
             # "primary_guest_passport_country": "",
             "cost_in_sgd": "199",
             "name_on_card": "Johnny",
@@ -124,9 +132,18 @@ class TestBooking(TestCase):
             "expiry_date": "2024-08-01",
             "security_code": "244",
             "billing_address_address": "59 Changi South Avenue 2",
-            # "billing_address_country": "",
+            "billing_address_country": "Singapore",
             "billing_address_city": "Singapore 2",
-            "billing_address_post_code": "485111"
+            "billing_address_post_code": "485111",
+            
+            "destination_id": "RsBU",
+            "did_primary_guest_accept_tnc": "true",
+            "primary_guest_email": "joebaarath@hotmail.com",
+            
+            "hotel_name": "Shangri-La Hotel Singapore",
+            "room_type": "Tower Wing, Deluxe Room, 1 King Bed",
+            "destination_region": "Merlion, Singapore"
+            
         }
         
 

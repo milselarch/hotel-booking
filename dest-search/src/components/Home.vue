@@ -347,7 +347,9 @@ export default {
         checkout: end_date_str,
         numrooms: this.num_rooms,
         numguests: this.num_guests,
-        destid: this.last_dest_id
+        destid: this.last_dest_id,
+        lat: hotel['latitude'],
+        long: hotel['longitude']
         }
       this.$store.commit("getDetails", hotelinfo)
 

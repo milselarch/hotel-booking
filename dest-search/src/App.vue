@@ -36,12 +36,12 @@
           <b-navbar-item href="#">
             <router-link to="/">Home</router-link>
           </b-navbar-item>
-          <b-navbar-item href="#">
+          <!-- <b-navbar-item href="#">
             <router-link to="/about">About Us</router-link>
           </b-navbar-item>
           <b-navbar-item href="#">
             Features
-          </b-navbar-item>
+          </b-navbar-item> -->
           
           <b-navbar-item
             tag="div" id="profile-icon"
@@ -83,6 +83,13 @@
                 needs to be click.native for jest unittests
                 to register click event properly
                 -->
+                <b-dropdown-item 
+                  v-show="authenticated"
+                  @click="gotto_booking_order_history"
+                  aria-role="listitem"
+                >
+                  Booking Order History
+                </b-dropdown-item>
                 <b-dropdown-item 
                   v-show="authenticated" @click.native="logout"
                   aria-role="listitem" id="logout-button"
@@ -163,7 +170,14 @@ export default {
     },
 
     on_login_complete() {
-      this.$router.push("/about") // TODO: redirect to profile page
+      // this.$router.push("/about") // TODO: redirect to profile page
+      // this.$buefy.toast.open({
+      //   duration: 5000,
+      //   message: `Login Succesful! Welcome back!`,
+      //   type: 'is-success',
+      //   pauseOnHover: true
+      // });
+      
       this.login_modal_active = false;
       this.signup_modal_active = false;
       this.modal_active = false;
@@ -188,12 +202,14 @@ export default {
       const name = `${first_name} ${last_name}`
       const escaped_name = _.escape(name)
 
-      this.$buefy.toast.open({
-        duration: 5000,
-        message: `Welcome  to Ascenda, ${escaped_name}!`,
-        type: 'is-success',
-        pauseOnHover: true
-      });
+      if (!escaped_name) {
+        this.$buefy.toast.open({
+          duration: 5000,
+          message: `Welcome  to Ascenda, ${escaped_name}!`,
+          type: 'is-success',
+          pauseOnHover: true
+        });
+      }
 
       this.$refs.login_modal.set_email(email)
       this.open_login();
@@ -201,6 +217,10 @@ export default {
 
     goto_profile_page() {
       router.push({ path: '/profile' })
+    },
+
+    gotto_booking_order_history() {
+      router.push({ path: '/bookinghistory' })
     },
 
     logout() {

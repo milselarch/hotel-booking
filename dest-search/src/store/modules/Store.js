@@ -16,7 +16,9 @@ export default {
       checkoutdate: null,
       numrooms: null,
       numguests: null,
-      destid: null
+      destid: null,
+      latitude: null,
+      longitude: null,
     }
   },
   mutations: {
@@ -34,6 +36,8 @@ export default {
       state.numguests = hotelinfo.numguests;
       state.destid = hotelinfo.destid;
       state.hotelId = hotelinfo.hotelid;
+      state.latitude= hotelinfo.lat;
+      state.longitude= hotelinfo.long;
     },
     getAmenities(state, amenities){
       state.hotelAmenities = amenities;

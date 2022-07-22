@@ -107,6 +107,13 @@
           // const access_token = response.data.access
           // const refresh_token = response.data.refresh
           // axios.defaults.headers.common["Authorization"] = 'Bearer ' + access_token
+
+              this.$buefy.toast.open({
+                duration: 5000,
+                message: `Login succesful! Welcome  to Ascenda!`,
+                type: 'is-success',
+                pauseOnHover: true
+              });
         
         }).catch(err_resp => {
           // console.log('ERR_RESP', err_resp)

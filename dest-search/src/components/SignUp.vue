@@ -68,6 +68,9 @@
           >
             Sign Up
           </b-button>
+          <a href="#" id="signup" @click="open_login_modal()">
+            Login
+          </a>
         </div>
       </section>
 
@@ -102,6 +105,9 @@
       }
     },
     methods: {
+      open_login_modal() {
+        this.$emit('open-login', true)
+      },
       signup() {
         const self = this;
         // disallow signup if current signup
