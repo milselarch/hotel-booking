@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import booking_order
 from .serializers import booking_serializer, booking_history_serializer
 from payment.serializers import user_payment_credit_card_details_serializer
+from datetime import datetime, date
 import re
 
 # function used to validate credit card number
@@ -96,6 +97,76 @@ class user_booking_data(APIView):
             card_number = request.data['card_number']
         else:
             return Response({"card_number": "Request requires a card number field"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if 'security_code' in request.data:
+            security_code = request.data['security_code']
+            if security_code != "" and security_code != None:
+                security_code = security_code.replace(" ", "")
+                request.data['security_code'] = security_code
+                if len(security_code) != 3:
+                    return Response({"security_code": "Invalid CVV/CVC. Requires 3 digits."}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"security_code": "Missing CVV/CVC value"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"security_code": "Request requires CVV/CVC value"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if 'primary_guest_phone' in request.data:
+            primary_guest_phone = request.data['primary_guest_phone']
+            if primary_guest_phone != "" and primary_guest_phone != None:
+                primary_guest_phone = primary_guest_phone.replace(" ", "")
+                request.data['primary_guest_phone'] = primary_guest_phone
+                if (len(primary_guest_phone) < 8 or len(primary_guest_phone) > 12):
+                    return Response({"primary_guest_phone": "Invalid Primary Guest Phone number. Requires 8-12 digits."}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"primary_guest_phone": "Missing Primary Guest Phone number"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"primary_guest_phone": "Request requires Primary Guest Phone number"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'billing_address_post_code' in request.data:
+            billing_address_post_code = request.data['billing_address_post_code']
+            if billing_address_post_code != "" and billing_address_post_code != None:
+                billing_address_post_code = billing_address_post_code.replace(" ", "")
+                request.data['billing_address_post_code'] = billing_address_post_code
+                if (len(billing_address_post_code) < 5 or len(billing_address_post_code) > 6):
+                    return Response({"billing_address_post_code": "Invalid Postal Code. Requires 5-6 digits."}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"billing_address_post_code": "Missing Postal Code"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"billing_address_post_code": "Request requires Postal Code"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if 'primary_guest_email' in request.data:
+            primary_guest_email = request.data['primary_guest_email']
+            if primary_guest_email != "" and primary_guest_email != None:
+                primary_guest_email = primary_guest_email.replace(" ", "")
+                request.data['primary_guest_email'] = primary_guest_email
+                regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                if (re.fullmatch(regex, primary_guest_email)):
+                    print("valid email")
+                else:
+                    return Response({"primary_guest_email": "Invalid Primary Guest's Email Address Format"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"primary_guest_email": "Missing Primary Guest's Email"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"primary_guest_email": "Request Primary Guest's Email"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        if 'expiry_date' in request.data:
+            expiry_date = request.data['expiry_date']
+            if expiry_date != "" and expiry_date != None:
+                expiry_date = expiry_date.replace(" ", "")
+                request.data['expiry_date'] = expiry_date
+                # incorrect format
+                try:
+                    exp_date = datetime.strptime(expiry_date, "%Y-%m-%d")
+                    if (exp_date.year < date.today().year) or (exp_date.year == date.today().year and exp_date.month < date.today().month ):
+                        return Response({"expiry_date": "Invalid Credit Card Expiry Date. Credit card has expired."}, status=status.HTTP_400_BAD_REQUEST)                    
+                except ValueError:
+                    return Response({"expiry_date": "Invalid Credit Card Expiry Date. Requires date in MM/YYYY"}, status=status.HTTP_400_BAD_REQUEST)
+                
+            else:
+                return Response({"expiry_date": "Missing Credit Card Expiry Date"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"expiry_date": "Request requires Credit Card Expiry Date"}, status=status.HTTP_400_BAD_REQUEST)
 
         # check if credit card number is present in the request
 
