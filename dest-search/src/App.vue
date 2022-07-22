@@ -36,12 +36,12 @@
           <b-navbar-item href="#">
             <router-link to="/">Home</router-link>
           </b-navbar-item>
-          <b-navbar-item href="#">
+          <!-- <b-navbar-item href="#">
             <router-link to="/about">About Us</router-link>
           </b-navbar-item>
           <b-navbar-item href="#">
             Features
-          </b-navbar-item>
+          </b-navbar-item> -->
           
           <b-navbar-item
             tag="div" id="profile-icon"
