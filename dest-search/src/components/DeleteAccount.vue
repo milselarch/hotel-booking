@@ -16,7 +16,8 @@
                         password-reveal
                         v-model = "password"
                         placeholder="Please confirm your password"
-                        required>
+                        required
+                        id = "delete_account_password_field">
                     </b-input>
                 </b-field>
             </section>

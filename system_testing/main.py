@@ -16,7 +16,7 @@ class Login_Signup(unittest.TestCase):
 
     def setUp(self):
         self.driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
-        self.email = "johndoe14@gmail.com"
+        self.email = "johndoe15@gmail.com"
         self.first_name = "John"
         self.last_name = "Doe"
         self.password = "ASqw!@12"
@@ -66,7 +66,7 @@ class Login_Signup(unittest.TestCase):
         
 
     def tearDown(self):
-        # TODO implement user account deletion
+        # user account deletion after testing
         driver = self.driver
         account_icon = driver.find_element(By.XPATH, "/html/body/div/nav/div[2]/div[2]/div/div/section/div/div[1]/button")
         account_icon.click()
@@ -77,7 +77,7 @@ class Login_Signup(unittest.TestCase):
             EC.presence_of_element_located((By.ID, "delete_account_button")))
         delete_account_button.click()
 
-        confirm_delete_password_input = driver.find_element(By.XPATH, "/html/body/div/div/div/div[2]/div[1]/div[2]/article[2]/div/div[2]/form/div/section/div/div/input")
+        confirm_delete_password_input = driver.find_element(By.ID, "delete_account_password_field")
         confirm_delete_password_input.send_keys(self.password)
         confirm_delete_account_button = driver.find_element(By.ID, "confirm_delete_account_button")
         confirm_delete_account_button.click()
