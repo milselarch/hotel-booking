@@ -97,6 +97,27 @@ class user_booking_data(APIView):
         # ensure that the request contains a card_number field in data
         if 'card_number' in request.data:
             card_number = request.data['card_number']
+            if card_number != "" and card_number != None:
+                # remove whitespaces from the credit card number
+                card_number = card_number.replace(" ", "")
+
+                # update card number in request with the
+                # removed whitespaces credit card number
+                request.data['card_number'] = card_number
+
+                # check if credit card number is valid    
+                if valid_credit_card(card_number):
+
+                    # pre-fill the data of the logged in user
+                    request.data["user_account"] = request.user.uid
+                    
+                    # mask credit card
+                    request.data['card_number'] = card_number[-4:]
+                    
+                else:
+                    Error_Responses["card_number"] = "Invalid Credit Card Number"
+            else:
+                Error_Responses["card_number"] = "Missing Credit Card Number"
         else:
             Error_Responses["card_number"] = "Request requires a card number field"
         
@@ -107,6 +128,9 @@ class user_booking_data(APIView):
                 request.data['security_code'] = security_code
                 if len(security_code) != 3:
                     Error_Responses["security_code"] = "Invalid CVV/CVC. Requires 3 digits."
+                else:
+                    #valid security code but dont store into db for PII and payment security
+                    request.data['security_code'] = ''
             else:
                 Error_Responses["security_code"] = "Missing CVV/CVC value"
         else:
@@ -171,53 +195,31 @@ class user_booking_data(APIView):
         if Error_Responses != {}:
             return Response(Error_Responses, status=status.HTTP_400_BAD_REQUEST)
 
-        # check if credit card number is present in the request
+        # save the payment info first to generate the payment id
+        payment_serializer = user_payment_credit_card_details_serializer(data=request.data)
+        if payment_serializer.is_valid():
 
-        if card_number != "" and card_number != None:
-            # remove whitespaces from the credit card number
-            card_number = card_number.replace(" ", "")
+            # obtain the user_payment_credit_card_details object
+            payment = payment_serializer.save()
 
-            # update card number in request with the
-            # removed whitespaces credit card number
-            request.data['card_number'] = card_number
+            # update the request with the payment id obtained
+            request.data['payment_id'] = payment.uid
 
-            # check if credit card number is valid    
-            if valid_credit_card(card_number):
+            # serializer to serialize all the data in the request
+            serializer = booking_serializer(data=request.data)
 
-                # pre-fill the data of the logged in user
-                request.data["user_account"] = request.user.uid
-                
-                # mask credit card
-                request.data['card_number'] = card_number[-4:]
-                request.data['security_code'] = ''
-
-                # save the payment info first to generate the payment id
-                payment_serializer = user_payment_credit_card_details_serializer(data=request.data)
-                if payment_serializer.is_valid():
-
-                    # obtain the user_payment_credit_card_details object
-                    payment = payment_serializer.save()
-
-                    # update the request with the payment id obtained
-                    request.data['payment_id'] = payment.uid
-
-                    # serializer to serialize all the data in the request
-                    serializer = booking_serializer(data=request.data)
-
-                    if serializer.is_valid():
-                        serializer.save()
-                        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-                    else:
-                        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-                else:
-                    return Response(payment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
             else:
-                return Response({"card_number": "Invalid Credit Card Number"}, status=status.HTTP_400_BAD_REQUEST)
+                Error_Responses =  {**Error_Responses, **serializer.errors}
+
         else:
-            return Response({"card_number": "Missing Credit Card Number"}, status=status.HTTP_400_BAD_REQUEST)
+            Error_Responses =  {**Error_Responses, **payment_serializer.errors}
+            
+        if Error_Responses != {}:
+                return Response(Error_Responses, status=status.HTTP_400_BAD_REQUEST)
 
     # modify a user's booking_data
     # pk = booking uid
