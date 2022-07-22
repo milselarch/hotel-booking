@@ -48,10 +48,16 @@ export default {
   },
 
   getters: {
-    authenticated (state) {
+    authenticated(state) {
       const authenticated = state.auth_token !== null
       // console.log('STATEAUTH', state.auth_token, authenticated)
       return authenticated
+    },
+
+    refresh_token(state) {
+      const refresh_token = state.refresh_token
+      if (refresh_token === null) { return -1 }
+      return refresh_token
     }
   }
 };

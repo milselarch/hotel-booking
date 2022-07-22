@@ -79,8 +79,12 @@
                 >
                   Profile
                 </b-dropdown-item>
+                <!-- 
+                needs to be click.native for jest unittests
+                to register click event properly
+                -->
                 <b-dropdown-item 
-                  v-show="authenticated" @click="logout"
+                  v-show="authenticated" @click.native="logout"
                   aria-role="listitem" id="logout-button"
                 >
                   Logout
@@ -132,6 +136,8 @@ export default {
       modal_active: false,
       login_modal_active: false,
       signup_modal_active: false,
+      // track logout requests (for jest testing)
+      logout_requests: []
     }
   },
 
@@ -198,17 +204,31 @@ export default {
     },
 
     logout() {
-      this.$store.commit('clear_credentials')
-      const requester = new AuthRequester(this)
-      // TODO: send logout request
+      console.log('LOGOUT-AUTH', this.authenticated)
+      if (!this.authenticated) { return false }
 
-      // router.push()
+      const refresh_token = this.$store.getters.refresh_token
+      const requester = new AuthRequester(this)
+      // send logout request to blacklist auth crednentials
+      const logout_request = requester.post(
+        'logout', {
+          'refresh_token': refresh_token
+        }
+      ).catch(error => {
+        console.error('LOGOUT REQUEST FAILED', error)
+      })
+
+      this.logout_requests.push(logout_request)
+      console.log('LOGOUT-REQUESTS', this.logout_requests)
       this.$buefy.toast.open({
         duration: 5000,
         message: `Signed out`,
         type: 'is-dark',
         pauseOnHover: true
-      });
+      })
+
+      this.$store.commit('clear_credentials')
+      return logout_request
     },
 
     async auth_test() {

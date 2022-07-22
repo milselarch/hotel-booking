@@ -35,7 +35,10 @@ urlpatterns = [
     path('admin_booking/<str:pk>/', views.admin_booking_data.as_view(),),
     path('loadTest', LoadTestingView.as_view(),),
 
-    path('logout/', LogoutView.as_view(), name='auth_logout'),
+    path('logout/',
+         csrf_exempt(LogoutView.as_view()),
+         name='auth_logout'
+    ),
     path('auth_test', ProfileView.as_view(), name='example'),
     path('profile', ProfileView.as_view(), name='profile'),
     path(

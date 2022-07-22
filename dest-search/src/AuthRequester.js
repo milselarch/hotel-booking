@@ -27,6 +27,16 @@ class AuthRequester {
     self.refresh_token = state.Persistent.refresh_token
   };
 
+  set_auth_token = (...args) => this._set_auth_token(...args)
+  _set_auth_token(auth_token) {
+    this.auth_token = auth_token
+  }
+
+  set_refresh_token = (...args) => this._set_refresh_token(...args)
+  _set_refresh_token(refresh_token) {
+    this.refresh_token = refresh_token
+  }
+
   build_headers = () => this._build_headers()
   _build_headers() {
     if (this.auth_token === null) {
@@ -143,7 +153,7 @@ class AuthRequester {
         const headers = self.build_headers()
         options = Object.assign(options, headers)
         // call endpoint again with the new access token
-        return await axios.get(endpoint, options)
+        return await request_func(endpoint, options)
       } else {
         // rethrow error if its not a 401
         // (401 means access token expired)
@@ -161,6 +171,13 @@ class AuthRequester {
 
   post = (...args) => this._post(...args)
   async _post(endpoint, options={}) {
+    return await this.wrap_request(
+      axios.post, endpoint, options
+    )
+  }
+
+  delete = (...args) => this._delete(...args)
+  async _delete(endpoint, options={}) {
     return await this.wrap_request(
       axios.post, endpoint, options
     )

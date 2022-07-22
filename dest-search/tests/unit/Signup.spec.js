@@ -1,6 +1,9 @@
 import {createLocalVue, mount} from '@vue/test-utils'
+import flushPromises from 'flush-promises'
+
 import SignUp from '../../src/components/SignUp.vue'
 import Login from '../../src/components/Login.vue'
+import Profile from '../../src/components/Profile.vue'
 import VuexAttach from '../../src/store/VuexAttach.js'
 import AuthRequester from '../../src/AuthRequester.js'
 import router from '../../src/router'
@@ -16,6 +19,8 @@ import sleep from 'await-sleep'
 import stubs from './stubs.js'
 import { assert, time } from 'console'
 import { wrap } from 'lodash'
+import exp from 'constants'
+import { fail } from 'assert'
 
 const segfault_handler = require('segfault-handler');
 const fs = require('fs');
@@ -73,6 +78,7 @@ describe('Signup Test', () => {
       false_password = crypto.randomBytes(6).toString('hex');
     }
 
+    // set the form data variables
     assert(false_password !== user.password)
     wrapper.vm.email = user.email
     wrapper.vm.first_name = user.first_name
@@ -312,9 +318,10 @@ describe('Signup Test', () => {
     // make sure the authenticated request succeeds
     expect(status_code).toBe(200)
   })
-
+  
   it('logout success test', async () => {
     // click the logout button on the navbar to logout
+    expect(store.getters.authenticated).toBe(true)
     const mock_jquery_navbar = new Object({
       ready(func) { func() },
       height() { return 500 }
@@ -335,11 +342,13 @@ describe('Signup Test', () => {
     // auth token works before the test starts
     wrapper.$store = store
     const requester = new AuthRequester(wrapper)
-    let status_code, response
+    const auth_token = requester.auth_token
+    const refresh_token = requester.refresh_token
+    let status_code = -1
     console.log('PRE-REQUEST')
     
     try {
-      response = await requester.get('profile')
+      const response = await requester.get('profile')
       console.log('PROFILE RESP', response)
       status_code = response.status
     } catch (error) {
@@ -351,7 +360,49 @@ describe('Signup Test', () => {
     expect(status_code).toBe(200)
 
     const logout_button = wrapper.find('#logout-button')
+    console.log('LOGOUT-BTTN', logout_button)
     expect(logout_button.exists()).toBe(true);
-    // await logout_button.vm.$listeners.click()
+    expect(wrapper.vm.logout_requests).toStrictEqual([])
+    jest.spyOn(wrapper.vm, 'logout')
+    // click the logout button on the navbar
+    await logout_button.trigger('click')
+    await wrapper.vm.$nextTick();
+
+    // await flushPromises()
+    // wait for vuejs component to update
+    
+    /*
+    // this test checks if the previous tokens work
+    // which im relegating to a seperate feature requirement
+    // i.e. blacklisting tokens on the backend 
+    // and sending the request to do so is out of scope
+    expect(wrapper.vm.logout).toHaveBeenCalled()
+    expect(wrapper.vm.logout_requests.length).toBe(1)
+    const logout_request = wrapper.vm.logout_requests[0]
+    const logout_response = await logout_request
+    const logout_status = logout_response.status
+    expect(logout_status).toBe(200)
+    */
+
+    // check that the user is logged out and the
+    // authenticated request to /profile fails
+    wrapper.$store = store
+    const requester2 = new AuthRequester(wrapper)
+    // requester2.set_auth_token(auth_token)
+    // requester2.set_refresh_token(refresh_token)
+    // console.log('POST-LOGOUT-REQUEST')
+    
+    try {
+      const response = await requester2.get('profile')
+      // console.log('PROFILE RESP', response)
+      status_code = response.status
+    } catch (error) {
+      // console.log('ERR-RESPONSE', error.response)
+      status_code = error.response.status
+    }
+
+    expect(store.getters.authenticated).toBe(false)
+    // make sure the authenticated request succeeds
+    expect(status_code).toBe(401)
   })
 })
