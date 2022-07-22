@@ -1,115 +1,261 @@
 <template>
-  <div class="profile">
-    <div id="load-status">
-      <div id="status" v-show="true">
-        <p id="status-text">{{ status_text }}</p>
-        <square id="spinner" v-show="is_loading"></square>
-        <b-button 
-          type="is-dark" id="login" outlined
-          @click="load()" icon-right="sync"
-          v-show="!(is_loading || load_success)"
-        >
-          try again
-        </b-button>
-      </div>
-    </div>
+  <div class="bookinghistory container is-max-widescreen">
+    <div class="columns is-mobile">
+      <div class="column is-two-third" id="booking">
+        <div id="load-status">
+          <div id="status" v-show="true">
+            <p id="status-text">{{ status_text }}</p>
+            <square id="spinner" v-show="pending"></square>
+            <b-button
+              type="is-dark"
+              id="login"
+              outlined
+              @click="load()"
+              icon-right="sync"
+              v-show="!(pending || load_success)"
+            >
+              try again
+            </b-button>
+          </div>
+        </div>
 
-    <div id="profile-info">
-      <h1>BOOKING history</h1>
-      <p> {{ email }} </p>
-      <p> {{ first_name }} {{ last_name }} </p>
+        <!-- ONLY SHOW IF empty DATA in bookinghistorydata-->
+        <div
+          v-show="bookinghistorydata != null && bookinghistorydata.length == 0"
+        >
+          <div class="card">
+            <div class="card-content">
+              <div class="content">No booking have been made yet!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ONLY SHOW IF HAVE DATA -->
+        <div
+          class="card"
+          v-for="(booking, index) in this.bookinghistorydata"
+          :key="index"
+          :class="{ striped: isEven(index) }"
+        >
+          <div class="card-header">
+            <div class="card-header-title">
+              Booking Order ID: {{ booking.uid }}
+            </div>
+          </div>
+
+          <div class="card-content">
+            <div class="content">
+              <h4>Booking Details</h4>
+              <div class="columns is-mobile">
+                <div class="column is-one-third">
+                  <b>Order Date</b><br />{{ booking.datetime_created }}
+                </div>
+                <div class="column is-one-third">
+                  <b>Total Price</b><br />SGD ${{ booking.cost_in_sgd }}
+                </div>
+                <div class="column is-one-third">
+                  <b>Booking Dates</b><br />{{ booking.check_in_date }} to
+                  {{ booking.check_out_date }}
+                </div>
+              </div>
+              <div class="columns is-mobile">
+                <div class="column is-one-third">
+                  <b>Hotel</b><br />{{ booking.hotel_name }}
+                </div>
+                <div class="column is-one-third">
+                  <b>Destination</b><br />{{ booking.destination_region }}
+                </div>
+                <div class="column is-one-third">
+                  <b>Room Type</b><br />{{ booking.room_type }}
+                </div>
+              </div>
+              <div class="columns is-mobile">
+                <div class="column is-one-third">
+                  <b>Number of Rooms</b><br />{{ booking.number_of_rooms }}
+                </div>
+                <div class="column is-one-third">
+                  <b>Number of Guests Per Room</b><br />{{
+                    booking.number_of_guests_per_rooms
+                  }}
+                </div>
+                <div class="column is-two-third">
+                  <b>Special Request</b><br />{{ booking.special_request }}
+                </div>
+              </div>
+
+              <br />
+              <h4>Primary Guest Details</h4>
+              <div class="columns is-mobile">
+                <div class="column is-one-third">
+                  <b>Primary Guest Name</b><br />
+                  {{ booking.primary_guest_title }}
+                  {{ booking.primary_guest_first_name }}
+                  {{ booking.primary_guest_last_name }}
+                </div>
+                <div class="column is-one-third">
+                  <b>Primary Guest Email</b><br />
+                  {{ booking.primary_guest_email }}
+                </div>
+                <div class="column is-two-third">
+                  <b>Primary Guest Phone Number</b><br />
+                  {{ booking.primary_guest_phone_country }}
+                  {{ booking.primary_guest_phone }}
+                </div>
+              </div>
+
+              <br />
+              <h4>Payment Details</h4>
+              <div class="columns is-mobile">
+                <div class="column is-one-third">
+                  <b>Name on Card</b><br />
+                  {{ booking.payment_id.name_on_card }}
+                </div>
+                <div class="column is-one-third">
+                  <b>Credit Card Details</b><br />
+                  XXXX-XXXX-XXXX-{{ booking.payment_id.card_number }} <br />
+                  Expiry: {{ booking.payment_id.expiry_date }} <br />
+                </div>
+                <div class="column is-two-third">
+                  <b>Billing Address Details</b><br />
+                  {{ booking.payment_id.billing_address_address }} <br />
+                  Postal Code:
+                  {{ booking.payment_id.billing_address_post_code }} <br />
+                  {{ booking.payment_id.billing_address_country }},
+                  {{ booking.payment_id.billing_address_city }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- </b-collapse> -->
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import AuthRequester from '@/AuthRequester'
-import sleep from 'await-sleep'
-import router from '../router'
+import AuthRequester from "@/AuthRequester";
+import sleep from "await-sleep";
+import router from "../router";
+import axios from "axios";
 
 export default {
-  name: 'BookingHistory',
-  data () {
+  name: "BookingHistory",
+  data() {
     return {
-      status_text: 'loading profile',
-      is_loading: false,
+      status_text: "loading booking history",
+      pending: false,
       is_mounted: false,
 
       load_success: false,
-      first_name: null,
-      last_name: null,
-      email: null
-    }
+      bookinghistorydata: null,
+    };
   },
 
   methods: {
-    logout(toast=false) {
-      const self = this
+    isEven(index) {
+      if (index % 2 !== 0) {
+        return true;
+      }
+    },
+    logout(toast = false) {
+      const self = this;
 
       if (toast) {
         self.$buefy.toast.open({
           duration: 5000,
           message: `User not logged in`,
-          type: 'is-danger',
-          pauseOnHover: true
+          type: "is-danger",
+          pauseOnHover: true,
         });
       }
 
-      self.status_text = 'login required'
-      self.load_success = false
-      self.first_name = null
-      self.last_name = null
-      self.email = null
-      router.push('/')
+      self.status_text = "login required";
+      self.load_success = false;
+      self.first_name = null;
+      self.last_name = null;
+      self.email = null;
+      router.push("/");
     },
 
     load() {
       const self = this;
-      console.log('LOAD START')
-
-      if (self.is_loading) {
-        return false;
-      };
-
-      self.is_loading = true;
+      console.log("LOAD START");
+      self.pending = true;
+      self.other_errors = "";
       self.load_success = false;
-      const requester = new AuthRequester(self)
-      let response;
-      
-      (async () => {
-        console.log('LOAD REQ START')
+      self.bookinghistorydata = null;
 
-        try {
-          response = await requester.get('profile')
-          self.load_success = true
-        } catch (error) {
-          const status_code = error.response.status;
+      const requester = new AuthRequester(self);
+      try {
+        requester.refresh().then(
+          (refresh_success) => {
+            if (!refresh_success) {
+              throw access_error;
+            }
+            requester.load_credentials();
+            let header_val = requester.build_headers();
+            self.getBookingHistory(header_val);
+          },
+          (requester_error) => {
+            self.status_text = "Booking History failed to load";
 
-          if (status_code === 401) {
-            self.logout(true)
-          } else {
-            self.status_text = 'profile load failed'
-            response = error.response;
-            console.log('LAOD ERR', error);
+            let errors = requester_error.response.data;
+            const other_errors = [];
+            if (errors === undefined) {
+              other_errors.push(requester_error.message);
+              errors = [];
+            }
+            console.error("ERRORS", errors);
+
+            for (let cause in errors) {
+              // only go through errors not covered already
+              if (formdata.hasOwnProperty(cause)) {
+                continue;
+              }
+              const reasons = errors[cause];
+              if (reasons instanceof Array) {
+                other_errors.push(...errors[cause]);
+              } else {
+                other_errors.push(errors[cause]);
+              }
+            }
+
+            self.other_errors = other_errors.join("\n");
+            self.hasError = true;
+            self.pending = false;
           }
-        } finally {
-          console.log('LOAD END');
-          self.is_loading = false;
-        }
+        );
+      } catch (refresh_error) {
+        console.error("REFRESH FAILED", refresh_error);
+        self.pending = false;
+        self.hasError = true;
+      }
 
-        if (!self.load_success) {
-          return false;
-        }
+      //return true;
+    },
 
-        console.log('RESPIBSE', response);
-        self.status_text = 'profile info'
-        self.first_name = response.data.first_name
-        self.last_name = response.data.last_name
-        self.email = response.data.email
-      })();
-
-      return true;
-    }
+    getBookingHistory(header_val) {
+      const self = this;
+      self.load_success = false;
+      self.pending = true;
+      axios
+        .get("booking/", header_val)
+        .then((response) => {
+          console.log("bookinghistory success!");
+          console.log("response!", response);
+          self.status_text = "Booking History";
+          self.load_success = true;
+          self.pending = false;
+          self.bookinghistorydata = response.data;
+        })
+        .catch((err_resp) => {
+          self.status_text = "Booking History failed to load";
+          self.pending = false;
+          console.log("bookinghistory error!");
+          console.log("err_resp!", err_resp);
+        });
+    },
   },
 
   mounted: function () {
@@ -132,9 +278,8 @@ export default {
 
   unmounted() {
     self.is_mounted = false;
-  }
-}
-
+  },
+};
 </script>
 
 <style lang='scss' scoped>
@@ -152,7 +297,7 @@ div#load-status {
     justify-content: center;
 
     & > p#status-text {
-      font-family: 'Babas Neue';
+      font-family: "Babas Neue";
       font-size: 2rem;
       white-space: pre-wrap;
       word-break: break-all;
@@ -161,8 +306,8 @@ div#load-status {
       &:empty::before {
         // allow paragraph elemenet to have height
         // even when it has no content
-        content:"";
-        display:inline-block;
+        content: "";
+        display: inline-block;
       }
     }
 
@@ -204,5 +349,9 @@ h1 {
   width: fit-content;
   display: inline;
   margin: 0px;
+}
+
+.striped{
+  background-color: #f3f3f3
 }
 </style>

@@ -15,7 +15,7 @@ class user_payment_credit_card_details(common_attribute_model):
     expiry_date = encrypt(models.DateField(blank=True, null=True))
     security_code = encrypt(models.CharField(max_length=3, blank=True, null=True))
     billing_address_address = encrypt(models.CharField(max_length=255, blank=True, null=True))
-    billing_address_country = encrypt(models.CharField(max_length=100, blank=False, null=False))
+    billing_address_country = encrypt(models.CharField(max_length=100, blank=True, null=True))
     billing_address_city = encrypt(models.CharField(max_length=100, blank=True, null=True))
     billing_address_post_code = encrypt(models.CharField(max_length=100, blank=True, null=True))
     user_payment = models.ForeignKey(user_payment, on_delete=models.PROTECT, blank=True, null=True)
