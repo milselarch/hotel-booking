@@ -8,6 +8,9 @@ import axios from 'axios'
 import Vuex from 'vuex'
 import sleep from 'await-sleep'
 import stubs from './stubs.js'
+import Buefy from 'buefy'
+import { start } from 'repl'
+import { raw } from 'file-loader'
 
 const segfault_handler = require('segfault-handler');
 const fs = require('fs');
@@ -24,7 +27,10 @@ fs.readdirSync(test_folder).forEach(file => {
 
 const infiniteScroll =  require('vue-infinite-scroll');
 const localVue = createLocalVue();
+
+localVue.config.silent = true;
 localVue.use(infiniteScroll)
+localVue.use(Buefy)
 localVue.use(Vuex);
 
 describe('Home.vue Test', () => {
@@ -131,5 +137,40 @@ describe('Home.vue Test', () => {
     const cards = wrapper.find('.card')
     expect(cards.exists()).toBe(true)
     console.log("CARDS", cards, cards.length)
+  })
+
+  // check that autocomplete search results are sensible
+  it('check autocomplete', async () => {
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+    // this test checks that if we enter the exact destination
+    // name into the autocomplete we will get the desination name
+    // as the first result of our autocomplete. We randomly try
+    // different valid desinations names from our list of valid
+    // destination names to make sure it works
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+
+    for (let k=0; k<10; k++) {
+      const search_destination = destination_names[
+        Math.floor(Math.random() * destination_names.length)
+      ];
+
+      // const search_destination = "Gap, France"
+      wrapper.vm.destination_input = search_destination
+      await wrapper.vm.$nextTick()
+      
+      const start_time = (new Date()).getTime()
+      const autocomplete_reuslts = wrapper.vm.filtered_search_matches;
+      const end_time = (new Date()).getTime()
+      const duration = end_time - start_time
+      console.log('SEARCH TIME', k, search_destination, duration)
+
+      expect(autocomplete_reuslts[0]).toBe(search_destination);
+    }
   })
 })

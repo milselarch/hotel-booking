@@ -476,7 +476,10 @@ export default {
       }
 
       assert(this.price_search_loading.hasOwnProperty(search_stamp))
-      console.log('PRICE_RESP', price_resp)
+      if (process.env.NODE_ENV !== 'test') {
+        console.log('PRICE_RESP', price_resp)
+      }
+
       const price_data = price_resp.data;
       // const price_data = price_resp.data;
       const price_mapping = {}
@@ -719,6 +722,31 @@ export default {
       }
 
       return true
+    },
+
+    unpack_destinations(destinations_data) {
+      /*
+      we expect destinations_data to be an array
+      with two arrays inside. the first inner array is a list
+      of all the destination IDs, and the second inner array
+      contains all the destinations name. For every destination i
+      the destination uid is at index i of the 1st inner array
+      and the destination name is at index i of the 2nd inner array
+      */
+      assert(destinations_data.length == 2)
+      const [uids, names] = destinations_data
+      // console.log('DEST', destinations_data, uids, names)
+      
+      assert(uids.length === names.length)
+      const destination_mappings = {};
+
+      for (let k=0; k<uids.length; k++) {
+        const uid = uids[k];
+        const name = names[k];
+        destination_mappings[name] = uid
+      }
+
+      return [names, destination_mappings]
     }
   },
 
@@ -732,21 +760,17 @@ export default {
     const checkout_date = date_now.add(96 , 'h').toDate();
     self.dates = [checkin_date, checkout_date]
 
-    const on_destinations_loaded = async (destinations) => {
+    const on_destinations_loaded = async (destinations_data) => {
       // await sleep(10000); // simulate json load delay
       // console.log('DESINATIONS JSON LOADED')
       // console.log('DATA LENGTH', destinations.length)
+      const [names, dest_mappings] = self.unpack_destinations(
+        destinations_data
+      )
 
-      for (let destination of destinations) {
-        const destinationID = destination["uid"]
-        const destinationName = destination["term"]
-        self.destination_names.push(destinationName)
-        // console.log(destinationName, destinationID)
-        self.destination_mappings[destinationName] = destinationID
-      };
-
-      // const length = Object.keys(self.destination_mappings).length
-      // console.log('LENGTH', length)
+      self.destination_names = names
+      self.destination_mappings = dest_mappings
+      // console.log('MAPPING', self.destination_mappings)
       self.destinations_loaded = true;
     }
 
@@ -769,9 +793,9 @@ export default {
         on_destinations_loaded(data);
       }
 
-      const load_path = '../assets/destinations.json'
+      const load_path = '../assets/destinations_flat.json'
       const abs_load_path = path.resolve(__dirname, load_path)
-      fs.readFile(abs_load_path, 'utf8',fs_read_handler)
+      fs.readFile(abs_load_path, 'utf8', fs_read_handler)
 
     } else {
       /*
@@ -779,7 +803,7 @@ export default {
       if we're actually running the website
       */
       // console.log('RUNNING ON: BROWSER')
-      const loader = import('@/assets/destinations.json')
+      const loader = import('@/assets/destinations_flat.json')
       loader.then(on_destinations_loaded);
     }
 
