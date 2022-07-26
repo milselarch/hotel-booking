@@ -747,6 +747,24 @@ export default {
       }
 
       return [names, destination_mappings]
+    },
+
+    fuzzy_search(search_input, input_names) {
+      // return a reordering of input_names where 
+      // sorted in order of name that matches the search_input
+      // best (first element of output) to name that matches the
+      // search_input worst (last element of output)
+      const matches = fuzzysort.go(search_input, input_names)
+      if ((matches.length) === 0) { return [] }
+      
+      const names = []
+      const length = Math.min(matches.length, 50)
+      for (let k=0; k<length; k++) {
+        // console.log(k, matches[k])
+        const destinationName = matches[k]['target'];
+        names.push(destinationName)
+      }
+      return names
     }
   },
 
@@ -1011,20 +1029,9 @@ export default {
     },
 
     filtered_search_matches() {
-      const matches = fuzzysort.go(
+      return this.fuzzy_search(
         this.destination_input, this.destination_names
-      )
-      
-      if ((matches.length) === 0) { return [] }
-      
-      const names = []
-      const length = Math.min(matches.length, 50)
-      for (let k=0; k<length; k++) {
-        // console.log(k, matches[k])
-        const destinationName = matches[k]['target'];
-        names.push(destinationName)
-      }
-      return names
+      );
     },
 
     is_destination_valid() {
