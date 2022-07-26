@@ -43,9 +43,6 @@
         </div>
         <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
         <div class="card-content">
-          <!-- <ul>
-            <li v-for="(amenity, key) in room.amenities" v-bind:key="key">{{amenity}}</li>
-          </ul> -->
           <p>{{ check_breakfast(room) }}</p>
           <ul v-for="(am, key) in room.amenities" v-bind:key="key">
             <li>{{am}}</li>
