@@ -412,7 +412,7 @@ describe('Signup Test', () => {
     // authenticated request to /profile fails
     wrapper.$store = store
     const requester2 = new AuthRequester(wrapper)
-    // requester2.set_auth_token(auth_token)
+    // requester2.set_auth_token('0')
     // requester2.set_refresh_token(refresh_token)
     // console.log('POST-LOGOUT-REQUEST')
     
