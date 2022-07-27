@@ -166,9 +166,7 @@ class user_booking_data(APIView):
                 primary_guest_email = primary_guest_email.replace(" ", "")
                 request.data['primary_guest_email'] = primary_guest_email
                 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-                if (re.fullmatch(regex, primary_guest_email)):
-                    print("valid email")
-                else:
+                if not (re.fullmatch(regex, primary_guest_email)):
                     Error_Responses["primary_guest_email"] = "Invalid Primary Guest's Email Address Format"
             else:
                 Error_Responses["primary_guest_email"] = "Missing Primary Guest's Email"

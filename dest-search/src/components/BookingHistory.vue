@@ -194,8 +194,7 @@ export default {
               throw access_error;
             }
             requester.load_credentials();
-            let header_val = requester.build_headers();
-            self.getBookingHistory(header_val);
+            self.getBookingHistory(requester);
           },
           (requester_error) => {
             self.status_text = "Booking History failed to load";
@@ -235,26 +234,39 @@ export default {
       //return true;
     },
 
-    getBookingHistory(header_val) {
+    getBookingHistory(requester) {
       const self = this;
       self.load_success = false;
       self.pending = true;
-      axios
-        .get("booking/", header_val)
-        .then((response) => {
-          console.log("bookinghistory success!");
-          console.log("response!", response);
-          self.status_text = "Booking History";
-          self.load_success = true;
-          self.pending = false;
-          self.bookinghistorydata = response.data;
-        })
-        .catch((err_resp) => {
+      let responseBooking;
+
+      (async () => {
+        console.log('BOOKING REQ START')
+        try {
+          responseBooking = await requester.get("booking/")
+          self.load_success = true
+        } catch (error) {
           self.status_text = "Booking History failed to load";
-          self.pending = false;
+          self.load_success = false
           console.log("bookinghistory error!");
-          console.log("err_resp!", err_resp);
-        });
+          console.log("error", error);
+        }
+        finally {
+          self.pending = false;
+        }
+
+        if (!self.load_success) {
+          self.load_success = false
+          return false;
+        }
+        console.log('Booking Response', responseBooking);
+        console.log("bookinghistory success!");
+        self.status_text = "Booking History";
+        self.load_success = true;
+        self.pending = false;
+        self.bookinghistorydata = responseBooking.data;
+      })();
+
     },
   },
 
