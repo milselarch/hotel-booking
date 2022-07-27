@@ -299,8 +299,8 @@ export default {
           return false;
         }
 
-        console.log('RESPONSE', response);
-        console.log('Booking Response', responseBooking);
+        // console.log('RESPONSE', response);
+        // console.log('Booking Response', responseBooking);
         self.status_text = 'profile info'
         self.user_title = response.title
         self.first_name = response.data.first_name

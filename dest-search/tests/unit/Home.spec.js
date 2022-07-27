@@ -8,6 +8,13 @@ import axios from 'axios'
 import Vuex from 'vuex'
 import sleep from 'await-sleep'
 import stubs from './stubs.js'
+import small_stubs from './small_stubs.js'
+import fuzzysort from 'fuzzysort'
+
+import Buefy from 'buefy'
+import { start } from 'repl'
+import { raw } from 'file-loader'
+import $ from 'jquery'
 
 const segfault_handler = require('segfault-handler');
 const fs = require('fs');
@@ -24,8 +31,33 @@ fs.readdirSync(test_folder).forEach(file => {
 
 const infiniteScroll =  require('vue-infinite-scroll');
 const localVue = createLocalVue();
+
+localVue.config.silent = true;
 localVue.use(infiniteScroll)
+localVue.use(Buefy)
 localVue.use(Vuex);
+
+const load_suggestions = (wrapper) => {
+  // extract autocomplete suggestions from the
+  // the autocomplete suggestions div
+  const dropdown_menu = wrapper.find('div.dropdown-menu')
+  console.log('DROPDOWN-MENU', dropdown_menu)
+  const suggest_elems = $(dropdown_menu.element).find('span')
+  console.log('SUGGEST-ELEMS', suggest_elems)
+  const suggestions = [];
+
+  // extract the autocomplete suggestion names
+  // from the HTML element divs that they're housed in
+  for (let k=0; k<suggest_elems.length; k++) {
+    const suggest_elem = $(suggest_elems[k]);
+    console.log('SINGLE-ELEM', suggest_elem)
+    const suggestion = suggest_elem.text()
+    console.log('SUGGEST', suggestion)
+    suggestions.push(suggestion)
+  }
+
+  return suggestions;
+}
 
 describe('Home.vue Test', () => {
   let store;
@@ -48,7 +80,7 @@ describe('Home.vue Test', () => {
         msg: 'Welcome to Your Vue.js App'
       },
       //specify custom components
-      stubs: stubs
+      stubs: small_stubs
     })
   })
 
@@ -131,5 +163,83 @@ describe('Home.vue Test', () => {
     const cards = wrapper.find('.card')
     expect(cards.exists()).toBe(true)
     console.log("CARDS", cards, cards.length)
+  })
+
+  // check that autocomplete search results are sensible
+  it('check autocomplete', async () => {
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+    // this test checks that if we enter an exact destination
+    // name into the autocomplete we will get the desination name
+    // as the first result of our autocomplete.
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+    const search_destination = "Gap, France"
+    wrapper.vm.destination_input = search_destination
+    await wrapper.vm.$nextTick()
+
+    // make sure the the text input in the raw HTML element
+    // of the autocomplete search bar is equal to the
+    // destination_input vue data variable that we set
+    // (confirms data binding of destination_input on searchbar)
+    const autocomplete_bar = wrapper.find('#dest_search_field')
+    console.log('AUTOCOMPLETE-BAR', autocomplete_bar)
+    const autocomplete_elem = autocomplete_bar.element
+    console.log('BAR-EL', autocomplete_bar.element)
+    expect(autocomplete_elem._value).toBe(search_destination)
+
+    const all_matches = fuzzysort.go(
+      search_destination, destination_names
+    )
+
+    const suggestions = load_suggestions(wrapper)
+    expect(suggestions.length).toBeLessThan(all_matches.length);
+    expect(all_matches).toContain(suggestions);
+
+    const start_time = (new Date()).getTime()
+    const autocomplete_reuslts = wrapper.vm.filtered_search_matches;
+    const end_time = (new Date()).getTime()
+    const duration = end_time - start_time
+
+    expect(autocomplete_reuslts[0]).toBe(search_destination);
+  })
+
+  // check that autocomplete search results are sensible
+  it('check fuzz autocomplete', async () => {
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+    // this test checks that if we enter the exact destination
+    // name into the autocomplete we will get the desination name
+    // as the first result of our autocomplete. We randomly try
+    // different valid desinations names from our list of valid
+    // destination names to make sure it works
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+
+    for (let k=0; k<10; k++) {
+      const search_destination = destination_names[
+        Math.floor(Math.random() * destination_names.length)
+      ];
+
+      // const search_destination = "Gap, France"
+      wrapper.vm.destination_input = search_destination
+      await wrapper.vm.$nextTick()
+      
+      const start_time = (new Date()).getTime()
+      const autocomplete_reuslts = wrapper.vm.filtered_search_matches;
+      const end_time = (new Date()).getTime()
+      const duration = end_time - start_time
+      console.log('SEARCH TIME', k, search_destination, duration)
+
+      expect(autocomplete_reuslts[0]).toBe(search_destination);
+    }
   })
 })

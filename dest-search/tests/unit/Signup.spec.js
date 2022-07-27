@@ -38,6 +38,8 @@ fs.readdirSync(test_folder).forEach(file => {
 const crypto = require("crypto");
 const infiniteScroll =  require('vue-infinite-scroll');
 const localVue = createLocalVue();
+
+localVue.config.silent = true;
 localVue.use(infiniteScroll)
 localVue.use(Vuex)
 localVue.use(Buefy)
@@ -308,10 +310,10 @@ describe('Signup Test', () => {
     
     try {
       response = await requester.get('profile')
-      console.log('PROFILE RESP', response)
+      // console.log('PROFILE RESP', response)
       status_code = response.status
     } catch (error) {
-      console.log('ERR-RESPONSE', error.response)
+      // console.log('ERR-RESPONSE', error.response)
       status_code = error.response.status_code
     }
 
@@ -371,7 +373,7 @@ describe('Signup Test', () => {
     
     try {
       const response = await requester.get('profile')
-      console.log('PROFILE RESP', response)
+      // console.log('PROFILE RESP', response)
       status_code = response.status
     } catch (error) {
       console.log('ERR-RESPONSE', error.response)
