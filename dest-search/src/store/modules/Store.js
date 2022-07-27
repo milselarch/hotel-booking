@@ -45,6 +45,9 @@ export default {
     getRoomDetails(state, roominfo) {
       state.roomName = roominfo.name;
       state.roomprice = roominfo.price;
+      state.roomTypeId = roominfo.type_id;
+      state.roomBreakfastInfo = roominfo.breakfast_info;
+      
     }
   }
 };

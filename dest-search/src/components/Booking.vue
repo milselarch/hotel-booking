@@ -964,8 +964,9 @@ export default {
       destination_region: "my_destination_region", //display only
       hotel_id: "my_hotel_id", //this.hotel_id,
       hotel_name: "my_hotel_name", //display only
-      room_id: "my_room_id", //this.room_id,
+      room_type_id: "my_room_type_id", //this.room_type_id,
       room_type: "my_room_type", //display only
+      room_breakfast_info: "my_room_breakfast_info", //this.room_breakfast_info,
       booking_id: "",
       check_in_date: "2022-01-01", //this.check_in_date,
       check_out_date: "2022-01-31", //this.check_out_date,
@@ -1040,6 +1041,8 @@ export default {
 
     this.hotel_name = this.$store.state.Store.hotelName;
     this.room_type = this.$store.state.Store.roomName;
+    this.room_type_id = this.$store.state.Store.roomTypeId;
+    this.room_breakfast_info = this.$store.state.Store.roomBreakfastInfo;
     this.destination_region = this.$store.state.Store.destination;
     this.check_in_date = this.$store.state.Store.checkindate;
     this.check_out_date = this.$store.state.Store.checkoutdate;
@@ -1057,7 +1060,9 @@ export default {
       !this.check_out_date ||
       !this.number_of_guests ||
       !this.total_cost ||
-      !this.room_type
+      !this.room_type ||
+      !this.room_type_id ||
+      !this.room_breakfast_info
     ) {
       //display error
       this.all_key_info_exists = false;
@@ -1137,8 +1142,8 @@ export default {
       const formdata = {
         destination_id: this.destination_id,
         hotel_id: this.hotel_id,
-        room_type_id: this.room_id,
-
+        room_type_id: this.room_type_id,
+        room_breakfast_info: this.room_breakfast_info,
         destination_region: this.destination_region,
         hotel_name: this.hotel_name,
         room_type: this.room_type,
@@ -1228,6 +1233,9 @@ export default {
           }
           if (errors.hasOwnProperty("room_type_id")) {
             other_errors.push(errors["room_type_id"]);
+          }
+          if (errors.hasOwnProperty("room_breakfast_info")) {
+            other_errors.push(errors["room_breakfast_info"]);
           }
           if (errors.hasOwnProperty("booking_id")) {
             other_errors.push(errors["booking_id"]);

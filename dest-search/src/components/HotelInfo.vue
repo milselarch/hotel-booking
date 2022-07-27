@@ -138,8 +138,19 @@ export default {
       if (room.roomAdditionalInfo.breakfastInfo == "hotel_detail_breakfast_included"){
         return "Breakfast included"
       }
-      else {
+      else if (room.roomAdditionalInfo.breakfastInfo == "hotel_detail_room_only"){
         return "Breakfast not included"
+      }
+      else {
+        let breakfastinfo = room.roomAdditionalInfo.breakfastInfo
+        breakfastinfo = breakfastinfo.replace("hotel_detail_","").replaceAll("_"," ")
+        breakfastinfo = breakfastinfo.charAt(0).toUpperCase() + breakfastinfo.slice(1).toLowerCase()
+        let temp_breakfastinfo = breakfastinfo
+        if(!temp_breakfastinfo.toLowerCase().includes('breakfast'.toLowerCase())) {
+          breakfastinfo = "Breakfast: " + breakfastinfo
+        }
+        
+        return breakfastinfo
       }
     },
     formatAmenities(am){
@@ -150,9 +161,12 @@ export default {
       return str
     },
     select_room(room){
+      console.log("room:", room);
       console.log("room select:", room.roomNormalizedDescription);
       var roominfo = {
         name: room.roomNormalizedDescription,
+        type_id: room.type,
+        breakfast_info: room.roomAdditionalInfo.breakfastInfo,
         price: room.price
       }
       
