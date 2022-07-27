@@ -754,16 +754,30 @@ export default {
       // sorted in order of name that matches the search_input
       // best (first element of output) to name that matches the
       // search_input worst (last element of output)
+      search_input = search_input.trim()
       const matches = fuzzysort.go(search_input, input_names)
       if ((matches.length) === 0) { return [] }
       
-      const names = []
+      let names = []
       const length = Math.min(matches.length, 50)
       for (let k=0; k<length; k++) {
         // console.log(k, matches[k])
         const destinationName = matches[k]['target'];
         names.push(destinationName)
       }
+
+      if (input_names.includes(search_input)) {
+        // if an exact match exsits in input_names
+        // remmove it from our fuzzy search and prepend
+        // it to the search results
+        const search_index = names.indexOf(search_input)
+        if (search_index !== -1) {
+          names.splice(search_index, 1)
+        }
+
+        names = [search_input, ...names]
+      }
+
       return names
     }
   },
