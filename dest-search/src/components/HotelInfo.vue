@@ -143,6 +143,7 @@ export default {
       }
     },
     formatAmenities(am){
+      //amenities are read as exampleAmenityTV
       var str = am
       str = str[0].toUpperCase() + str.slice(1)
       str = str.match(/[A-Z]?[a-z]+|[0-9]+|[A-Z]+(?![a-z])/g).join(" ")

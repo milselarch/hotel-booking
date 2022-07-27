@@ -47,7 +47,7 @@
                 <b-field label="First name" class="input-field" :type="{
                   'is-danger': Object.keys(first_name_error).length > 0,
                 }" :message="first_name_error">
-                  <b-input value="" maxlength="30" placeholder="John" v-model="first_name"></b-input>
+                  <b-input id="first_name_field" value="" maxlength="30" placeholder="John" v-model="first_name"></b-input>
                 </b-field>
               </div>
 
@@ -55,7 +55,7 @@
                 <b-field label="Last name" class="input-field" :type="{
                   'is-danger': Object.keys(last_name_error).length > 0,
                 }" :message="last_name_error">
-                  <b-input value="" maxlength="30" placeholder="Doe" v-model="last_name"></b-input>
+                  <b-input id="last_name_field" value="" maxlength="30" placeholder="Doe" v-model="last_name"></b-input>
                 </b-field>
               </div>
             </div>
@@ -510,7 +510,7 @@
               <div class="column is-one-third">
                 <b-field label="Phone" :type="{ 'is-danger': Object.keys(phone_error).length > 0 }"
                   :message="phone_error">
-                  <b-input v-model="phone" name="phone" placeholder="912345678" pattern="[0-9]*" minlength="8"
+                  <b-input id="phone_num_field" v-model="phone" name="phone" placeholder="912345678" pattern="[0-9]*" minlength="8"
                     maxlength="12" v-cardformat:restrictNumeric></b-input>
                   <!-- <b-input v-model="phone"
                 name="phone"
@@ -529,7 +529,7 @@
               <div class="column is-one-third">
                 <b-field label="Email" class="input-field" :type="{ 'is-danger': Object.keys(email_error).length > 0 }"
                   :message="email_error">
-                  <b-input name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" maxlength="30"
+                  <b-input id="email_field" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" maxlength="30"
                     placeholder="nobody@nowhere.com" v-model="email"></b-input>
                   <!-- <b-input
                 v-validate
@@ -564,7 +564,7 @@
                 <b-field label="Credit Card Number" class="input-field" :type="{
                   'is-danger': Object.keys(cc_number_error).length > 0,
                 }" :message="cc_number_error">
-                  <b-input name="cc_number" value="" placeholder="5555-5555-5555-5555" maxlength="19"
+                  <b-input id="cc_num_field" name="cc_number" value="" placeholder="5555-5555-5555-5555" maxlength="19"
                     v-model="cc_number" v-cardformat:formatCardNumber></b-input>
                   <!-- <b-input
                   v-validate
@@ -582,7 +582,7 @@
               <div class="column is-two-fifth">
                 <b-field label="Name on Card" class="input-field"
                   :type="{ 'is-danger': Object.keys(cc_name_error).length > 0 }" :message="cc_name_error">
-                  <b-input value="" maxlength="30" placeholder="John Doe" v-model="cc_name"></b-input>
+                  <b-input id="cc_name_field" value="" maxlength="30" placeholder="John Doe" v-model="cc_name"></b-input>
                 </b-field>
               </div>
             </div>
@@ -608,7 +608,7 @@
               <div class="column is-one-third">
                 <b-field label="CVV/CVC" :type="{ 'is-danger': Object.keys(cc_cvc_error).length > 0 }"
                   :message="cc_cvc_error">
-                  <b-input v-model="cc_cvc" name="cc_cvc" placeholder="000" minlength="3" maxlength="3"
+                  <b-input v-model="cc_cvc" id="cvc_field" name="cc_cvc" placeholder="000" minlength="3" maxlength="3"
                     v-cardformat:restrictNumeric></b-input>
                   <!-- <b-input 
                       v-model="cc_cvc" 
@@ -856,7 +856,7 @@
               <div class="column is-two-fifth">
                 <b-field label="City" class="input-field" :type="{ 'is-danger': Object.keys(ba_city_error).length > 0 }"
                   :message="ba_city_error">
-                  <b-input value="" maxlength="30" placeholder="Singapore" v-model="ba_city"></b-input>
+                  <b-input id="city_field" value="" maxlength="30" placeholder="Singapore" v-model="ba_city"></b-input>
                 </b-field>
               </div>
             </div>
@@ -866,7 +866,7 @@
                 <b-field label="Billing Address" :type="{
                   'is-danger': Object.keys(ba_address_error).length > 0,
                 }" :message="ba_address_error">
-                  <b-input v-model="ba_address" placeholder="Blk 100 Hougang Ave 3 #10-10"></b-input>
+                  <b-input id="address_field" v-model="ba_address" placeholder="Blk 100 Hougang Ave 3 #10-10"></b-input>
                 </b-field>
               </div>
 
@@ -874,7 +874,7 @@
                 <b-field label="Postal code" :type="{
                   'is-danger': Object.keys(ba_postal_code_error).length > 0,
                 }" :message="ba_postal_code_error">
-                  <b-input v-model="ba_postal_code" name="ba_postal_code" placeholder="111111" minlength="5"
+                  <b-input id="postal_field" v-model="ba_postal_code" name="ba_postal_code" placeholder="111111" minlength="5"
                     maxlength="6" v-cardformat:restrictNumeric></b-input>
                   <!-- <b-input 
                     v-model="ba_postal_code"
@@ -896,8 +896,8 @@
             <b-field :type="{
               'is-danger': Object.keys(termsCheckBoxGroup_error).length > 0,
             }">
-              <b-checkbox v-model="termsCheckBoxGroup" native-value="true" :message="termsCheckBoxGroup_error">
-                I've read the terms and condition
+              <b-checkbox id="checkbox" v-model="termsCheckBoxGroup" native-value="true" :message="termsCheckBoxGroup_error">
+                I've read the terms and conditions
               </b-checkbox>
             </b-field>
           </div>
@@ -907,7 +907,7 @@
           }}</b-message>
 
           <div class="center">
-            <b-button class="button is-primary bigbutton" @click="makeBooking()" :disabled="pending || !allow_booking">
+            <b-button id="booking_button" class="button is-primary bigbutton" @click="makeBooking()" :disabled="pending || !allow_booking">
               Confirm Booking</b-button>
           </div>
         </form>
