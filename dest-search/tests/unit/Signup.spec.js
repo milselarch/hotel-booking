@@ -160,6 +160,61 @@ describe('Signup Test', () => {
     expect(store.getters.authenticated).toBe(false)
   })
 
+  it('duplicate signup failure mismatch test', async () => {
+    /*
+    check that signing up with the same credentials
+    (and especially same username) after the previous signup
+    test fails (as we cannot sign up with the same email twice)
+    */
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+
+    let false_password = user.password
+    while (false_password === user.password) {
+      // keep generating random differing passwords
+      // the while loop makes sure the regenerated password
+      // does not end up marching the original password
+      // I know this is unbelievably improbable, but whatever
+      false_password = crypto.randomBytes(6).toString('hex');
+    }
+
+    // set the form data variables
+    assert(false_password !== user.password)
+    wrapper.vm.email = user.email
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = user.password
+    wrapper.vm.re_password = false_password
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(true);
+    console.log("SIGNUP-ATTR", signup_button)
+    // make sure the sign up button is not disabled now
+    expect(signup_button.attributes().disabled).toBe(undefined);
+    expect(wrapper.vm.pending).toBe(false)
+
+    await signup_button.vm.$listeners.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.vm.has_error).toBe(true)
+    const err_msg = "user_account with this email already exists."
+    // check that email error message exists and is correct
+    expect(wrapper.vm.email_error).toStrictEqual([err_msg])
+  })
+
   it('login password failure test', async () => {
     /*
     test that login fails if we enter the correct
@@ -201,6 +256,63 @@ describe('Signup Test', () => {
 
     wrapper.vm.email = user.email
     wrapper.vm.password = false_password
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.vm.pending).toBe(false)
+    await login_button.vm.$listeners.click()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+
+    expect(wrapper.vm.has_error).toBe(true);
+    const errors = wrapper.vm.other_errors;
+    const err_msg = 'No active account found with the given credentials'
+    expect(errors).toBe(err_msg)
+    // console.log('LOGIN ERRORS', errors)
+  })
+
+  it('login email failure test', async () => {
+    /*
+    test that login fails if we enter the wrong
+    email but correct password
+    */
+    const start_stamp = (new Date()).getTime() / 1000
+    while (!signed_up) {
+      // wait for the signup test to complete
+      // and ensure there exists a user account in the backend
+      // from which we can login into
+      await sleep(100);
+    }
+
+    const end_stamp = (new Date()).getTime() / 1000
+    const duration = end_stamp - start_stamp
+    console.log('WAIT DURATION', duration)
+
+    const wrapper = mount(Login, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const login_button = wrapper.find('#login');
+    const errors_box = wrapper.find('#errors_box')
+    expect(login_button.exists()).toBe(true);
+    expect(wrapper.vm.has_error).toBe(false);
+    // const email_field = wrapper.find('#email-field')
+    // const password_field = wrapper.find('#password-field')
+
+    let false_email = user.email
+    while (false_email === user.email) {
+      // keep generating random differing passwords
+      // the while loop makes sure the regenerated password
+      // does not end up marching the original password
+      // I know this is unbelievably improbable, but whatever
+      await sleep(100);
+      false_email = user.generate_email(new Date())
+    }
+
+    wrapper.vm.email = false_email
+    wrapper.vm.password = user.password
     await wrapper.vm.$nextTick()
 
     expect(wrapper.vm.pending).toBe(false)
