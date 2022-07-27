@@ -25,7 +25,6 @@ class LogoutView(APIView):
         request.csrf_processing_done = True
         return super().dispatch(request, *args, **kwargs)
 
-    @method_decorator(csrf_exempt)
     def post(self, request, format=None):
         print('ENTER COOKIE', request)
 
@@ -36,6 +35,7 @@ class LogoutView(APIView):
 
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
+            print('LOGOUT ERR', e)
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 

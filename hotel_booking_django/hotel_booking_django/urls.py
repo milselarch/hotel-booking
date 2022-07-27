@@ -23,7 +23,8 @@ from django.views.decorators.csrf import csrf_exempt
 from common.views import get_csrf_token
 from hotel_booking_django.api_proxy import proxy_view, proxy_mocklabs
 from rest_framework_simplejwt import views as jwt_views
-from accounts.views import ProfileView, LoadTestingView, LogoutView
+from accounts.views import ProfileView, LoadTestingView
+from accounts.views import LogoutView
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -37,7 +38,7 @@ urlpatterns = [
     path('loadTest', LoadTestingView.as_view(),),
 
     path('load-csrf', csrf_exempt(get_csrf_token)),
-    path('token-logout/', csrf_exempt(LogoutView.as_view()), name='auth_logout'),
+    path('token-logout', csrf_exempt(LogoutView.as_view()), name='auth_logout'),
     path('auth_test', ProfileView.as_view(), name='example'),
     path('profile', ProfileView.as_view(), name='profile'),
     path(
