@@ -155,6 +155,8 @@ describe('Home.vue Test', () => {
     // wait for the backend request to complete
     while (wrapper.vm.is_loading) { await sleep(100); }
     expect(wrapper.vm.is_loading).toBe(false)
+    await wrapper.vm.$nextTick()
+
     // expect the backend load error flag to be false
     expect(wrapper.vm.load_error).toBe(false)
     expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
@@ -404,6 +406,16 @@ describe('Home.vue Test', () => {
           console.warn(
             fuzzed_input, search_destination, suggestions
           )
+
+          // if the fuzzed input conmtains a subset of the 
+          // initial search destination. then we expect that
+          // its a subset of the top fuzzy search suggestion as well
+          // this is based on anecdotal observation so its not 
+          // guaranteed to be true either
+          if (search_destination.includes(fuzzed_input)) {
+            console.log('FUZZ INCLUDE CHECK')
+            expect(sugggestions[0]).stringMatching(fuzzed_input)
+          }
         }
       }
 
