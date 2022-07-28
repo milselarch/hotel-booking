@@ -25,7 +25,7 @@ class HotelSearch(unittest.TestCase):
         self.lastname = "Bacon"
         self.phonenum = "90325412"
 
-        self.cardnum = "9493910388423475"
+        self.cardnum = "4111 1111 1112"
         self.cardname = "Chris P. Bacon"
         self.expmonth = "5"
         self.expyear = "2030"
@@ -38,7 +38,7 @@ class HotelSearch(unittest.TestCase):
         driver = self.driver
         # driver.get("http://localhost:8080/")
         # driver.maximize_window()
-        driver.implicitly_wait(2)
+        driver.implicitly_wait(3)
 
         loginpop = driver.find_element(By.ID, "login")
         loginpop.click()
@@ -120,6 +120,7 @@ class HotelSearch(unittest.TestCase):
         time.sleep(0.5)
         driver.find_element(By.ID, "booking_button").click()
 
+        driver.execute_script("window.scrollTo({top: 800, behavior: 'smooth'})")
 
         time.sleep(3)
 
