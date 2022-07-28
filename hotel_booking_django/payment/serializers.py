@@ -3,7 +3,7 @@ from .models import user_payment_credit_card_details
 
 # serialize all the datafields in the user_payment_credit_card_details model
 class user_payment_credit_card_details_serializer(serializers.ModelSerializer):
-    expiry_date = serializers.DateField(format="%b-%Y")
+
     class Meta:
         model = user_payment_credit_card_details
         fields = (

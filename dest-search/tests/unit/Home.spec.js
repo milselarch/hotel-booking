@@ -8,7 +8,19 @@ import axios from 'axios'
 import Vuex from 'vuex'
 import sleep from 'await-sleep'
 import stubs from './stubs.js'
+import small_stubs from './small_stubs.js'
+import fuzzysort from 'fuzzysort'
 
+import Buefy from 'buefy'
+import { start } from 'repl'
+import { raw } from 'file-loader'
+import $ from 'jquery'
+import exp from 'constants'
+
+// string fuzzing generator
+const fuzzer = require('fuzzer');
+// random number generator
+const rand = require('random-seed').create();
 const segfault_handler = require('segfault-handler');
 const fs = require('fs');
 const mock = require('./mock.js');
@@ -24,8 +36,33 @@ fs.readdirSync(test_folder).forEach(file => {
 
 const infiniteScroll =  require('vue-infinite-scroll');
 const localVue = createLocalVue();
+
+localVue.config.silent = true;
 localVue.use(infiniteScroll)
+localVue.use(Buefy)
 localVue.use(Vuex);
+
+const load_suggestions = (wrapper) => {
+  // extract autocomplete suggestions from the
+  // the autocomplete suggestions div
+  const dropdown_menu = wrapper.find('div.dropdown-menu')
+  // console.log('DROPDOWN-MENU', dropdown_menu)
+  const suggest_elems = $(dropdown_menu.element).find('span')
+  // console.log('SUGGEST-ELEMS', suggest_elems)
+  const suggestions = [];
+
+  // extract the autocomplete suggestion names
+  // from the HTML element divs that they're housed in
+  for (let k=0; k<suggest_elems.length; k++) {
+    const suggest_elem = $(suggest_elems[k]);
+    // console.log('SINGLE-ELEM', suggest_elem)
+    const suggestion = suggest_elem.text().trim()
+    // console.log('SUGGEST', suggestion)
+    suggestions.push(suggestion)
+  }
+
+  return suggestions;
+}
 
 describe('Home.vue Test', () => {
   let store;
@@ -48,7 +85,7 @@ describe('Home.vue Test', () => {
         msg: 'Welcome to Your Vue.js App'
       },
       //specify custom components
-      stubs: stubs
+      stubs: small_stubs
     })
   })
 
@@ -131,5 +168,251 @@ describe('Home.vue Test', () => {
     const cards = wrapper.find('.card')
     expect(cards.exists()).toBe(true)
     console.log("CARDS", cards, cards.length)
+  })
+
+  // check that autocomplete search results are sensible
+  it('check autocomplete', async () => {
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+    // this test checks that if we enter an exact destination
+    // name into the autocomplete we will get the desination name
+    // as the first result of our autocomplete suggestions.
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+    const search_destination = "Gap, France"
+    wrapper.vm.destination_input = search_destination
+    await wrapper.vm.$nextTick()
+
+    // make sure the the text input in the raw HTML element
+    // of the autocomplete search bar is equal to the
+    // destination_input vue data variable that we set
+    // (confirms data binding of destination_input on searchbar)
+    const autocomplete_bar = wrapper.find('#dest_search_field')
+    console.log('AUTOCOMPLETE-BAR', autocomplete_bar)
+    const autocomplete_elem = autocomplete_bar.element
+    console.log('BAR-EL', autocomplete_bar.element)
+    expect(autocomplete_elem._value).toBe(search_destination)
+
+    // fuzzy search destination names ourselves with the
+    // search destination (so that we can check again UI suggestions)
+    const all_matches = fuzzysort.go(
+      search_destination, destination_names
+    ).map(search_result => search_result.target)
+    console.log("ALL_MATCHES", all_matches)
+
+    // collect list of suggestions displayed on autocomplete
+    // suggestions box into the suggestions array variable
+    const suggestions = load_suggestions(wrapper)
+    // get the first couple of fuzzysort matches with the
+    // same length as the list of autocomplete suggestions
+    const sub_matches = all_matches.slice(0, suggestions.length);
+    expect(sub_matches).toStrictEqual(suggestions);
+    expect(suggestions.length).toBeLessThanOrEqual(
+      all_matches.length
+    );
+
+    const start_time = (new Date()).getTime()
+    const autocomplete_reuslts = wrapper.vm.filtered_search_matches;
+    const end_time = (new Date()).getTime()
+    const duration = end_time - start_time
+
+    expect(autocomplete_reuslts[0]).toBe(search_destination);
+  })
+
+  // check that autocomplete search results are sensible
+  it('check random autocomplete', async () => {
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+    // this test checks that if we enter the exact destination
+    // name (we randomly sample from our list of destination names
+    // into the autocomplete we will get the desination name
+    // as the first result of our autocomplete suggestions.
+    // We randomly try
+    // different valid desinations names from our list of valid
+    // destination names to make sure it works
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+
+    for (let k=0; k<10; k++) {
+      const search_destination = destination_names[
+        Math.floor(Math.random() * destination_names.length)
+      ];
+
+      // const search_destination = "Gap, France"
+      wrapper.vm.destination_input = search_destination
+      await wrapper.vm.$nextTick()
+
+      // make sure the the text input in the raw HTML element
+      // of the autocomplete search bar is equal to the
+      // destination_input vue data variable that we set
+      // (confirms data binding of destination_input on searchbar)
+      const autocomplete_bar = wrapper.find('#dest_search_field')
+      console.log('AUTOCOMPLETE-BAR', autocomplete_bar)
+      const autocomplete_elem = autocomplete_bar.element
+      console.log('BAR-EL', autocomplete_bar.element)
+      expect(autocomplete_elem._value).toBe(search_destination)
+
+      // fuzzy search destination names ourselves with the
+      // search destination (so that we can check again UI suggestions)
+      const all_matches = fuzzysort.go(
+        search_destination, destination_names
+      ).map(search_result => search_result.target)
+      console.log("ALL_MATCHES", all_matches)
+
+      // Cradle Mountain, Cradle Mountain, TAS, Australia
+      // collect list of suggestions displayed on autocomplete
+      // suggestions box into the suggestions array variable
+      const suggestions = load_suggestions(wrapper)
+      // get the first couple of fuzzysort matches with the
+      // same length as the list of autocomplete suggestions
+      const sub_matches = all_matches.slice(0, suggestions.length);
+      if (!(
+        (suggestions[0] === search_destination) &&
+        (all_matches[0] !== search_destination)
+       )) {
+        /*
+        the vue component search ago intentionally pushes
+        a suggestion to the top if it matches the input
+        destination typed in perfectly, while surprisingly enough
+        fuzzy search by itself does not do that all the time.
+        Therefore we only check that our own fuzzysearch 
+        results with the vue suggestions loader only in the
+        case where the suggestions loader isn't pushing
+        exact matches to the top (hence the if condition)
+        */
+        expect(sub_matches).toStrictEqual(suggestions);
+      }
+
+      expect(suggestions.length).toBeLessThanOrEqual(
+        all_matches.length
+      );
+      
+      const start_time = (new Date()).getTime()
+      const autocomplete_reuslts = wrapper.vm.filtered_search_matches;
+      const end_time = (new Date()).getTime()
+      const duration = end_time - start_time
+      console.log('SEARCH TIME', k, search_destination, duration)
+
+      expect(autocomplete_reuslts[0]).toBe(search_destination);
+    }
+  })
+
+  // check that autocomplete search results are sensible
+  it('fuzz autocomplete suggestions', async () => {
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+    /*
+    this test checks that if we enter the exact destination
+    name (we randomly sample from our list of destination names
+    into the autocomplete we will get the desination name
+    as the first result of our autocomplete suggestions.
+    We randomly try different valid desinations names from our
+    list of valid destination names to make sure it works
+    */
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+    const num_fuzz_tests = 20;
+
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+    const fuzzer_seed = rand();
+    fuzzer.seed(fuzzer_seed);
+
+    for (let k=0; k<num_fuzz_tests; k++) {
+      const search_destination = destination_names[
+        Math.floor(Math.random() * destination_names.length)
+      ];
+
+      let fuzzed_input = '';
+      while (true) {
+        fuzzed_input = fuzzer.mutate.string(search_destination);
+        
+        if (fuzzed_input.length === 0) {
+          console.log('FUZZED STRING IS EMPTY. SKIPPING')
+          continue;
+        } else if (fuzzed_input === search_destination) {
+          continue
+        }
+        
+        break;
+      }
+
+      // const search_destination = "Gap, France"
+      wrapper.vm.destination_input = fuzzed_input
+      await wrapper.vm.$nextTick()
+
+      // make sure the the text input in the raw HTML element
+      // of the autocomplete search bar is equal to the
+      // destination_input vue data variable that we set
+      // (confirms data binding of destination_input on searchbar)
+      const autocomplete_bar = wrapper.find('#dest_search_field')
+      console.log('AUTOCOMPLETE-BAR', autocomplete_bar)
+      const autocomplete_elem = autocomplete_bar.element
+      console.log('BAR-EL', autocomplete_bar.element)
+      expect(autocomplete_elem._value).toBe(fuzzed_input)
+
+      // fuzzy search destination names ourselves with the
+      // search destination (so that we can check again UI suggestions)
+      const all_matches = fuzzysort.go(
+        fuzzed_input, destination_names
+      ).map(search_result => search_result.target)
+      // console.log("ALL_MATCHES", all_matches)
+
+      // collect list of suggestions displayed on autocomplete
+      // suggestions box into the suggestions array variable
+      const suggestions = load_suggestions(wrapper)
+      // get the first couple of fuzzysort matches with the
+      // same length as the list of autocomplete suggestions
+      const sub_matches = all_matches.slice(0, suggestions.length);
+      expect(sub_matches).toStrictEqual(suggestions);
+      expect(suggestions.length).toBeLessThanOrEqual(
+        all_matches.length
+      );
+      
+      const start_time = (new Date()).getTime()
+      // call the computed property used to generate search results 
+      // fed to the homepage autocomplete suggestions box
+      const autocomplete_reuslts = wrapper.vm.filtered_search_matches;
+      const end_time = (new Date()).getTime()
+      const duration = end_time - start_time
+
+      expect(suggestions).toStrictEqual(autocomplete_reuslts)
+      const index = autocomplete_reuslts.indexOf(search_destination)
+      console.log(`
+        START_DEST: [${search_destination}]
+        FUZZE_SEAR: [${fuzzed_input}]
+        SUGGESTIED: ${suggestions.slice(0, 10).join(' | ')}
+      `)
+
+      let relative_position = -1
+      if (suggestions.length !== 0) {
+        // expect(index).not.toBe(-1)
+        relative_position = index / suggestions.length
+        if (relative_position >= 0.5) {
+          // maybe could do a test to check if the higher ranking
+          // suggestions contain the fuzzed input or something
+          console.warn('FUZZED INPUT NOT IN TOP 50% OF SEARCHES')
+          console.warn(
+            fuzzed_input, search_destination, suggestions
+          )
+        }
+      }
+
+      console.log(`
+        FUZZ-SEARCH [${k}] - ${duration}
+        ORIG [${search_destination}] FUZZ [${fuzzed_input}]
+        POS ${index} / ${autocomplete_reuslts.length}
+        R-POS ${relative_position}
+      `)
+    }
   })
 })

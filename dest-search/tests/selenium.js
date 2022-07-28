@@ -1,4 +1,4 @@
-const {By,Key,Builder} = require("selenium-webdriver");
+const {By,Key,Builder, promise} = require("selenium-webdriver");
 require("chromedriver");
 
 async function example(){
@@ -8,12 +8,11 @@ async function example(){
     //To wait for browser to build and launch properly
     let driver = await new Builder().forBrowser("chrome").build();
 
-    //To fetch http://google.com from the browser with our code.
     await driver.get("http://localhost:8080/#/");
     driver.manage().window().maximize();
          
-    //To send a search query by passing the value in searchString.
-    const search_button= driver.findElement(By.id("search_button"))
+    //To send a search query by passing the value in search.
+    const search_button= driver.findElement(By.id("search_button"));
     await driver.findElement(By.id("dest_search_field")).sendKeys(searchString);
     await driver.sleep(900);
     await driver.findElement(By.id("dest_search_field")).sendKeys(Key.ARROW_DOWN);
@@ -25,9 +24,6 @@ async function example(){
     driver.executeScript("arguments[0].style.border='none'", search_button);
     driver.findElement(By.id("search_button")).click();
 
-    //print title
-    // var title = await driver.getTitle();
-    // console.log('Title is:',title);
     for (let i=0; i<3; i++){
         await driver.sleep(1200);
         await driver.executeScript("window.scrollBy({top: 800, behavior: 'smooth'})");
@@ -36,8 +32,31 @@ async function example(){
     await driver.executeScript("window.scrollTo({ top: 700, behavior: 'smooth'})");
     await driver.sleep(1000);
 
+    
     // await driver.wait(until.elementIsVisible(el),100);
-    driver.findElement(By.id("hotel-cards")).click();
+    
+    await driver.findElements(By.className("card")).then(function(hotels) {
+        const valid = [];
+        for (let i=0; i<hotels.length; i++){
+            ((index) => {
+                hotels[index].findElement(By.id("price")).isDisplayed().then((price) => {
+                    // console.log(price);
+                    if (price) {
+                        valid.push(hotels[index]);
+                        console.log("pushed", index);
+                    }
+                    console.log("inner:", valid);
+                    valid[0].click();
+                });
+            })(i);
+        }
+        console.log("outer:", valid);
+        // console.log(valid);
+        // valid[0].click();
+        // Promise.all(prom1).then((result) => console.log(result));
+
+    });
+
 
     for (let i=0; i<3; i++){
         await driver.sleep(1500);
@@ -49,7 +68,7 @@ async function example(){
 
     //It is always a safe practice to quit the browser after execution
     await driver.sleep(3000);
-    await driver.quit();
+    // await driver.quit();
 
 }
 

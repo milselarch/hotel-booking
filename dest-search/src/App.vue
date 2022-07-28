@@ -296,7 +296,7 @@ export default {
     async auth_test() {
       const requester = new AuthRequester(this)
       let success = false
-      let response
+      let response;
 
       try {
         response = await requester.get('auth_test')
