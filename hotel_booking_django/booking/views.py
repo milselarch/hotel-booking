@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from types import SimpleNamespace
 from weakref import proxy
 from django.shortcuts import render
@@ -196,7 +195,7 @@ class user_booking_data(APIView):
                         Error_Responses["expiry_date"] = "Invalid Credit Card Expiry Date. Credit card has expired."
                     else:
                         # valid but don't store in db
-                        request.data['expiry_date'] = ''
+                        request.data['expiry_date'] = None
                 except ValueError:
                     Error_Responses["expiry_date"] = "Invalid Credit Card Expiry Date. Requires date in MM/YYYY"
             else:
@@ -228,7 +227,7 @@ class user_booking_data(APIView):
 
         result_json_response = proxy_view(getReq, f"hotels/{request.data['hotel_id']}/price")
         result_json_content = json.loads(result_json_response.content)
-        selected_room_price = NULL
+        selected_room_price = 0
         if result_json_content["proxy_success"] == True:
             result_dict = result_json_content["proxy_json"]
             print(f"req: {request.data['room_type_id']}")
@@ -239,7 +238,7 @@ class user_booking_data(APIView):
                         #print(f"found: {i['type']} - {i['roomAdditionalInfo']['breakfastInfo']}")
                         selected_room_price = i['price']
                         break
-            if selected_room_price == NULL or selected_room_price == 0:
+            if selected_room_price <= 0 and request.data['number_of_rooms'] <= 0:
                 return Response("Room Price cannot be verifeid", status=status.HTTP_400_BAD_REQUEST)
             else:
                 calculated_price = selected_room_price * request.data['number_of_rooms']
