@@ -238,7 +238,7 @@ class user_booking_data(APIView):
                         #print(f"found: {i['type']} - {i['roomAdditionalInfo']['breakfastInfo']}")
                         selected_room_price = i['price']
                         break
-            if selected_room_price <= 0 and request.data['number_of_rooms'] <= 0:
+            if selected_room_price <= 0 or request.data['number_of_rooms'] <= 0:
                 return Response("Room Price cannot be verifeid", status=status.HTTP_400_BAD_REQUEST)
             else:
                 calculated_price = selected_room_price * request.data['number_of_rooms']
