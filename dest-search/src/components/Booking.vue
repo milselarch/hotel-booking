@@ -919,11 +919,11 @@
           <h3 class="title is-4">Summary</h3>
           <p><b>Hotel</b>: {{ hotel_name }}</p>
           <p><b>Location</b>: {{ destination_region }}</p>
-          <p><b>Room Type</b>: {{ room_type }}</p>
+          <p><b>Room Type</b>: {{ room_type }} {{check_breakfast(room_breakfast_info)}}</p>
           <p><b>Number of Rooms</b>: {{ number_of_rooms }}</p>
           <p><b>Number of Guests per Room</b>: {{ number_of_guests }}</p>
-          <p><b>Check In Date</b>: {{ check_in_date }}</p>
-          <p><b>Check Out Date</b>: {{ check_out_date }}</p>
+          <p><b>Check In Date</b>: {{ formate_date(check_in_date) }}</p>
+          <p><b>Check Out Date</b>: {{ formate_date(check_out_date) }}</p>
           <p><b>Total Cost</b>: SGD ${{ total_cost }}</p>
         </div>
       </div>
@@ -948,9 +948,11 @@ import AuthRequester from "@/AuthRequester";
 import sleep from "await-sleep";
 import axios from "axios";
 import router from "../router";
+import HotelInfo from "./HotelInfo.vue"
 
 export default {
   name: "Booking",
+  mixins: [HotelInfo],
   data() {
     return {
       primaryGuestRadioButton: "Nope",
@@ -1074,6 +1076,16 @@ export default {
     }
   },
   methods: {
+    formate_date(date_str){
+      let mydate = new Date(date_str);
+      let month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][mydate.getMonth()];
+      let str = ('0' + mydate.getDate()).slice(-2) + '-' + month + '-' + mydate.getFullYear();
+      return str;
+    },
+    check_breakfast(breakfastInfo){
+      return "(" + HotelInfo.methods.check_breakfast_func(breakfastInfo) + ")"
+    },
     makeBooking: function (e) {
       const self = this;
       self.pending = true;
