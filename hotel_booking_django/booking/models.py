@@ -17,6 +17,8 @@ class booking_order(common_attribute_model):
     destination_region = models.CharField(max_length=255, blank=True, null=True)
     
     room_type_id = models.CharField(max_length=255, blank=False, null=False)
+    room_breakfast_info = models.CharField(max_length=255, blank=False, null=False)
+    
     
     booking_id = models.CharField(max_length=255, blank=True, null=True)
     check_in_date = models.DateField(blank=False, null=False)

@@ -41,9 +41,9 @@
             @error="replace_default_image"
             alt="Room image not found">
         </div>
-        <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
+        <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}{{ check_breakfast(room) }}</p>
         <div class="card-content">
-          <p>{{ check_breakfast(room) }}</p>
+          <p><b></b></p>
           <ul v-for="(am, key) in room.amenities" v-bind:key="key">
             <li>{{am}}</li>
           </ul>
@@ -134,24 +134,46 @@ export default {
       &markers=${lat},${long}
       &key=AIzaSyAF557v7RJcGzZdlQ3H7dy9lTY6wuSb5mM`
     },
-    check_breakfast(room){
-      if (room.roomAdditionalInfo.breakfastInfo == "hotel_detail_breakfast_included"){
+    check_breakfast_func(breakfastInfo) {
+      if (breakfastInfo == "hotel_detail_breakfast_included"){
         return "Breakfast included"
       }
-      else {
+      else if (breakfastInfo == "hotel_detail_room_only"){
         return "Breakfast not included"
       }
+      else {
+        breakfastInfo = breakfastInfo.replace("hotel_detail_","").replaceAll("_"," ")
+        breakfastInfo = breakfastInfo.charAt(0).toUpperCase() + breakfastInfo.slice(1).toLowerCase()
+        let temp_breakfastInfo = breakfastInfo
+        if(!temp_breakfastInfo.toLowerCase().includes('breakfast'.toLowerCase())) {
+          breakfastInfo = "Breakfast: " + breakfastInfo
+        }
+        
+        return breakfastInfo
+      }
+    },
+    check_breakfast(room){
+      if(room && room.roomAdditionalInfo && room.roomAdditionalInfo.breakfastInfo){
+        return " (" + this.check_breakfast_func(room.roomAdditionalInfo.breakfastInfo) + ")"
+      }
+      else{
+        return ""
+      }      
     },
     formatAmenities(am){
+      //amenities are read as exampleAmenityTV
       var str = am
       str = str[0].toUpperCase() + str.slice(1)
       str = str.match(/[A-Z]?[a-z]+|[0-9]+|[A-Z]+(?![a-z])/g).join(" ")
       return str
     },
     select_room(room){
+      console.log("room:", room);
       console.log("room select:", room.roomNormalizedDescription);
       var roominfo = {
         name: room.roomNormalizedDescription,
+        type_id: room.type,
+        breakfast_info: room.roomAdditionalInfo.breakfastInfo,
         price: room.price
       }
       

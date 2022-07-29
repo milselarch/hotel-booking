@@ -88,9 +88,11 @@
             
             (async () => {
                 console.log('LOAD REQ START')
-
+                let data = {
+                    "data": formdata
+                }
                 try {
-                    response = await requester.delete('auth/users/me/', formdata)
+                    response = await requester.delete('auth/users/me/', {}, data)
                     const status_code = response.status;
                     if (status_code !== 204){
                         console.warn("Deletion Failed")
