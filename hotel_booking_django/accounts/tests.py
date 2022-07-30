@@ -69,11 +69,11 @@ class TestAuthentication(TestCase):
     # password matches the one inputted to the create_user method
     def test_user_password(self):
 
-        user_qs1 = user_account.objects.filter(email__iexact="test1@test.com")
+        user_qs1 = user_account.objects.filter(email="test1@test.com")
         user1 = user_qs1.first()
         self.assertTrue(user1.check_password(self.TEST_USER1['password']))
 
-        user_qs2 = user_account.objects.filter(email__iexact="test2@test.com")
+        user_qs2 = user_account.objects.filter(email="test2@test.com")
         user2 = user_qs2.first()
         self.assertTrue(user2.check_password(self.TEST_USER2['password']))
 
