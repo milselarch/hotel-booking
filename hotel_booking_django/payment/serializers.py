@@ -10,8 +10,6 @@ class user_payment_credit_card_details_serializer(serializers.ModelSerializer):
                 'uid', 
                 'name_on_card',
                 'card_number',
-                'expiry_date',
-                'security_code',
                 'billing_address_address',
                 'billing_address_country',
                 'billing_address_city',

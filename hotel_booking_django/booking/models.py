@@ -8,7 +8,9 @@ import uuid
 class booking_order(common_attribute_model):
 
     # payee id = user id
-    user_account = models.ForeignKey(user_account, on_delete=models.SET_NULL, blank=False, null=True)
+    # when user account is deleted, the booking orderes created
+    # by the user will also be deleted
+    user_account = models.ForeignKey(user_account, on_delete=models.CASCADE, blank=False, null=True)
     destination_id = models.CharField(max_length=255, blank=False, null=False)
     hotel_id = models.CharField(max_length=255, blank=False, null=False)
     

@@ -93,15 +93,101 @@ class user_booking_data(APIView):
                 "billing_address_address": ,
                 "billing_address_country": ,
                 "billing_address_city": ,
-                "billing_address_post_code": 
+                "billing_address_post_code":
             }
 
         Returns:
             A response that contains all the booking information being saved into the database
         """
-    
+
         Error_Responses = {}
 
+        Error_Responses = self.booking_fields_validation(
+            request, Error_Responses)
+
+        if Error_Responses != {}:
+            return Response(Error_Responses, status=status.HTTP_400_BAD_REQUEST)
+
+        # START OF VERIFYING PRICE CALCULATIONS
+        result_json_content = self.room_details_get_request(request)
+        resp = self.verify_hotel_price_from_ascenda_api_matches_with_request_from_client(result_json_content, request)
+        if resp != None:
+            return resp
+        # END OF VERIFYING PRICE CALCULATIONS
+
+        # save the payment info first to generate the payment id
+        payment_serializer = user_payment_credit_card_details_serializer(data=request.data)
+        if payment_serializer.is_valid():
+
+            # obtain the user_payment_credit_card_details object
+            payment = payment_serializer.save()
+
+            # update the request with the payment id obtained
+            request.data['payment_id'] = payment.uid
+
+            # serializer to serialize all the data in the request
+            serializer = booking_serializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            else:
+                Error_Responses = {**Error_Responses, **serializer.errors}
+
+        else:
+            Error_Responses = {**Error_Responses, **payment_serializer.errors}
+
+        if Error_Responses != {}:
+            return Response(Error_Responses, status=status.HTTP_400_BAD_REQUEST)
+    
+    def verify_hotel_price_from_ascenda_api_matches_with_request_from_client(self, result_json_content, request):
+        selected_room_price = 0
+        if result_json_content["proxy_success"] == True:
+            result_dict = result_json_content["proxy_json"]
+            print(f"req: {request.data['room_type_id']}")
+            if "rooms" in result_dict and isinstance(result_dict["rooms"], list) and len(result_dict["rooms"]) > 0:
+                for i in result_dict["rooms"]:
+                    print(i["type"])
+                    if(i["type"] == request.data["room_type_id"] and i['roomAdditionalInfo']['breakfastInfo'] == request.data["room_breakfast_info"]):
+                        # print(f"found: {i['type']} - {i['roomAdditionalInfo']['breakfastInfo']}")
+                        selected_room_price = i['price']
+                        break
+            if selected_room_price <= 0 or request.data['number_of_rooms'] <= 0:
+                return Response("Room Price cannot be verifeid", status=status.HTTP_400_BAD_REQUEST)
+            else:
+                calculated_price = selected_room_price * \
+                    request.data['number_of_rooms']
+                if(calculated_price != request.data['cost_in_sgd']):
+                    return Response("Price in web browser doesn't match with price in system", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # print(result_json_content["error_message"])
+            return Response(result_json_content["error_message"], status=status.HTTP_400_BAD_REQUEST)
+
+    def room_details_get_request(self, request):
+        getReq = type(
+            "request",  # the name
+            (object,),  # base classess
+            {  # the body
+                "GET": {
+                    "destination_id": request.data["destination_id"],
+                    "checkin": request.data["check_in_date"],
+                    "checkout": request.data["check_out_date"],
+                    "lang": "en_US",
+                    "currency": "SGD",
+                    "partner_id": "16",
+                    "country_code": "SG",
+                    "guests": request.data["number_of_guests_per_rooms"]
+                }
+            }
+        )()
+
+        result_json_response = proxy_view(
+            getReq, f"hotels/{request.data['hotel_id']}/price")
+        result_json_content = json.loads(result_json_response.content)
+        return result_json_content
+
+    def booking_fields_validation(self, request, Error_Responses):
         # ensure that the request contains a card_number field in data
         if 'card_number' in request.data:
             card_number = request.data['card_number']
@@ -115,13 +201,11 @@ class user_booking_data(APIView):
 
                 # check if credit card number is valid
                 if valid_credit_card(card_number):
-
                     # pre-fill the data of the logged in user
                     request.data["user_account"] = request.user.uid
 
                     # mask credit card
                     request.data['card_number'] = card_number[-4:]
-                    
 
                 else:
                     Error_Responses["card_number"] = "Invalid Credit Card Number"
@@ -202,82 +286,11 @@ class user_booking_data(APIView):
                 Error_Responses["expiry_date"] = "Missing Credit Card Expiry Date"
         else:
             Error_Responses["expiry_date"] = "Request requires Credit Card Expiry Date"
-
-        if Error_Responses != {}:
-            return Response(Error_Responses, status=status.HTTP_400_BAD_REQUEST)
-
-        # START OF VERIFYING PRICE CALCULATIONS
-
-        getReq = type(
-            "request",  # the name
-            (object,),  # base classess
-            {  # the body
-                "GET": {
-                    "destination_id": request.data["destination_id"],
-                    "checkin": request.data["check_in_date"],
-                    "checkout": request.data["check_out_date"],
-                    "lang": "en_US",
-                    "currency": "SGD",
-                    "partner_id": "16",
-                    "country_code": "SG",
-                    "guests": request.data["number_of_guests_per_rooms"]
-                }
-            }
-        )()
-
-        result_json_response = proxy_view(getReq, f"hotels/{request.data['hotel_id']}/price")
-        result_json_content = json.loads(result_json_response.content)
-        selected_room_price = 0
-        if result_json_content["proxy_success"] == True:
-            result_dict = result_json_content["proxy_json"]
-            print(f"req: {request.data['room_type_id']}")
-            if "rooms" in result_dict and isinstance(result_dict["rooms"], list) and len(result_dict["rooms"]) > 0:
-                for i in result_dict["rooms"]:
-                    print(i["type"])
-                    if(i["type"] == request.data["room_type_id"] and i['roomAdditionalInfo']['breakfastInfo'] == request.data["room_breakfast_info"]):
-                        #print(f"found: {i['type']} - {i['roomAdditionalInfo']['breakfastInfo']}")
-                        selected_room_price = i['price']
-                        break
-            if selected_room_price <= 0 or request.data['number_of_rooms'] <= 0:
-                return Response("Room Price cannot be verifeid", status=status.HTTP_400_BAD_REQUEST)
-            else:
-                calculated_price = selected_room_price * request.data['number_of_rooms']
-                if( calculated_price != request.data['cost_in_sgd']):
-                    return Response("Price in web browser doesn't match with price in system", status=status.HTTP_400_BAD_REQUEST)
-        else:
-            print(result_json_content["error_message"])
-            return Response(result_json_content["error_message"], status=status.HTTP_400_BAD_REQUEST)
-        # END OF VERIFYING PRICE CALCULATIONS
-
-        # save the payment info first to generate the payment id
-        payment_serializer = user_payment_credit_card_details_serializer(
-            data=request.data)
-        if payment_serializer.is_valid():
-
-            # obtain the user_payment_credit_card_details object
-            payment = payment_serializer.save()
-
-            # update the request with the payment id obtained
-            request.data['payment_id'] = payment.uid
-
-            # serializer to serialize all the data in the request
-            serializer = booking_serializer(data=request.data)
-
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-            else:
-                Error_Responses = {**Error_Responses, **serializer.errors}
-
-        else:
-            Error_Responses = {**Error_Responses, **payment_serializer.errors}
-
-        if Error_Responses != {}:
-            return Response(Error_Responses, status=status.HTTP_400_BAD_REQUEST)
+        return Error_Responses
 
     # modify a user's booking_data
     # pk = booking uid
+
     def put(self, request, pk):
         instance = get_object_or_404(booking_order.objects.all(), pk=pk)
 

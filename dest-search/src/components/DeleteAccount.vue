@@ -7,7 +7,7 @@
             </header>
 
             <section class="modal-card-body">
-                <b-field label="Confirm password to delete account"
+                <b-field label="Confirm password to delete account">
                     class = "input-field"
                     :type="{ 'is-danger': hasError }"
                     :message="password_error">
@@ -25,12 +25,13 @@
             <footer class="modal-card-foot">
                 <b-button
                     label="Back"
+                    id = "close_delete_account_modal"
                     @click="$emit('close_delete_modal')" />
                 <b-button
                     label="Confirm"
                     type="is-danger"
                     id = "confirm_delete_account_button"
-                    @click="delete_account()" />
+                    @click.native="delete_account()" />
             </footer>
 
         </div>
@@ -100,6 +101,7 @@
                     }
                     this.deleted = true
                     this.$emit("deleted")
+                    
 
                 } catch (error) {
                     console.log(error)
@@ -118,27 +120,10 @@
                 if (!this.deleted) {
                     return false;
                 }
-
-                console.log('Account Deleted');
             })();
 
             return true;
             
-            // axios.delete(
-            //     'auth/users/me/', 
-            //     formdata,
-            //     config
-            // ).then(response => {
-            //     console.log('Account deleted')
-            //     // console.log(response.data);
-            //     this.$emit("deleted")
-            
-            // }).catch(err =>{
-            //     console.log(err.response.data)
-            //     this.password_error = "Wrong password provided"
-            //     this.hasError = true
-            // })
-
         }
     }
 }
