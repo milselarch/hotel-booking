@@ -537,6 +537,7 @@ describe('Signup Test', () => {
       status_code = error.response.status
     }
 
+    // check that the user is no longer authenticated
     expect(store.getters.authenticated).toBe(false)
     // make sure the authenticated request succeeds
     expect(status_code).toBe(401)

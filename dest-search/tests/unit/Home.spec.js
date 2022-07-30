@@ -165,12 +165,87 @@ describe('Home.vue Test', () => {
     const status_text = wrapper.vm.status_text;
     expect(wrapper.vm.allow_search).toBe(false)
     expect(status_text).toBe(search_destination)
+  })
+
+  it('infinite scroll test', async () => {
+    /*
+    check that infinite scrolling of hotels for our 
+    search destination can load all the avaliable hotels
+    onto the frontend webpage
+    */
+    // wait for desintations.json to be loaded
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+
+    const search_destination = "Gap, France"
+    wrapper.vm.destination_input = search_destination
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.allow_search).toBe(true)
+    // attempt to search on the correct endpoint
+    const search_started = wrapper.vm.begin_search()
+    expect(search_started).toBe(true)
+
+    while (wrapper.vm.is_loading) { await sleep(100); }
+    expect(wrapper.vm.is_loading).toBe(false)
+    await wrapper.vm.$nextTick()
+
+    const cards_holder_id ='#hotel-cards'
+    const cards_holder = wrapper.find(cards_holder_id)
+    const cards_holder_elem = cards_holder.element
+    const cards_holder_component = wrapper.findComponent(
+      cards_holder_id
+    )
+
+    let card_elems = $(cards_holder_elem).find('div.card')    
+    const hotels = wrapper.vm.hotels
+    console.log('HCOUNT', hotels.length)
+    // make sure this destination has 23 hotels total
+    expect(hotels.length).toBe(23)
+    // make sure at least 1 hotel card is being shown
+    expect(card_elems.length).toBeGreaterThan(0)
+
+    // expect(card_elems.exists()).toBe(true)
+    console.log('CARDS_REF', cards_holder)
+    // console.log("CARD_HOLDER_ELEM", cards_holder_elem)
+    // console.log("CARD_ELEMS", card_elems)
+    const target = $('html,body'); 
+    console.log('TARGET', target)
+    /*
+    console.log(
+      'DIMS', $(cards_holder_elem).height(),
+      cards_holder_component, cards_holder_elem,
+      cards_holder
+    )
+    */
+    // ['@@InfiniteScroll']
+    // console.log('IISS', cards_holder_elem['@@InfiniteScroll'])
+
+    // acquire the binding infinite scroll callback function
+    const infinite_scroll = cards_holder_elem['@@InfiniteScroll']
+    const infinite_srcoll_trigger = infinite_scroll.expression
+    console.log(
+      'SCROLL CALLBACK', infinite_srcoll_trigger,
+      typeof infinite_srcoll_trigger
+    )
+    
+    // simulate infinite scrolling till all hotels are loaded
+    for (let k=0; k<hotels.length; k++) {
+      // trigger infinite scroll loading
+      infinite_srcoll_trigger()
+      await wrapper.vm.$nextTick()
+
+      const loaded_hotels = wrapper.vm.hotels_loaded
+      console.log('HOTEL-LOAD', k, loaded_hotels.length)
+      if (hotels.length === loaded_hotels.length) {
+        break;
+      }
+    }
 
     await wrapper.vm.$nextTick()
-    const cards = wrapper.find('.card')
-    expect(cards.exists()).toBe(true)
-    console.log("CARDS", cards, cards.length)
-  })
+    expect(wrapper.vm.all_hotels_loaded).toBe(true)
+    const loaded_hotels = wrapper.vm.hotels_loaded
+    expect(hotels.length).toBe(loaded_hotels.length)
+    expect(hotels).toStrictEqual(loaded_hotels)
+  }) 
 
   // check that autocomplete search results are sensible
   it('check autocomplete', async () => {

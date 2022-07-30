@@ -387,19 +387,27 @@ export default {
       return true
     },
 
-    render_more_hotels() {
+    render_more_hotels(num_to_load=9) {
       /*
       loads hotel cards such the entirety
-      of the last row is filled. 
+      of the last row is filled. We will attempt smart loading
+      (load cards to fill the entirety of the last row) if
+      hotel card width and hotel card holder width is avaliable.
+      Otherwise, we will load a fixed number of cards
       */
+      assert(typeof num_to_load === 'number')
+      assert(Number.isInteger(num_to_load))
+
       const self = this;
       let smart_loading = true;
-      let num_to_load = 9;
       
       if (
         (self.card_width === null) ||
         (self.card_holder_width === null)
       ) {
+        // if we don't know either the width of a single
+        // card, or the width of the card holder, we will
+        // disable smart loading
         smart_loading = false;
       }
 
@@ -673,14 +681,16 @@ export default {
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
       
-      const price_loader = self.load_prices({
+      self.load_prices({
         dest_id: dest_id, dates: dates, 
         num_guests: self.num_guests, num_rooms: self.num_rooms,
         search_stamp: self.search_stamp
       })
+      
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
       });
+
       try {
         // wait for both requests to complete
         let response = await hotel_request;
