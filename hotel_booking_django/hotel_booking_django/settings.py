@@ -187,7 +187,7 @@ DJOSER = {
 # A list of hex-encoded 32 byte keys
 # You only need one unless/until rotating keys
 FIELD_ENCRYPTION_KEYS = [
-    "99c3d602e197f7c653b687b3f083e47f6b9292e40a6649cb4f86e60f8fa93010"
+    os.environ.get('FIELD_ENCRYPTION_KEY'),
 ]
 
 AUTH_USER_MODEL = 'accounts.user_account'
