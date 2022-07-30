@@ -31,7 +31,7 @@ Vue.use(Vuex)
 
 Vue.use(VueGoogleMaps, {
   load: {
-    key: 'AIzaSyAF557v7RJcGzZdlQ3H7dy9lTY6wuSb5mM'
+    key: process.env.VUE_APP_GOOGLE_API_KEY
   }
 });
 

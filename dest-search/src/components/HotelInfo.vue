@@ -98,7 +98,7 @@ export default {
       status: "",
 
       latitude: 'lat',
-      longitude: 'long'
+      longitude: 'long',
 
     }
   },
@@ -133,7 +133,7 @@ export default {
       return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${long}
       &size=500x400
       &markers=${lat},${long}
-      &key=AIzaSyAF557v7RJcGzZdlQ3H7dy9lTY6wuSb5mM`
+      &key=${process.env.VUE_APP_GOOGLE_API_KEY}`
     },
     check_breakfast_func(breakfastInfo) {
       if (breakfastInfo == "hotel_detail_breakfast_included"){
