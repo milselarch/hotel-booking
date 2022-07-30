@@ -1041,18 +1041,18 @@ export default {
 
     window.scrollTo({ top: 0, behavior: "auto" });
 
-    this.hotel_name = this.$store.state.Store.hotelName;
-    this.room_type = this.$store.state.Store.roomName;
-    this.room_type_id = this.$store.state.Store.roomTypeId;
-    this.room_breakfast_info = this.$store.state.Store.roomBreakfastInfo;
-    this.destination_region = this.$store.state.Store.destination;
-    this.check_in_date = this.$store.state.Store.checkindate;
-    this.check_out_date = this.$store.state.Store.checkoutdate;
-    this.number_of_rooms = this.$store.state.Store.numrooms;
-    this.number_of_guests = this.$store.state.Store.numguests;
-    this.total_cost = this.$store.state.Store.roomprice * this.number_of_rooms;
-    this.destination_id = this.$store.state.Store.destid;
-    this.hotel_id = this.$store.state.Store.hotelId;
+    this.hotel_name = this.$store.state.Persistent.hotelName;
+    this.room_type = this.$store.state.Persistent.roomName;
+    this.room_type_id = this.$store.state.Persistent.roomTypeId;
+    this.room_breakfast_info = this.$store.state.Persistent.roomBreakfastInfo;
+    this.destination_region = this.$store.state.Persistent.destination;
+    this.check_in_date = this.$store.state.Persistent.checkindate;
+    this.check_out_date = this.$store.state.Persistent.checkoutdate;
+    this.number_of_rooms = this.$store.state.Persistent.numrooms;
+    this.number_of_guests = this.$store.state.Persistent.numguests;
+    this.total_cost = this.$store.state.Persistent.roomprice * this.number_of_rooms;
+    this.destination_id = this.$store.state.Persistent.destid;
+    this.hotel_id = this.$store.state.Persistent.hotelId;
 
     if (
       !this.hotel_id ||

@@ -41,9 +41,10 @@
             @error="replace_default_image"
             alt="Room image not found">
         </div>
-        <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}{{ check_breakfast(room) }}</p>
+        <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
+        <p style="padding-left: 19rem;"><b>{{ check_breakfast(room) }}</b></p>
         <div class="card-content">
-          <p><b></b></p>
+          
           <ul v-for="(am, key) in room.amenities" v-bind:key="key">
             <li>{{am}}</li>
           </ul>
@@ -178,22 +179,22 @@ export default {
       }
       
       //if user logged in 
-        if (this.$store.getters.authenticated) {
-          this.$store.commit("getRoomDetails", roominfo)
-          router.push("/booking");
-        }
+      if (this.$store.getters.authenticated) {
+        this.$store.commit("getRoomDetails", roominfo)
+        router.push("/booking");
+      }
       
       //if not logged in 
-        if (!this.$store.getters.authenticated) {
-          // toast
-          this.$buefy.toast.open({
-            duration: 5000,
-            message: `Please sign up or login to proceed with booking!`,
-            type: 'is-danger',
-            pauseOnHover: true
-          });
-          this.$emit('open-signup', true)
-        }
+      if (!this.$store.getters.authenticated) {
+        // toast
+        this.$buefy.toast.open({
+          duration: 5000,
+          message: `Please sign up or login to proceed with booking!`,
+          type: 'is-danger',
+          pauseOnHover: true
+        });
+        this.$emit('open-signup', true)
+      }
       
     }
   },
@@ -222,12 +223,12 @@ export default {
       }
     })
 
-    this.hotelName = this.$store.state.Store.hotelName;
-    this.hotelDetails = this.$store.state.Store.hotelDetails;
-    this.hotelAmenities = this.$store.state.Store.hotelAmenities;
-    this.hotelImages = this.$store.state.Store.hotelImages;
-    this.latitude = this.$store.state.Store.latitude;
-    this.longitude = this.$store.state.Store.longitude;
+    this.hotelName = this.$store.state.Persistent.hotelName;
+    this.hotelDetails = this.$store.state.Persistent.hotelDetails;
+    this.hotelAmenities = this.$store.state.Persistent.hotelAmenities;
+    this.hotelImages = this.$store.state.Persistent.hotelImages;
+    this.latitude = this.$store.state.Persistent.latitude;
+    this.longitude = this.$store.state.Persistent.longitude;
   },
   computed: {
     check_amenities(){  
@@ -331,7 +332,7 @@ div#room-cards {
   & img.card-image {
     // preserve aspect ratio for card images
     object-fit: cover;
-    height: 15.5rem;
+    height: 17rem;
     width: 18rem;
     float: left;
   }
