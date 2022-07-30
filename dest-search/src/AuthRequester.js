@@ -117,11 +117,9 @@ class AuthRequester {
 
     try {
       const request = request_func(endpoint, data, options)
-      console.log("WHYWHYW", options)
       return await request
     } catch (access_error) {
       const status_code = access_error.response.status
-      console.warn("FUUU", access_error);
       console.warn('FAIL STATUS CODE', status_code)
       console.warn('FAIL ERR', access_error)
 
