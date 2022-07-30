@@ -174,6 +174,7 @@ describe('Home.vue Test', () => {
     onto the frontend webpage
     */
     // wait for desintations.json to be loaded
+    await wrapper.vm.$nextTick()
     while (!wrapper.vm.destinations_loaded) { await sleep(100); }
 
     const search_destination = "Gap, France"
@@ -240,6 +241,11 @@ describe('Home.vue Test', () => {
       }
     }
 
+    /*
+    console.log(
+      'LENS', wrapper.vm.hotels_loaded.length, hotels.length
+    )
+    */
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.all_hotels_loaded).toBe(true)
     const loaded_hotels = wrapper.vm.hotels_loaded

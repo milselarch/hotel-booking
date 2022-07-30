@@ -397,7 +397,9 @@ export default {
       */
       assert(typeof num_to_load === 'number')
       assert(Number.isInteger(num_to_load))
+      assert(num_to_load > 0)
 
+      // console.log('NUM_TO_LOAD', num_to_load)
       const self = this;
       let smart_loading = true;
       
