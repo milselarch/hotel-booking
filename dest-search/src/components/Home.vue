@@ -405,7 +405,9 @@ export default {
       
       if (
         (self.card_width === null) ||
-        (self.card_holder_width === null)
+        (self.card_width === 0) ||
+        (self.card_holder_width === null) ||
+        (self.card_holder_width === 0)
       ) {
         // if we don't know either the width of a single
         // card, or the width of the card holder, we will
@@ -547,11 +549,11 @@ export default {
       // pricing api has missing destinations (e.g. TXQ5)
       // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
       const get_params = {
-          destination_id: dest_id, partner_id: 1,
-          checkin: start_date_str, checkout: end_date_str,
-          lang: "en_US", currency: "SGD",
-          country_code: "SG", guests: guests_query
-        }
+        destination_id: dest_id, partner_id: 1,
+        checkin: start_date_str, checkout: end_date_str,
+        lang: "en_US", currency: "SGD",
+        country_code: "SG", guests: guests_query
+      }
 
       // keep making the price request
       // till we get that completed is true
@@ -567,6 +569,8 @@ export default {
       search_stamp
     }) {
       assert(typeof search_stamp === 'number')
+      // declare that the price search for the current
+      // search stamp is ongoing
       this.price_search_loading[search_stamp] = true
       let price_resp = {}
 
@@ -577,6 +581,8 @@ export default {
       } catch (e) {
         console.log('PRICING FAIL', search_stamp)
       } finally {
+        // declare that the price search for the current
+        // search stamp is complete
         this.price_search_loading[search_stamp] = false
       }
 
@@ -1040,6 +1046,9 @@ export default {
     },
 
     all_hotels_loaded() {
+      console.log(
+        'H_LOADED', this.hotels.length, this.hotels_loaded.length
+      );
       return (
         this.hotels.length ===
         this.hotels_loaded.length

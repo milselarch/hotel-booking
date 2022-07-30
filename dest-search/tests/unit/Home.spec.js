@@ -16,6 +16,7 @@ import { start } from 'repl'
 import { raw } from 'file-loader'
 import $ from 'jquery'
 import exp from 'constants'
+import { wrap } from 'module'
 
 // string fuzzing generator
 const fuzzer = require('fuzzer');
@@ -65,8 +66,8 @@ const load_suggestions = (wrapper) => {
 }
 
 describe('Home.vue Test', () => {
-  let store;
-  let wrapper;
+  let saved_wrapper, wrapper, store;
+  const france_dest = "Gap, France"
 
   beforeEach(() => {
     // trick axios into thinking its running on the browser
@@ -90,8 +91,10 @@ describe('Home.vue Test', () => {
   })
 
   afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
+    if (wrapper !== saved_wrapper) {
+      wrapper.destroy();
+      wrapper = null;
+    }
   });
 
   it('check message when component is created', () => {
@@ -117,7 +120,7 @@ describe('Home.vue Test', () => {
     expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
 
     // set the destination search inputs, the others are pre-filled
-    wrapper.vm.destination_input = "Gap, France"
+    wrapper.vm.destination_input = france_dest
     // wait for vue to update state
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.allow_search).toBe(true)
@@ -136,6 +139,7 @@ describe('Home.vue Test', () => {
 
   // attempt a valid search now
   it('check valid hotel search status text', async () => {
+    saved_wrapper = wrapper
     // wait for desintations.json to be loaded
     while (!wrapper.vm.destinations_loaded) { await sleep(100); }
 
@@ -143,7 +147,7 @@ describe('Home.vue Test', () => {
     // if the backend is down and we do a hotel search
     expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
 
-    const search_destination = "Gap, France"
+    const search_destination = france_dest
     wrapper.vm.destination_input = search_destination
     // wait for vue to update state
     await wrapper.vm.$nextTick()
@@ -174,27 +178,13 @@ describe('Home.vue Test', () => {
     onto the frontend webpage
     */
     // wait for desintations.json to be loaded
-    await wrapper.vm.$nextTick()
-    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
-
-    const search_destination = "Gap, France"
-    wrapper.vm.destination_input = search_destination
-    await wrapper.vm.$nextTick()
-    expect(wrapper.vm.allow_search).toBe(true)
-    // attempt to search on the correct endpoint
-    const search_started = wrapper.vm.begin_search()
-    expect(search_started).toBe(true)
-
-    while (wrapper.vm.is_loading) { await sleep(100); }
-    expect(wrapper.vm.is_loading).toBe(false)
-    await wrapper.vm.$nextTick()
+    wrapper = saved_wrapper
+    expect(saved_wrapper.vm.destination_input).toBe(france_dest)
+    expect(wrapper.vm.destinations_loaded).toBe(true)
 
     const cards_holder_id ='#hotel-cards'
     const cards_holder = wrapper.find(cards_holder_id)
     const cards_holder_elem = cards_holder.element
-    const cards_holder_component = wrapper.findComponent(
-      cards_holder_id
-    )
 
     let card_elems = $(cards_holder_elem).find('div.card')    
     const hotels = wrapper.vm.hotels
@@ -241,16 +231,94 @@ describe('Home.vue Test', () => {
       }
     }
 
-    /*
     console.log(
       'LENS', wrapper.vm.hotels_loaded.length, hotels.length
     )
-    */
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.all_hotels_loaded).toBe(true)
     const loaded_hotels = wrapper.vm.hotels_loaded
     expect(hotels.length).toBe(loaded_hotels.length)
     expect(hotels).toStrictEqual(loaded_hotels)
+  })
+
+  it('price load check', async () => {
+    /*
+    Check that price info (loaded asynchronously to hotel info)
+    matches the api price response, and is displayed correctly in
+    hotel cards where such prices exist
+
+    To be clear, this test does NOT check that hotels and hotel
+    prices are loaded asynchronously. Rather, it checks that 
+    our asynchronous hotel and price loading requests will conclude
+    successfully with all hotel names loaded, and all prices loaded
+    and displayed for each hotel that the price api has a price for
+    */
+    wrapper = saved_wrapper
+    expect(saved_wrapper.vm.destination_input).toBe(france_dest)
+    expect(wrapper.vm.destinations_loaded).toBe(true)
+
+    // wait for price search apu to complete
+    const search_stamp = wrapper.vm.search_stamp
+    while (wrapper.vm.price_search_loading[search_stamp]) {
+      await sleep(100);
+    }
+
+    const hotels = wrapper.vm.hotels;
+    // get api response price mappings
+    const all_price_mappings = wrapper.vm.price_mapping
+    const price_mapping = all_price_mappings[search_stamp]
+    expect(price_mapping).not.toBe(undefined)
+
+    // load all the hotels onto the frontend
+    wrapper.vm.render_more_hotels(hotels.length);
+    await wrapper.vm.$nextTick()
+
+    const loaded_hotels = wrapper.vm.hotels_loaded
+    const cards_holder_id ='#hotel-cards'
+    const cards_holder = wrapper.find(cards_holder_id)
+    const cards_holder_elem = cards_holder.element
+    let card_elems = $(cards_holder_elem).find('div.card')    
+    // verify all hotel cards are loaded
+    expect(card_elems.length).toBeGreaterThan(0)
+    expect(loaded_hotels.length).toBe(hotels.length)
+
+    // map hotel names to hotel ids
+    const hotel_name_mapping = {}
+    for (let k=0; k<hotels.length; k++) {
+      const hotel = hotels[k]
+      hotel_name_mapping[hotel.name] = hotel.id
+    }
+
+    /*
+    for every hotel card, check that the price
+    displayed matches the hotel price response
+    for each hotel id with the same hotel name
+    as what is displayed on the hotel card
+    */
+    for (let k=0; k<card_elems.length; k++) {
+      const card_elem = card_elems[k]
+      const price_elem = $(card_elem).find('p#price')
+      const title_elem = $(card_elem).find('p.title')
+      const hotel_name = $(title_elem).text().trim()
+      // price element is in the format "SGD ${price}"
+      // therefore the slice (4) to remove the "SGD "
+      const str_hotel_price = $(price_elem).text().trim().slice(4)
+      const hotel_price = Number(str_hotel_price)
+
+      console.log('HOTCARD', k, hotel_name, hotel_price, card_elem)
+      const hotel_id = hotel_name_mapping[hotel_name]
+      expect(hotel_id).not.toBe(undefined)
+      expect(typeof hotel_id).toBe('string')
+
+      // skip price card checks if the pricing api response
+      // doesn't contain the price for the current hotel id
+      if (!price_mapping.hasOwnProperty(hotel_id)) { continue; }
+
+      const api_hotel_price_info = price_mapping[hotel_id]
+      const api_hotel_price = api_hotel_price_info.price
+      expect(hotel_price).toBe(api_hotel_price)
+      expect(hotel_price).toBeGreaterThan(0)
+    }
   }) 
 
   // check that autocomplete search results are sensible
