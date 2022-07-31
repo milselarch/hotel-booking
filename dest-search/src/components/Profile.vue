@@ -61,16 +61,16 @@
                 Booking creation date: <b-tag>{{ datetime_created }}</b-tag> 
               </p>
               <p>
-                Destination ID: <b-tag>{{ destination_id }}</b-tag>
+                Destination: <b-tag>{{ destination_region }}</b-tag>
               </p>
               <p> 
-                Hotel Name: <b-tag>{{ hotel_id }}</b-tag> 
+                Hotel Name: <b-tag>{{ hotel_name }}</b-tag> 
               </p>
               <p>
                 Room Type: <b-tag>{{ room_type }}</b-tag>  
               </p>
               <p>
-                Breakfast Information: <b-tag>{{ breakfast_info }}</b-tag>  
+                Breakfast Information: <b-tag>{{ check_breakfast_func(breakfast_info) }}</b-tag>  
               </p>
               <p>
                 Check In Date: <b-tag>{{ check_in_date }}</b-tag> 
@@ -138,51 +138,6 @@
         </div>
       </div>
     </div>
-
-    
-
-    <!-- <div class="container is-fluid">
-      <div class="notification is-primary">
-        <div id="load-status">
-          <div id="status" v-show="true">
-            <p id="status-text">{{ status_text }}</p>
-            <square id="spinner" v-show="is_loading"></square>
-            <b-button 
-              type="is-dark" id="login" outlined
-              @click="load()" icon-right="sync"
-              v-show="!(is_loading || load_success)"
-            >
-              try again
-            </b-button>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-    <!-- <div id="account_delete_button">
-      <b-button
-            label="Delete account"
-            type="is-danger"
-            size="is-medium"
-            @click="isDeleteAccountModalActive = true" />
-
-      <b-modal
-            v-model="isDeleteAccountModalActive"
-            has-modal-card
-            trap-focus
-            :destroy-on-hide="false"
-            aria-role="dialog"
-            aria-label="Example Modal"
-            close-button-aria-label="Close"
-            aria-modal>
-            <DeleteAccount 
-              v-show="isDeleteAccountModalActive"
-              @deleted="account_deleted"
-              @close_delete_modal = "isDeleteAccountModalActive = false"
-            />
-        </b-modal>
-    </div> -->
-
   </div>
 </template>
 
@@ -194,7 +149,6 @@ import DeleteAccount from '@/components/DeleteAccount.vue'
 
 export default {
   name: 'Profile',
-
   components: {
     DeleteAccount
   },
@@ -219,7 +173,7 @@ export default {
       isDeleteAccountModalActive: false,
 
       booking_id: null,
-      destination_id: null,
+      destination_region: null,
       hotel_name: null,
       room_type: null,
       booking_id: null,
@@ -243,6 +197,25 @@ export default {
   },
 
   methods: {
+    check_breakfast_func(breakfastInfo) {
+      if (breakfastInfo == "hotel_detail_breakfast_included"){
+        return "Breakfast included"
+      }
+      else if (breakfastInfo == "hotel_detail_room_only"){
+        return "Breakfast not included"
+      }
+      else {
+        breakfastInfo = breakfastInfo.replace("hotel_detail_","").replaceAll("_"," ")
+        breakfastInfo = breakfastInfo.charAt(0).toUpperCase() + breakfastInfo.slice(1).toLowerCase()
+        let temp_breakfastInfo = breakfastInfo
+        if(!temp_breakfastInfo.toLowerCase().includes('breakfast'.toLowerCase())) {
+          breakfastInfo = "Breakfast: " + breakfastInfo
+        }
+        
+        return breakfastInfo
+      }
+    },
+
     logout(toast=false) {
       const self = this
 
@@ -318,7 +291,7 @@ export default {
         if (last === -1) { return false }
 
         self.booking_id = responseBooking.data[last].uid
-        self.destination_id = responseBooking.data[last].destination_id
+        self.destination_region = responseBooking.data[last].destination_region
         self.hotel_name = responseBooking.data[last].hotel_name
         self.room_type = responseBooking.data[last].room_type
         // self.booking_id = responseBooking.data[last].booking_id
@@ -337,7 +310,7 @@ export default {
         self.datetime_created = responseBooking.data[last].datetime_created.split("T")[0]
         self.booking_tnc = responseBooking.data[last].booking_tnc
         self.hotel_tnc = responseBooking.data[last].hotel_tnc
-        self.breakfast_info = responseBooking.data[last].breakfast_info
+        self.breakfast_info = responseBooking.data[last].room_breakfast_info
       })();
 
       return true;
