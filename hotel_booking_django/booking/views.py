@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import booking_order
 from .serializers import booking_serializer, booking_history_serializer
 from payment.serializers import user_payment_credit_card_details_serializer
-from hotel_booking_django.api_proxy import proxy_view, proxy_request
+from api_proxy.views import proxy_view, proxy_request
 from datetime import datetime, date
 import re
 import json
@@ -21,8 +21,6 @@ from ast import literal_eval
 
 # function used to validate credit card number
 # credits: https://www.geeksforgeeks.org/luhn-algorithm/
-
-
 def valid_credit_card(cardNo):
 
     nDigits = len(cardNo)

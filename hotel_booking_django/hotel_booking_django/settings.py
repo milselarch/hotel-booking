@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'common',
     'payment',
     "encrypted_fields",
+    "api_proxy"
 ]
 
 
