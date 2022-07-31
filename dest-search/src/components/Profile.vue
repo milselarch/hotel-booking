@@ -64,10 +64,13 @@
                 Destination ID: <b-tag>{{ destination_id }}</b-tag>
               </p>
               <p> 
-                Hotel ID: <b-tag>{{ hotel_id }}</b-tag> 
+                Hotel Name: <b-tag>{{ hotel_id }}</b-tag> 
               </p>
               <p>
-                Room Type ID: <b-tag>{{ room_type_id }}</b-tag>  
+                Room Type: <b-tag>{{ room_type }}</b-tag>  
+              </p>
+              <p>
+                Breakfast Information: <b-tag>{{ breakfast_info }}</b-tag>  
               </p>
               <p>
                 Check In Date: <b-tag>{{ check_in_date }}</b-tag> 
@@ -217,8 +220,8 @@ export default {
 
       booking_id: null,
       destination_id: null,
-      hotel_id: null,
-      room_type_id: null,
+      hotel_name: null,
+      room_type: null,
       booking_id: null,
       check_in_date: null,
       check_out_date: null,
@@ -235,6 +238,7 @@ export default {
       datetime_created: null,
       booking_tnc: null,
       hotel_tnc: null,
+      breakfast_info: null,
     }
   },
 
@@ -315,8 +319,8 @@ export default {
 
         self.booking_id = responseBooking.data[last].uid
         self.destination_id = responseBooking.data[last].destination_id
-        self.hotel_id = responseBooking.data[last].hotel_id
-        self.room_type_id = responseBooking.data[last].room_type_id
+        self.hotel_name = responseBooking.data[last].hotel_name
+        self.room_type = responseBooking.data[last].room_type
         // self.booking_id = responseBooking.data[last].booking_id
         self.check_in_date = responseBooking.data[last].check_in_date
         self.check_out_date = responseBooking.data[last].check_out_date
@@ -333,6 +337,7 @@ export default {
         self.datetime_created = responseBooking.data[last].datetime_created.split("T")[0]
         self.booking_tnc = responseBooking.data[last].booking_tnc
         self.hotel_tnc = responseBooking.data[last].hotel_tnc
+        self.breakfast_info = responseBooking.data[last].breakfast_info
       })();
 
       return true;
