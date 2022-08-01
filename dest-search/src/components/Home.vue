@@ -387,19 +387,31 @@ export default {
       return true
     },
 
-    render_more_hotels() {
+    render_more_hotels(num_to_load=9) {
       /*
       loads hotel cards such the entirety
-      of the last row is filled. 
+      of the last row is filled. We will attempt smart loading
+      (load cards to fill the entirety of the last row) if
+      hotel card width and hotel card holder width is avaliable.
+      Otherwise, we will load a fixed number of cards
       */
+      assert(typeof num_to_load === 'number')
+      assert(Number.isInteger(num_to_load))
+      assert(num_to_load > 0)
+
+      // console.log('NUM_TO_LOAD', num_to_load)
       const self = this;
       let smart_loading = true;
-      let num_to_load = 9;
       
       if (
         (self.card_width === null) ||
-        (self.card_holder_width === null)
+        (self.card_width === 0) ||
+        (self.card_holder_width === null) ||
+        (self.card_holder_width === 0)
       ) {
+        // if we don't know either the width of a single
+        // card, or the width of the card holder, we will
+        // disable smart loading
         smart_loading = false;
       }
 
@@ -537,11 +549,11 @@ export default {
       // pricing api has missing destinations (e.g. TXQ5)
       // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
       const get_params = {
-          destination_id: dest_id, partner_id: 1,
-          checkin: start_date_str, checkout: end_date_str,
-          lang: "en_US", currency: "SGD",
-          country_code: "SG", guests: guests_query
-        }
+        destination_id: dest_id, partner_id: 1,
+        checkin: start_date_str, checkout: end_date_str,
+        lang: "en_US", currency: "SGD",
+        country_code: "SG", guests: guests_query
+      }
 
       // keep making the price request
       // till we get that completed is true
@@ -557,6 +569,8 @@ export default {
       search_stamp
     }) {
       assert(typeof search_stamp === 'number')
+      // declare that the price search for the current
+      // search stamp is ongoing
       this.price_search_loading[search_stamp] = true
       let price_resp = {}
 
@@ -567,6 +581,8 @@ export default {
       } catch (e) {
         console.log('PRICING FAIL', search_stamp)
       } finally {
+        // declare that the price search for the current
+        // search stamp is complete
         this.price_search_loading[search_stamp] = false
       }
 
@@ -673,14 +689,16 @@ export default {
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
       
-      const price_loader = self.load_prices({
+      self.load_prices({
         dest_id: dest_id, dates: dates, 
         num_guests: self.num_guests, num_rooms: self.num_rooms,
         search_stamp: self.search_stamp
       })
+      
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
       });
+
       try {
         // wait for both requests to complete
         let response = await hotel_request;
@@ -1028,6 +1046,9 @@ export default {
     },
 
     all_hotels_loaded() {
+      console.log(
+        'H_LOADED', this.hotels.length, this.hotels_loaded.length
+      );
       return (
         this.hotels.length ===
         this.hotels_loaded.length

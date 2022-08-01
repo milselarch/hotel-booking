@@ -25,7 +25,10 @@ class HotelSearch(unittest.TestCase):
         self.lastname = "Bacon"
         self.phonenum = "90325412"
 
-        self.cardnum = "9493910388423475"
+        self.cardnum1 = "4111"
+        self.cardnum2 = "1111"
+        self.cardnum3 = "1111"
+        self.cardnum4 = "1111"
         self.cardname = "Chris P. Bacon"
         self.expmonth = "5"
         self.expyear = "2030"
@@ -38,7 +41,7 @@ class HotelSearch(unittest.TestCase):
         driver = self.driver
         # driver.get("http://localhost:8080/")
         # driver.maximize_window()
-        driver.implicitly_wait(2)
+        driver.implicitly_wait(3)
 
         loginpop = driver.find_element(By.ID, "login")
         loginpop.click()
@@ -97,14 +100,16 @@ class HotelSearch(unittest.TestCase):
         title.click()
         time.sleep(0.4)
         driver.find_element(By.XPATH, "//form[@id='bookingForm']/div[1]/div[2]/div/div/div/span/select/option[3]").click()
-        # title.send_keys([Keys.ARROW_DOWN, Keys.ARROW_DOWN, Keys. RETURN])
         driver.find_element(By.ID, "first_name_field").send_keys(self.firstname)
         driver.find_element(By.ID, "last_name_field").send_keys(self.lastname)
         driver.find_element(By.ID, "phone_num_field").send_keys(self.phonenum)
         driver.find_element(By.ID, "email_field").send_keys(self.email)
 
         time.sleep(2)
-        driver.find_element(By.ID, "cc_num_field").send_keys(self.cardnum)
+        driver.find_element(By.ID, "cc_num_field").send_keys(self.cardnum1)
+        driver.find_element(By.ID, "cc_num_field").send_keys(self.cardnum2)
+        driver.find_element(By.ID, "cc_num_field").send_keys(self.cardnum3)
+        driver.find_element(By.ID, "cc_num_field").send_keys(self.cardnum4)
         driver.find_element(By.ID, "cc_name_field").send_keys(self.cardname)
         driver.find_element(By.ID, "cc_expiry_date").send_keys(self.expmonth)
         driver.find_element(By.ID, "cc_expiry_date").send_keys(self.expyear)
@@ -120,8 +125,9 @@ class HotelSearch(unittest.TestCase):
         time.sleep(0.5)
         driver.find_element(By.ID, "booking_button").click()
 
+        driver.execute_script("window.scrollTo({top: 800, behavior: 'smooth'})")
 
-        time.sleep(3)
+        time.sleep(4)
 
     
     def end(self):

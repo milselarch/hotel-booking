@@ -66,7 +66,7 @@
                   <b>Destination</b><br />{{ booking.destination_region }}
                 </div>
                 <div class="column is-one-third">
-                  <b>Room Type</b><br />{{ booking.room_type }}
+                  <b>Room Type</b><br />{{ booking.room_type }} {{ check_breakfast(booking.room_breakfast_info) }}
                 </div>
               </div>
               <div class="columns is-mobile">
@@ -137,9 +137,11 @@ import AuthRequester from "@/AuthRequester";
 import sleep from "await-sleep";
 import router from "../router";
 import axios from "axios";
+import HotelInfo from "./HotelInfo.vue"
 
 export default {
   name: "BookingHistory",
+  mixins: [HotelInfo],
   data() {
     return {
       status_text: "loading booking history",
@@ -150,8 +152,10 @@ export default {
       bookinghistorydata: null,
     };
   },
-
   methods: {
+    check_breakfast(breakfastInfo){
+      return "(" + HotelInfo.methods.check_breakfast_func(breakfastInfo) + ")"
+    },
     isEven(index) {
       if (index % 2 !== 0) {
         return true;

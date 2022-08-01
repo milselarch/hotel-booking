@@ -42,8 +42,9 @@
             alt="Room image not found">
         </div>
         <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
+        <p style="padding-left: 19rem;"><b>{{ check_breakfast(room) }}</b></p>
         <div class="card-content">
-          <p>{{ check_breakfast(room) }}</p>
+          
           <ul v-for="(am, key) in room.amenities" v-bind:key="key">
             <li>{{am}}</li>
           </ul>
@@ -134,24 +135,31 @@ export default {
       &markers=${lat},${long}
       &key=AIzaSyAF557v7RJcGzZdlQ3H7dy9lTY6wuSb5mM`
     },
-    check_breakfast(room){
-      if (room.roomAdditionalInfo.breakfastInfo == "hotel_detail_breakfast_included"){
+    check_breakfast_func(breakfastInfo) {
+      if (breakfastInfo == "hotel_detail_breakfast_included"){
         return "Breakfast included"
       }
-      else if (room.roomAdditionalInfo.breakfastInfo == "hotel_detail_room_only"){
+      else if (breakfastInfo == "hotel_detail_room_only"){
         return "Breakfast not included"
       }
       else {
-        let breakfastinfo = room.roomAdditionalInfo.breakfastInfo
-        breakfastinfo = breakfastinfo.replace("hotel_detail_","").replaceAll("_"," ")
-        breakfastinfo = breakfastinfo.charAt(0).toUpperCase() + breakfastinfo.slice(1).toLowerCase()
-        let temp_breakfastinfo = breakfastinfo
-        if(!temp_breakfastinfo.toLowerCase().includes('breakfast'.toLowerCase())) {
-          breakfastinfo = "Breakfast: " + breakfastinfo
+        breakfastInfo = breakfastInfo.replace("hotel_detail_","").replaceAll("_"," ")
+        breakfastInfo = breakfastInfo.charAt(0).toUpperCase() + breakfastInfo.slice(1).toLowerCase()
+        let temp_breakfastInfo = breakfastInfo
+        if(!temp_breakfastInfo.toLowerCase().includes('breakfast'.toLowerCase())) {
+          breakfastInfo = "Breakfast: " + breakfastInfo
         }
         
-        return breakfastinfo
+        return breakfastInfo
       }
+    },
+    check_breakfast(room){
+      if(room && room.roomAdditionalInfo && room.roomAdditionalInfo.breakfastInfo){
+        return " (" + this.check_breakfast_func(room.roomAdditionalInfo.breakfastInfo) + ")"
+      }
+      else{
+        return ""
+      }      
     },
     formatAmenities(am){
       //amenities are read as exampleAmenityTV
@@ -171,22 +179,22 @@ export default {
       }
       
       //if user logged in 
-        if (this.$store.getters.authenticated) {
-          this.$store.commit("getRoomDetails", roominfo)
-          router.push("/booking");
-        }
+      if (this.$store.getters.authenticated) {
+        this.$store.commit("getRoomDetails", roominfo)
+        router.push("/booking");
+      }
       
       //if not logged in 
-        if (!this.$store.getters.authenticated) {
-          // toast
-          this.$buefy.toast.open({
-            duration: 5000,
-            message: `Please sign up or login to proceed with booking!`,
-            type: 'is-danger',
-            pauseOnHover: true
-          });
-          this.$emit('open-signup', true)
-        }
+      if (!this.$store.getters.authenticated) {
+        // toast
+        this.$buefy.toast.open({
+          duration: 5000,
+          message: `Please sign up or login to proceed with booking!`,
+          type: 'is-danger',
+          pauseOnHover: true
+        });
+        this.$emit('open-signup', true)
+      }
       
     }
   },
@@ -215,12 +223,12 @@ export default {
       }
     })
 
-    this.hotelName = this.$store.state.Store.hotelName;
-    this.hotelDetails = this.$store.state.Store.hotelDetails;
-    this.hotelAmenities = this.$store.state.Store.hotelAmenities;
-    this.hotelImages = this.$store.state.Store.hotelImages;
-    this.latitude = this.$store.state.Store.latitude;
-    this.longitude = this.$store.state.Store.longitude;
+    this.hotelName = this.$store.state.Persistent.hotelName;
+    this.hotelDetails = this.$store.state.Persistent.hotelDetails;
+    this.hotelAmenities = this.$store.state.Persistent.hotelAmenities;
+    this.hotelImages = this.$store.state.Persistent.hotelImages;
+    this.latitude = this.$store.state.Persistent.latitude;
+    this.longitude = this.$store.state.Persistent.longitude;
   },
   computed: {
     check_amenities(){  
@@ -324,7 +332,7 @@ div#room-cards {
   & img.card-image {
     // preserve aspect ratio for card images
     object-fit: cover;
-    height: 15.5rem;
+    height: 17rem;
     width: 18rem;
     float: left;
   }

@@ -2,13 +2,15 @@ from django.db import models
 from common.models import common_attribute_model
 from accounts.models import user_account
 from payment.models import user_payment_credit_card_details
-import uuid
+from django_cryptography.fields import encrypt
 
 # Create your models here.
 class booking_order(common_attribute_model):
 
     # payee id = user id
-    user_account = models.ForeignKey(user_account, on_delete=models.SET_NULL, blank=False, null=True)
+    # when user account is deleted, the booking orderes created
+    # by the user will also be deleted
+    user_account = models.ForeignKey(user_account, on_delete=models.CASCADE, blank=False, null=True)
     destination_id = models.CharField(max_length=255, blank=False, null=False)
     hotel_id = models.CharField(max_length=255, blank=False, null=False)
     
@@ -31,12 +33,12 @@ class booking_order(common_attribute_model):
         ('MS', 'Ms.'),
         ('MRS', 'Mrs.'),
     )
-    primary_guest_title = models.CharField(max_length=3, choices=titles, blank=False, null=False)
-    primary_guest_first_name = models.CharField(max_length=100, blank=False, null=False)
-    primary_guest_last_name = models.CharField(max_length=100, blank=False, null=False)
-    primary_guest_email = models.CharField(max_length=100, blank=False, null=False)
-    primary_guest_phone = models.CharField(max_length=100, blank=False, null=False)
-    primary_guest_phone_country = models.CharField(max_length=200, blank=False, null=False)
+    primary_guest_title = encrypt(models.CharField(max_length=3, choices=titles, blank=False, null=False))
+    primary_guest_first_name = encrypt(models.CharField(max_length=100, blank=False, null=False))
+    primary_guest_last_name = encrypt(models.CharField(max_length=100, blank=False, null=False))
+    primary_guest_email = encrypt(models.CharField(max_length=100, blank=False, null=False))
+    primary_guest_phone = encrypt(models.CharField(max_length=100, blank=False, null=False))
+    primary_guest_phone_country = encrypt(models.CharField(max_length=200, blank=False, null=False))
     did_primary_guest_accept_tnc = models.BooleanField(blank=False, null=False)
     #promotion_json
     #cost_breaking_Down

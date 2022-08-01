@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'booking',
     'common',
     'payment',
+    "encrypted_fields",
 ]
 
 
@@ -181,5 +182,11 @@ DJOSER = {
         "current_user": 'accounts.serializers.UserCreateSerializer',
     }
 }
+
+# A list of hex-encoded 32 byte keys
+# You only need one unless/until rotating keys
+FIELD_ENCRYPTION_KEYS = [
+    "99c3d602e197f7c653b687b3f083e47f6b9292e40a6649cb4f86e60f8fa93010"
+]
 
 AUTH_USER_MODEL = 'accounts.user_account'
