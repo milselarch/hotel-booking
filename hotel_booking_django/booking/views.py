@@ -81,14 +81,10 @@ class user_booking_data(APIView):
                 "primary_guest_last_name": ,
                 "primary_guest_phone": ,
                 "primary_guest_phone_country": ,
-                "primary_guest_passport_number": ,
-                "primary_guest_passport_country": ,
                 "cost_in_sgd": ,
                 "name_on_card": ,
                 "card_number": ,
-                "expiry_date": ,
-                "security_code": ,
-                "billing_address_address": ,
+                "billing_address": ,
                 "billing_address_country": ,
                 "billing_address_city": ,
                 "billing_address_post_code":
@@ -152,7 +148,7 @@ class user_booking_data(APIView):
                         selected_room_price = i['price']
                         break
             if selected_room_price <= 0 or request.data['number_of_rooms'] <= 0:
-                return Response("Room Price cannot be verifeid", status=status.HTTP_400_BAD_REQUEST)
+                return Response("Room Price cannot be verified", status=status.HTTP_400_BAD_REQUEST)
             else:
                 calculated_price = selected_room_price * \
                     request.data['number_of_rooms']
@@ -195,15 +191,25 @@ class user_booking_data(APIView):
 
                 # update card number in request with the
                 # removed whitespaces credit card number
+                _mutable = request.data._mutable
+                request.data._mutable = True
                 request.data['card_number'] = card_number
+                request.data._mutable = _mutable
+
 
                 # check if credit card number is valid
                 if valid_credit_card(card_number):
                     # pre-fill the data of the logged in user
+                    
+                    _mutable = request.data._mutable
+                    request.data._mutable = True
                     request.data["user_account"] = request.user.uid
-
+                    request.data._mutable = _mutable
                     # mask credit card
+                    _mutable = request.data._mutable
+                    request.data._mutable = True
                     request.data['card_number'] = card_number[-4:]
+                    request.data._mutable = _mutable
 
                 else:
                     Error_Responses["card_number"] = "Invalid Credit Card Number"
@@ -216,12 +222,19 @@ class user_booking_data(APIView):
             security_code = request.data['security_code']
             if security_code != "" and security_code != None:
                 security_code = security_code.replace(" ", "")
+                _mutable = request.data._mutable
+                request.data._mutable = True
                 request.data['security_code'] = security_code
+                request.data._mutable = _mutable
+                
                 if len(security_code) != 3:
                     Error_Responses["security_code"] = "Invalid CVV/CVC. Requires 3 digits."
                 else:
                     # valid security code but dont store into db for PII and payment security
+                    _mutable = request.data._mutable
+                    request.data._mutable = True
                     request.data['security_code'] = ''
+                    request.data._mutable = _mutable
             else:
                 Error_Responses["security_code"] = "Missing CVV/CVC value"
         else:
@@ -231,7 +244,11 @@ class user_booking_data(APIView):
             primary_guest_phone = request.data['primary_guest_phone']
             if primary_guest_phone != "" and primary_guest_phone != None:
                 primary_guest_phone = primary_guest_phone.replace(" ", "")
+                _mutable = request.data._mutable
+                request.data._mutable = True
                 request.data['primary_guest_phone'] = primary_guest_phone
+                request.data._mutable = _mutable
+
                 if (len(primary_guest_phone) < 8 or len(primary_guest_phone) > 12):
                     Error_Responses["primary_guest_phone"] = "Invalid Primary Guest Phone number. Requires 8-12 digits."
             else:
@@ -244,7 +261,11 @@ class user_booking_data(APIView):
             if billing_address_post_code != "" and billing_address_post_code != None:
                 billing_address_post_code = billing_address_post_code.replace(
                     " ", "")
+                _mutable = request.data._mutable
+                request.data._mutable = True
                 request.data['billing_address_post_code'] = billing_address_post_code
+                request.data._mutable = _mutable
+                
                 if (len(billing_address_post_code) < 5 or len(billing_address_post_code) > 6):
                     Error_Responses["billing_address_post_code"] = "Invalid Postal Code. Requires 5-6 digits."
             else:
@@ -256,7 +277,11 @@ class user_booking_data(APIView):
             primary_guest_email = request.data['primary_guest_email']
             if primary_guest_email != "" and primary_guest_email != None:
                 primary_guest_email = primary_guest_email.replace(" ", "")
+                _mutable = request.data._mutable
+                request.data._mutable = True
                 request.data['primary_guest_email'] = primary_guest_email
+                request.data._mutable = _mutable
+                
                 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
                 if not (re.fullmatch(regex, primary_guest_email)):
                     Error_Responses["primary_guest_email"] = "Invalid Primary Guest's Email Address Format"
@@ -269,7 +294,11 @@ class user_booking_data(APIView):
             expiry_date = request.data['expiry_date']
             if expiry_date != "" and expiry_date != None:
                 expiry_date = expiry_date.replace(" ", "")
+                _mutable = request.data._mutable
+                request.data._mutable = True
                 request.data['expiry_date'] = expiry_date
+                request.data._mutable = _mutable
+                
                 # incorrect format
                 try:
                     exp_date = datetime.strptime(expiry_date, "%Y-%m-%d")
@@ -277,7 +306,11 @@ class user_booking_data(APIView):
                         Error_Responses["expiry_date"] = "Invalid Credit Card Expiry Date. Credit card has expired."
                     else:
                         # valid but don't store in db
+                        _mutable = request.data._mutable
+                        request.data._mutable = True
                         request.data['expiry_date'] = None
+                        request.data._mutable = _mutable
+                        
                 except ValueError:
                     Error_Responses["expiry_date"] = "Invalid Credit Card Expiry Date. Requires date in MM/YYYY"
             else:
