@@ -5,6 +5,7 @@ from common.models import common_attribute_model
 import uuid
 from django_cryptography.fields import encrypt
 from encrypted_fields import fields
+import os
 
 
 class user_account_manager(BaseUserManager):
@@ -45,7 +46,7 @@ class user_account_manager(BaseUserManager):
 
 class user_account(AbstractBaseUser, PermissionsMixin, common_attribute_model):
     _email_data = fields.EncryptedEmailField()
-    email = fields.SearchField(hash_key="b6b7029f69d04cc11f4d22a84e80d4bcab1249dbf981c58de64a69deb46e8b06", encrypted_field_name="_email_data", unique = True)
+    email = fields.SearchField(hash_key=os.environ.get("EMAIL_HASH_KEY"), encrypted_field_name="_email_data", unique = True)
     
 
     first_name = encrypt(models.CharField(max_length=100, blank=True, null=True))

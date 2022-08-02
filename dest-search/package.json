@@ -19,6 +19,7 @@
     "buefy": "^0.9.21",
     "chromedriver": "^103.0.0",
     "crypto": "^1.0.1",
+    "dotenv-webpack": "^8.0.0",
     "flush-promises": "^1.0.2",
     "fuzzer": "^0.2.1",
     "fuzzysort": "^2.0.1",

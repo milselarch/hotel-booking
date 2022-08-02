@@ -21,7 +21,7 @@ from booking import views
 from django.views.decorators.csrf import csrf_exempt
 
 from common.views import get_csrf_token
-from hotel_booking_django.api_proxy import proxy_view, proxy_mocklabs
+from api_proxy.views import proxy_view, proxy_mocklabs
 from rest_framework_simplejwt import views as jwt_views
 from accounts.views import ProfileView, LoadTestingView
 from accounts.views import LogoutView

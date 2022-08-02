@@ -1352,7 +1352,7 @@ export default {
         let toast_type, message;
         const status_code = responseBooking.status;
         toast_type = "is-dark";
-        message = "booking was made succesfully";
+        message = "Booking was made succesfully";
 
         this.$buefy.toast.open({
           duration: 5000,
