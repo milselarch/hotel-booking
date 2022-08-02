@@ -198,17 +198,25 @@ export default {
 
   methods: {
     check_breakfast_func(breakfastInfo) {
+      if (breakfastInfo === null) { return '' }
       if (breakfastInfo == "hotel_detail_breakfast_included"){
         return "Breakfast included"
-      }
-      else if (breakfastInfo == "hotel_detail_room_only"){
+      } else if (breakfastInfo == "hotel_detail_room_only"){
         return "Breakfast not included"
-      }
-      else {
-        breakfastInfo = breakfastInfo.replace("hotel_detail_","").replaceAll("_"," ")
-        breakfastInfo = breakfastInfo.charAt(0).toUpperCase() + breakfastInfo.slice(1).toLowerCase()
+      } else {
+        breakfastInfo = breakfastInfo
+        .replace("hotel_detail_","").replaceAll("_", " ");
+        breakfastInfo = (
+          breakfastInfo.charAt(0).toUpperCase() + 
+          breakfastInfo.slice(1).toLowerCase()
+        )
+        
         let temp_breakfastInfo = breakfastInfo
-        if(!temp_breakfastInfo.toLowerCase().includes('breakfast'.toLowerCase())) {
+        
+        if (
+          !temp_breakfastInfo.toLowerCase()
+          .includes('breakfast'.toLowerCase())
+        ) {
           breakfastInfo = "Breakfast: " + breakfastInfo
         }
         
@@ -247,8 +255,8 @@ export default {
       self.is_loading = true;
       self.load_success = false;
       const requester = new AuthRequester(self)
-      let response;
       let responseBooking;
+      let response;
       
       (async () => {
         console.log('LOAD REQ START')
