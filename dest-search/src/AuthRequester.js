@@ -23,7 +23,7 @@ class AuthRequester {
 
   disable_save_auth = () => this._disable_save_auth()
   _disable_save_auth() {
-    self.autosave_auth_token = false
+    this.autosave_auth_token = false
   }
 
   load_credentials = () => this._load_credentials()
@@ -99,6 +99,7 @@ class AuthRequester {
     const auth_token = response.data.access
     // TODO: commit auth token to vuex store
     if (self.autosave_auth_token) {
+      console.log('REGEN TOKEN SAVE')
       self.store.commit('save_auth_token', auth_token)
     }
     
