@@ -296,7 +296,7 @@ export default {
         pauseOnHover: true
       })
 
-return logout_request
+      return logout_request
     },
 
     async auth_test() {

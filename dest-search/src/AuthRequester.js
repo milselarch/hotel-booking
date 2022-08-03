@@ -23,11 +23,14 @@ class AuthRequester {
 
   disable_save_auth = () => this._disable_save_auth()
   _disable_save_auth() {
+    // disable saving refresh-generated auth token 
+    // automatically into the vuex store during requests
     this.autosave_auth_token = false
   }
 
   load_credentials = () => this._load_credentials()
   _load_credentials() {
+    // load auth and refresh tokens from vuex into this class
     const self = this;
     const state = self.store.state
     self.auth_token = state.Persistent.auth_token

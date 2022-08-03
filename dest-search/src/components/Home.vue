@@ -82,6 +82,8 @@
 
             <b-field 
               id="guests-field" expanded class="custom-label"
+              :type="num_guests_has_error ? 'is-danger': 'text'"
+              :message="guests_validation_error"
             >
               <div class="label-header">
                 <div class="line"></div>
@@ -93,6 +95,7 @@
                 label="test" ref="guests_input"
                 type="number" icon="user" 
                 v-model.number="num_guests"
+                :use-html5-validation="false"
 
                 min="1" :max="max_num_guests" default="1"
                 pattern="[0-9]+" required
@@ -115,6 +118,8 @@
               placeholder="Select check in and checkout dates"
               v-model="dates" 
               icon="calendar"
+              :date-formatter="format_date"
+              :date-parser="parse_date"
               :icon-right="dates_are_valid ? 'check': ''"
               :unselectable-dates="should_exclude_date"
               :disabled="is_loading"
@@ -200,6 +205,7 @@ import { faL } from '@fortawesome/free-solid-svg-icons'
 import router from '../router'
 
 const LOAD_FAIL_MSG = "failed to load hotels\n●︿●";
+const DATE_FORMAT = 'DD/MM/YYYY'
 
 const print_error = () => {
   // print to console if we're not running a unit test
@@ -211,6 +217,7 @@ const print_error = () => {
 export default {
   name: 'Home',
   LOAD_FAIL_MSG: LOAD_FAIL_MSG,
+  DATE_FORMAT: DATE_FORMAT,
 
   data () {
     return {
@@ -276,6 +283,32 @@ export default {
       const date_now = moment(this.current_date)
       const cutoff_date = date_now.add(24, 'h').toDate();
       this.current_date = cutoff_date
+    },
+
+    format_date(date) {
+      console.log('INPUT-DATE', date)
+
+      if (date instanceof Date) {
+        const date_str = moment(date).format(DATE_FORMAT);
+        console.log("DATE-STR", date, date_str)
+        return date_str
+      } else if (Array.isArray(date)) {
+        assert(date.length <= 2)
+        if (date.length === 0) { return '' }
+        assert(date.length === 2)
+
+        const date_str1 = this.format_date(date[0])
+        const date_str2 = this.format_date(date[1])
+        return `${date_str1} - ${date_str2}`
+      }
+
+      throw `BAD DATE ${date}`
+    },
+
+    parse_date(date_str) {
+      console.log('DATE STR-PARSE', date_str)
+      const date = moment(date_str, DATE_FORMAT).toDate();
+      return date
     },
 
     should_exclude_date(date) {
@@ -702,11 +735,14 @@ export default {
       try {
         // wait for both requests to complete
         let response = await hotel_request;
+        const status_code = response.data.status_code
         console.warn('HOTELS RESPONSE', response)
-        console.log('CODE', response.data.status_code)
-        if (response.status !== 200) {
+        console.log('CODE', status_code)
+
+        if (status_code !== 200) {
           throw response.statusText;
         }
+        
         self.hotels = response.data.proxy_json;
         self.hotels.sort((hotel1, hotel2) => {
           if (hotel1.rating < hotel2.rating) {
@@ -940,6 +976,20 @@ export default {
   },
 
   computed: {
+    guests_validation_error() {
+      if (!this.num_guests_has_error) { return '' }
+      if (!Number.isInteger(this.num_guests)) {
+        return 'Please enter a whole number'
+      }
+
+      const search_range = `1 and ${this.max_num_guests}`
+      return `Guests must be a number between ${search_range}`
+    },
+
+    num_guests_has_error() {
+      return !this.is_valid_guests(this.num_guests)
+    },
+
     search_success() {
       return (
         (this.load_error === false) &&
