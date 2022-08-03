@@ -104,39 +104,6 @@ describe('Home.vue Test', () => {
     expect(wrapper.vm.$options.name).toMatch('Home')
   })
 
-  it('flat destinations.json check', async () => {
-    /*
-    load up destinations.json, and check that all the 
-    destinations entries loaded in the home wrapper are
-    also in destinations.json (basically ensure that 
-    destinations.json is loaded correctly by the Home.vue component)
-    */
-    // wait for all destinations to be loaded
-    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
-
-    // load up destinations.json on our own
-    const load_path = 'src/assets/destinations.json'
-    const destinations_data = fs.readFileSync(load_path, 'utf8')
-    const destinations = JSON.parse(destinations_data)
-    const dest_map = {}
-
-    // extract destination name to uid mapping
-    for (const destination of destinations) {
-      const dest_name = destination.term
-      const dest_uid = destination.uid
-      dest_map[dest_name] = dest_uid
-    }
-
-    // verify that the desination mappings we loaded in
-    // ourself matches the mappings in the home.vue wrapper
-    const loaded_dests = wrapper.vm.destination_mappings
-    for (const destination_name in loaded_dests) {
-      const loaded_dest_uid = loaded_dests[destination_name]
-      const dest_uid = dest_map[destination_name]
-      expect(loaded_dest_uid).toBe(dest_uid)
-    }
-  })
-
   it('check hotel search unresponsive text', async () => {
     // this test checks that we fail to load hotels
     // if the backend is down and we do a hotel search
@@ -202,106 +169,6 @@ describe('Home.vue Test', () => {
     const status_text = wrapper.vm.status_text;
     expect(wrapper.vm.allow_search).toBe(false)
     expect(status_text).toBe(search_destination)
-  })
-
-  it('load hotels test', async () => {
-    /*
-    check that after we enter a (randomly selected)
-    valid search destination, and search, we'll get back
-    hotel cards containing all the hotels that exist
-    in the destination according to the backend proxy
-    TODO: can also add a check for card rating sorting here
-    */
-    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
-    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
-    // load the destinations json file ourselves
-    const dest_path = 'src/assets/destinations_flat.json'
-    const raw_file_data = await fs.readFileSync(dest_path);
-    const file_data = JSON.parse(raw_file_data);
-
-    const unpack_results = wrapper.vm.unpack_destinations(file_data)
-    const [destination_names, dest_mapping] = unpack_results
-    // randomly pick a search destination from the list of possible
-    // destinations that were loaded in from dest_path
-    const search_destination = destination_names[
-      Math.floor(Math.random() * destination_names.length)
-    ];
-
-    // get destination id for dest name search_destination
-    const dest_id = dest_mapping[search_destination]
-    // load the hotels ourselves to compare against
-    // the hotels loaded by the vue component
-    const hotels_request = axios.get("proxy/hotels", {
-      params: {destination_id: dest_id}
-    });
-
-    // set the autocomplete search input
-    wrapper.vm.destination_input = search_destination
-    await wrapper.vm.$nextTick()
-    
-    // attempt to search on the correct endpoint
-    const search_started = wrapper.vm.begin_search()
-    expect(search_started).toBe(true)
-    // wait for the backend request to complete
-    while (wrapper.vm.is_loading) { await sleep(100); }
-    expect(wrapper.vm.is_loading).toBe(false)
-    await wrapper.vm.$nextTick()
-    
-    const hotels = wrapper.vm.hotels;
-    // set all the hotels to be displayed on the frontend
-    const num_to_load = Math.max(hotels.length, 1)
-    wrapper.vm.render_more_hotels(num_to_load);
-    await wrapper.vm.$nextTick()
-
-    // retrieve the hotel cards that were rendered
-    const loaded_hotels = wrapper.vm.hotels_loaded
-    const cards_holder_id ='#hotel-cards'
-    const cards_holder = wrapper.find(cards_holder_id)
-    const cards_holder_elem = cards_holder.element
-    let card_elems = $(cards_holder_elem).find('div.card')
-
-    // map hotel names to hotel ids
-    const hotel_name_mapping = {}
-    for (let k=0; k<hotels.length; k++) {
-      const hotel = hotels[k]
-      hotel_name_mapping[hotel.name] = hotel.id
-    }
-
-    const response = await hotels_request
-    console.log('RESP', response)
-    const status_code = response.data.status_code
-    expect(status_code).toBe(200)
-    
-    const reference_hotels = response.data.proxy_json
-    const ref_hotel_name_mapping = {}
-    for (let k=0; k<reference_hotels.length; k++) {
-      const hotel = reference_hotels[k]
-      ref_hotel_name_mapping[hotel.name] = hotel.id
-    }
-
-    // console.log('VUE-HOTEL-MAP', hotel_name_mapping)
-    // console.log('REF-HOTEL-MAP', ref_hotel_name_mapping)
-    // check that the hotels we loaded ourselves match
-    // the ones loaded by the vue component
-    expect(hotel_name_mapping).toStrictEqual(
-      ref_hotel_name_mapping
-    )
-
-    // for every hotel card, check that the hotel name
-    // displayed on the card exists in the hotel response
-    const shown_hotel_ids = []
-    for (let k=0; k<card_elems.length; k++) {
-      const card_elem = card_elems[k]
-      const title_elem = $(card_elem).find('p.title')
-      const hotel_name = $(title_elem).text().trim()
-
-      const hotel_id = hotel_name_mapping[hotel_name]
-      expect(hotel_id).not.toBe(undefined)
-      expect(typeof hotel_id).toBe('string')
-      // make sure each hotel id shows up once only
-      expect(shown_hotel_ids).not.toContain(hotel_id)
-      shown_hotel_ids.push(hotel_id)
-    }
   })
 
   it('infinite scroll test', async () => {
@@ -403,11 +270,9 @@ describe('Home.vue Test', () => {
     expect(price_mapping).not.toBe(undefined)
 
     // load all the hotels onto the frontend
-    const num_to_load = Math.max(hotels.length, 1)
-    wrapper.vm.render_more_hotels(num_to_load);
+    wrapper.vm.render_more_hotels(hotels.length);
     await wrapper.vm.$nextTick()
 
-    // retrieve the hotel cards that were rendered
     const loaded_hotels = wrapper.vm.hotels_loaded
     const cards_holder_id ='#hotel-cards'
     const cards_holder = wrapper.find(cards_holder_id)
@@ -458,13 +323,10 @@ describe('Home.vue Test', () => {
 
   // check that autocomplete search results are sensible
   it('check autocomplete', async () => {
-    /*
-    this test checks that if we enter an exact destination
-    name into the autocomplete we will get the desination name
-    as the first result of our autocomplete suggestions.
-    */
-    // wait for destinations json file to be loaded asynchronous
     while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+    // this test checks that if we enter an exact destination
+    // name into the autocomplete we will get the desination name
+    // as the first result of our autocomplete suggestions.
     expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
     const dest_path = 'src/assets/destinations_flat.json'
     const raw_file_data = await fs.readFileSync(dest_path);

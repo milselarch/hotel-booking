@@ -67,6 +67,8 @@
     "jest-localstorage-mock": "^2.4.21",
     "node-sass": "^4.5.3",
     "sass-loader": "^6.0.6",
+    "string.prototype.replaceall": "^1.0.6",
+    "string.prototype.trim": "^1.2.6",
     "url-loader": "^4.1.1",
     "vitest": "^0.18.0",
     "vue-loader": "^13.0.5",
@@ -100,7 +102,11 @@
     "resetMocks": false,
     "setupFiles": [
       "jest-localstorage-mock"
-    ]
+    ],
+    "setupFilesAfterEnv": [
+      "./setup-jest.js"
+    ],
+    "preset": "@vue/cli-plugin-unit-jest/presets/no-babel"
   },
   "license": "GPLV3"
 }

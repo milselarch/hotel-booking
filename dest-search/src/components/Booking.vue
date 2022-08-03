@@ -35,7 +35,7 @@
               <div class="column is-one-third">
                 <b-field label="Title" :type="{ 'is-danger': Object.keys(title_error).length > 0 }"
                   :message="title_error">
-                  <b-select v-model="title" placeholder="Title" expanded>
+                  <b-select id="title_select_field" v-model="title" placeholder="Title" expanded>
                     <option value="MR">Mr.</option>
                     <option value="MS">Ms.</option>
                     <option value="MRS">Mrs.</option>
@@ -66,7 +66,7 @@
                   'is-danger':
                     Object.keys(countryCodeSelect_error).length > 0,
                 }" :message="countryCodeSelect_error">
-                  <b-select v-model="countryCodeSelect" placeholder="Country code" expanded>
+                  <b-select id="country_phone_select_field" v-model="countryCodeSelect" placeholder="Country code" expanded>
                     <option value="Afghanistan +93">Afghanistan +93</option>
                     <option value="Albania +355">Albania +355</option>
                     <option value="Algeria +213">Algeria +213</option>
@@ -512,17 +512,6 @@
                   :message="phone_error">
                   <b-input id="phone_num_field" v-model="phone" name="phone" placeholder="912345678" pattern="[0-9]*" minlength="8"
                     maxlength="12" v-cardformat:restrictNumeric></b-input>
-                  <!-- <b-input v-model="phone"
-                name="phone"
-                v-validate
-                :message="phone_error" 
-                placeholder="912345678"
-                pattern="[0-9]*"
-                validation-message="Enter valid 8 to 12 digits phone number"
-                minlength="8" 
-                maxlength="12" 
-                v-cardformat:restrictNumeric
-                ></b-input> -->
                 </b-field>
               </div>
 
@@ -531,15 +520,6 @@
                   :message="email_error">
                   <b-input id="email_field" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" maxlength="30"
                     placeholder="nobody@nowhere.com" v-model="email"></b-input>
-                  <!-- <b-input
-                v-validate
-                :message="email_error"
-                name="email"
-                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                validation-message="Enter valid email address"
-                maxlength="30" placeholder="nobody@nowhere.com"
-                v-model="email"                
-              ></b-input> -->
                 </b-field>
               </div>
             </div>
@@ -548,7 +528,7 @@
               <b-field label="Special requests" :type="{
                 'is-danger': Object.keys(special_requests_error).length > 0,
               }" :message="special_requests_error">
-                <b-input v-model="special_requests" maxlength="500" type="textarea"
+                <b-input id="special_requests_field" v-model="special_requests" maxlength="500" type="textarea"
                   placeholder="We will pass on the requests to the hotel. Please note that all requests are at the hotel's discretion and not guaranteed.">
                 </b-input>
               </b-field>
@@ -566,17 +546,6 @@
                 }" :message="cc_number_error">
                   <b-input id="cc_num_field" name="cc_number" value="" placeholder="5555-5555-5555-5555" maxlength="19"
                     v-model="cc_number" v-cardformat:formatCardNumber></b-input>
-                  <!-- <b-input
-                  v-validate
-                  name="cc_number"
-                  value="" 
-                  placeholder="5555-5555-5555-5555"
-                  maxlength="19"
-                  minlength="16"
-                  validation-message="Enter valid credit card"
-                  v-model="cc_number"
-                  v-cardformat:formatCardNumber                 
-                ></b-input> -->
                 </b-field>
               </div>
               <div class="column is-two-fifth">
@@ -592,17 +561,8 @@
                 <b-field label="Expiry date (MM / YYYY)" :type="{
                   'is-danger': Object.keys(cc_expiry_date_error).length > 0,
                 }" :message="cc_expiry_date_error">
-                  <b-input id="cc_expiry_date" name="cc_expiry_date" v-model="cc_expiry_date" placeholder="MM / YYYY"
+                  <b-input id="cc_expiry_date_field" name="cc_expiry_date" v-model="cc_expiry_date" placeholder="MM / YYYY"
                     v-cardformat:formatCardExpiry minlength="6" maxlength="9"></b-input>
-                  <!-- <b-input id="cc_expiry_date" 
-                      name="cc_expiry_date"
-                      v-model="cc_expiry_date" placeholder="06 / 2026"
-                      v-cardformat:formatCardExpiry
-                      minlength="6" 
-                      maxlength="9" 
-                      v-validate
-                      validation-message="Enter credit card expiry date in MM/YYYY format"
-                      ></b-input> -->
                 </b-field>
               </div>
               <div class="column is-one-third">
@@ -610,17 +570,6 @@
                   :message="cc_cvc_error">
                   <b-input v-model="cc_cvc" id="cvc_field" name="cc_cvc" placeholder="000" minlength="3" maxlength="3"
                     v-cardformat:restrictNumeric></b-input>
-                  <!-- <b-input 
-                      v-model="cc_cvc" 
-                      name="cc_cvc"
-                      placeholder="000"
-                      :message="cc_cvc_error"
-                      minlength="3" 
-                      maxlength="3" 
-                      v-validate
-                      validation-message="Enter valid 3 digits CVV/CCVC number"
-                      v-cardformat:restrictNumeric
-                    ></b-input> -->
                 </b-field>
               </div>
             </div>
@@ -634,7 +583,7 @@
                 <b-field label="Country" :type="{
                   'is-danger': Object.keys(ba_country_error).length > 0,
                 }" :message="ba_country_error">
-                  <b-select v-model="ba_country" expanded>
+                  <b-select id="country_select_field" v-model="ba_country" expanded>
                     <option value="Afghanistan">Afghanistan</option>
                     <option value="Albania">Albania</option>
                     <option value="Algeria">Algeria</option>
@@ -876,16 +825,6 @@
                 }" :message="ba_postal_code_error">
                   <b-input id="postal_field" v-model="ba_postal_code" name="ba_postal_code" placeholder="111111" minlength="5"
                     maxlength="6" v-cardformat:restrictNumeric></b-input>
-                  <!-- <b-input 
-                    v-model="ba_postal_code"
-                    name="ba_postal_code"
-                    placeholder="111111"
-                    :message="ba_postal_code_error"
-                    minlength="5" 
-                    maxlength="6" 
-                    v-validate
-                    validation-message="Enter valid 6 digits postal code or valid 5 digits zip code (US)"
-                    v-cardformat:restrictNumeric></b-input> -->
                 </b-field>
               </div>
             </div>
@@ -896,7 +835,7 @@
             <b-field :type="{
               'is-danger': Object.keys(termsCheckBoxGroup_error).length > 0,
             }">
-              <b-checkbox id="checkbox" v-model="termsCheckBoxGroup" native-value="true" :message="termsCheckBoxGroup_error">
+              <b-checkbox id="checkbox_field" v-model="termsCheckBoxGroup" native-value="true" :message="termsCheckBoxGroup_error">
                 I've read the terms and conditions
               </b-checkbox>
             </b-field>
@@ -948,11 +887,9 @@ import AuthRequester from "@/AuthRequester";
 import sleep from "await-sleep";
 import axios from "axios";
 import router from "../router";
-import HotelInfo from "./HotelInfo.vue"
 
 export default {
   name: "Booking",
-  mixins: [HotelInfo],
   data() {
     return {
       primaryGuestRadioButton: "Nope",
@@ -981,16 +918,12 @@ export default {
       last_name: "",
       phone: "",
       email: "",
-      //countryCodeSelect: "",,
-      //primary_guest_passport_number: "",
-      //primary_guest_passport_country: "",
 
       cc_name: "",
       cc_number: "",
       cc_expiry_date: "",
       cc_cvc: "",
       ba_address: "",
-      //ba_country: "",
       ba_city: "",
       ba_postal_code: "",
 
@@ -1083,8 +1016,30 @@ export default {
       let str = ('0' + mydate.getDate()).slice(-2) + '-' + month + '-' + mydate.getFullYear();
       return str;
     },
+    check_breakfast_func(breakfastInfo) {
+      if (!breakfastInfo){
+        return ""
+      }
+      else if (breakfastInfo == "hotel_detail_breakfast_included"){
+        return "Breakfast included"
+      }
+      else if (breakfastInfo == "hotel_detail_room_only"){
+        return "Breakfast not included"
+      }
+      else {
+        breakfastInfo = breakfastInfo.replace("hotel_detail_","")
+        breakfastInfo = breakfastInfo.replace(/_/g," ")
+        breakfastInfo = breakfastInfo.charAt(0).toUpperCase() + breakfastInfo.slice(1).toLowerCase()
+        let temp_breakfastInfo = breakfastInfo
+        if(!temp_breakfastInfo.toLowerCase().includes('breakfast'.toLowerCase())) {
+          breakfastInfo = "Breakfast: " + breakfastInfo
+        }
+        
+        return breakfastInfo
+      }
+    },
     check_breakfast(breakfastInfo){
-      return "(" + HotelInfo.methods.check_breakfast_func(breakfastInfo) + ")"
+      return "(" + this.check_breakfast_func(breakfastInfo) + ")"
     },
     makeBooking: function (e) {
       const self = this;
@@ -1392,16 +1347,27 @@ export default {
   computed: {
     allow_booking() {
       return (
+        this.first_name !== null &&
         this.first_name.trim() !== "" &&
+        this.last_name.trim() !== null &&
         this.last_name.trim() !== "" &&
+        this.email.trim() !== null &&
         this.email.trim() !== "" &&
+        this.phone.trim() !== null &&
         this.phone.trim() !== "" &&
+        this.cc_name.trim() !== null &&
         this.cc_name.trim() !== "" &&
+        this.cc_number.trim() !== null &&
         this.cc_number.trim() !== "" &&
+        this.cc_expiry_date.trim() !== null &&
         this.cc_expiry_date.trim() !== "" &&
+        this.cc_cvc.trim() !== null &&
         this.cc_cvc.trim() !== "" &&
+        this.ba_address.trim() !== null &&
         this.ba_address.trim() !== "" &&
+        this.ba_city.trim() !== null &&
         this.ba_city.trim() !== "" &&
+        this.ba_postal_code.trim() !== null &&
         this.ba_postal_code.trim() !== "" &&
         this.termsCheckBoxGroup == true
       );
