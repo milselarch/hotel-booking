@@ -6,7 +6,7 @@ import dotenv
 
 def main():
     """Run administrative tasks."""
-    dotenv.load_dotenv()
+    dotenv.read_dotenv()
     os.environ.setdefault(
         'DJANGO_SETTINGS_MODULE', 
         'hotel_booking_django.settings'
