@@ -117,7 +117,12 @@ class user_booking_data(APIView):
             payment = payment_serializer.save()
 
             # update the request with the payment id obtained
+            
+            _mutable = request.data._mutable
+            request.data._mutable = True
             request.data['payment_id'] = payment.uid
+            request.data._mutable = _mutable
+                
 
             # serializer to serialize all the data in the request
             serializer = booking_serializer(data=request.data)
@@ -367,3 +372,217 @@ class admin_booking_data(APIView):
 # # generate the html webpage for booking tnc
 # class BookingTnCView(TemplateView):
 #     template_name = "booking_tnc.html"
+
+class BookingCreation_LoadTest(APIView):
+    # only admins can use this endpoint
+    permission_classes = (IsAuthenticated,)
+
+    # load test endpoint for booking creation
+    def post(self, request):
+        """
+        Create a booking under the user account
+
+        Args:
+            request: a request that contains a json object in its data field.
+            The json object should contain these information:
+            {
+                "hotel_id": ,
+                "room_type_id": ,
+                "booking_id": ,
+                "check_in_date": ,
+                "check_out_date": ,
+                "number_of_rooms": ,
+                "number_of_guests_per_rooms": ,
+                "special_request": ,
+                "primary_guest_title": ,
+                "primary_guest_first_name": ,
+                "primary_guest_last_name": ,
+                "primary_guest_phone": ,
+                "primary_guest_phone_country": ,
+                "cost_in_sgd": ,
+                "name_on_card": ,
+                "card_number": ,
+                "billing_address": ,
+                "billing_address_country": ,
+                "billing_address_city": ,
+                "billing_address_post_code":
+            }
+
+        Returns:
+            A response that contains all the booking information being saved into the database
+        """
+
+        Error_Responses = {}
+
+        Error_Responses = self.booking_fields_validation(
+            request, Error_Responses)
+
+        if Error_Responses != {}:
+            return Response(Error_Responses, status=status.HTTP_400_BAD_REQUEST)
+
+        # save the payment info first to generate the payment id
+        payment_serializer = user_payment_credit_card_details_serializer(data=request.data)
+        if payment_serializer.is_valid():
+
+            # obtain the user_payment_credit_card_details object
+            payment = payment_serializer.save()
+
+            # update the request with the payment id obtained
+            _mutable = request.data._mutable
+            request.data._mutable = True
+            request.data['payment_id'] = payment.uid
+            request.data._mutable = _mutable
+
+            # serializer to serialize all the data in the request
+            serializer = booking_serializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            else:
+                Error_Responses = {**Error_Responses, **serializer.errors}
+
+        else:
+            Error_Responses = {**Error_Responses, **payment_serializer.errors}
+
+        if Error_Responses != {}:
+            return Response(Error_Responses, status=status.HTTP_400_BAD_REQUEST)
+
+    def booking_fields_validation(self, request, Error_Responses):
+        # ensure that the request contains a card_number field in data
+        if 'card_number' in request.data:
+            card_number = request.data['card_number']
+            if card_number != "" and card_number != None:
+                # remove whitespaces from the credit card number
+                card_number = card_number.replace(" ", "")
+
+                # update card number in request with the
+                # removed whitespaces credit card number
+                _mutable = request.data._mutable
+                request.data._mutable = True
+                request.data['card_number'] = card_number
+                request.data._mutable = _mutable
+
+
+                # check if credit card number is valid
+                if valid_credit_card(card_number):
+                    # pre-fill the data of the logged in user
+                    
+                    _mutable = request.data._mutable
+                    request.data._mutable = True
+                    request.data["user_account"] = request.user.uid
+                    request.data._mutable = _mutable
+                    # mask credit card
+                    _mutable = request.data._mutable
+                    request.data._mutable = True
+                    request.data['card_number'] = card_number[-4:]
+                    request.data._mutable = _mutable
+
+                else:
+                    Error_Responses["card_number"] = "Invalid Credit Card Number"
+            else:
+                Error_Responses["card_number"] = "Missing Credit Card Number"
+        else:
+            Error_Responses["card_number"] = "Request requires a card number field"
+
+        if 'security_code' in request.data:
+            security_code = request.data['security_code']
+            if security_code != "" and security_code != None:
+                security_code = security_code.replace(" ", "")
+                _mutable = request.data._mutable
+                request.data._mutable = True
+                request.data['security_code'] = security_code
+                request.data._mutable = _mutable
+                
+                if len(security_code) != 3:
+                    Error_Responses["security_code"] = "Invalid CVV/CVC. Requires 3 digits."
+                else:
+                    # valid security code but dont store into db for PII and payment security
+                    _mutable = request.data._mutable
+                    request.data._mutable = True
+                    request.data['security_code'] = ''
+                    request.data._mutable = _mutable
+            else:
+                Error_Responses["security_code"] = "Missing CVV/CVC value"
+        else:
+            Error_Responses["security_code"] = "Request requires CVV/CVC value"
+
+        if 'primary_guest_phone' in request.data:
+            primary_guest_phone = request.data['primary_guest_phone']
+            if primary_guest_phone != "" and primary_guest_phone != None:
+                primary_guest_phone = primary_guest_phone.replace(" ", "")
+                _mutable = request.data._mutable
+                request.data._mutable = True
+                request.data['primary_guest_phone'] = primary_guest_phone
+                request.data._mutable = _mutable
+
+                if (len(primary_guest_phone) < 8 or len(primary_guest_phone) > 12):
+                    Error_Responses["primary_guest_phone"] = "Invalid Primary Guest Phone number. Requires 8-12 digits."
+            else:
+                Error_Responses["primary_guest_phone"] = "Missing Primary Guest Phone number"
+        else:
+            Error_Responses["primary_guest_phone"] = "Request requires Primary Guest Phone number"
+
+        if 'billing_address_post_code' in request.data:
+            billing_address_post_code = request.data['billing_address_post_code']
+            if billing_address_post_code != "" and billing_address_post_code != None:
+                billing_address_post_code = billing_address_post_code.replace(
+                    " ", "")
+                _mutable = request.data._mutable
+                request.data._mutable = True
+                request.data['billing_address_post_code'] = billing_address_post_code
+                request.data._mutable = _mutable
+                
+                if (len(billing_address_post_code) < 5 or len(billing_address_post_code) > 6):
+                    Error_Responses["billing_address_post_code"] = "Invalid Postal Code. Requires 5-6 digits."
+            else:
+                Error_Responses["billing_address_post_code"] = "Missing Postal Code"
+        else:
+            Error_Responses["billing_address_post_code"] = "Request requires Postal Code"
+
+        if 'primary_guest_email' in request.data:
+            primary_guest_email = request.data['primary_guest_email']
+            if primary_guest_email != "" and primary_guest_email != None:
+                primary_guest_email = primary_guest_email.replace(" ", "")
+                _mutable = request.data._mutable
+                request.data._mutable = True
+                request.data['primary_guest_email'] = primary_guest_email
+                request.data._mutable = _mutable
+                
+                regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                if not (re.fullmatch(regex, primary_guest_email)):
+                    Error_Responses["primary_guest_email"] = "Invalid Primary Guest's Email Address Format"
+            else:
+                Error_Responses["primary_guest_email"] = "Missing Primary Guest's Email"
+        else:
+            Error_Responses["primary_guest_email"] = "Request Primary Guest's Email"
+
+        if 'expiry_date' in request.data:
+            expiry_date = request.data['expiry_date']
+            if expiry_date != "" and expiry_date != None:
+                expiry_date = expiry_date.replace(" ", "")
+                _mutable = request.data._mutable
+                request.data._mutable = True
+                request.data['expiry_date'] = expiry_date
+                request.data._mutable = _mutable
+                
+                # incorrect format
+                try:
+                    exp_date = datetime.strptime(expiry_date, "%Y-%m-%d")
+                    if (exp_date.year < date.today().year) or (exp_date.year == date.today().year and exp_date.month < date.today().month):
+                        Error_Responses["expiry_date"] = "Invalid Credit Card Expiry Date. Credit card has expired."
+                    else:
+                        # valid but don't store in db
+                        _mutable = request.data._mutable
+                        request.data._mutable = True
+                        request.data['expiry_date'] = None
+                        request.data._mutable = _mutable
+                        
+                except ValueError:
+                    Error_Responses["expiry_date"] = "Invalid Credit Card Expiry Date. Requires date in MM/YYYY"
+            else:
+                Error_Responses["expiry_date"] = "Missing Credit Card Expiry Date"
+        else:
+            Error_Responses["expiry_date"] = "Request requires Credit Card Expiry Date"
+        return Error_Responses
