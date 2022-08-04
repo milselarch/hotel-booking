@@ -261,7 +261,14 @@ export default {
       if (!this.authenticated) { return false }
 
       const refresh_token = this.$store.getters.refresh_token
+      const auth_token = this.$store.getters.auth_token
+      this.$store.commit('clear_credentials')
+
       const requester = new AuthRequester(this)
+      requester.set_refresh_token(refresh_token)
+      requester.set_auth_token(auth_token)
+      requester.disable_save_auth()
+
       // send logout request to blacklist auth crednentials
 
       const csrf_token = $.cookie('csrftoken');
@@ -289,7 +296,6 @@ export default {
         pauseOnHover: true
       })
 
-      this.$store.commit('clear_credentials')
       return logout_request
     },
 

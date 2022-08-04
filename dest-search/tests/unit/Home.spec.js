@@ -104,39 +104,6 @@ describe('Home.vue Test', () => {
     expect(wrapper.vm.$options.name).toMatch('Home')
   })
 
-  it('flat destinations.json check', async () => {
-    /*
-    load up destinations.json, and check that all the 
-    destinations entries loaded in the home wrapper are
-    also in destinations.json (basically ensure that 
-    destinations.json is loaded correctly by the Home.vue component)
-    */
-    // wait for all destinations to be loaded
-    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
-
-    // load up destinations.json on our own
-    const load_path = 'src/assets/destinations.json'
-    const destinations_data = fs.readFileSync(load_path, 'utf8')
-    const destinations = JSON.parse(destinations_data)
-    const dest_map = {}
-
-    // extract destination name to uid mapping
-    for (const destination of destinations) {
-      const dest_name = destination.term
-      const dest_uid = destination.uid
-      dest_map[dest_name] = dest_uid
-    }
-
-    // verify that the desination mappings we loaded in
-    // ourself matches the mappings in the home.vue wrapper
-    const loaded_dests = wrapper.vm.destination_mappings
-    for (const destination_name in loaded_dests) {
-      const loaded_dest_uid = loaded_dests[destination_name]
-      const dest_uid = dest_map[destination_name]
-      expect(loaded_dest_uid).toBe(dest_uid)
-    }
-  })
-
   it('check hotel search unresponsive text', async () => {
     // this test checks that we fail to load hotels
     // if the backend is down and we do a hotel search

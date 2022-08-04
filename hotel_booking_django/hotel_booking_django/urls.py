@@ -26,6 +26,7 @@ from rest_framework_simplejwt import views as jwt_views
 from accounts.views import ProfileView, LoadTestingView
 from accounts.views import LogoutView
 from django.views.generic import TemplateView
+from booking.views import BookingCreation_LoadTest
 
 urlpatterns = [
     path('admin/', admin.site.urls), 
@@ -36,6 +37,7 @@ urlpatterns = [
     path('admin_booking/', views.admin_booking_data.as_view(),),
     path('admin_booking/<str:pk>/', views.admin_booking_data.as_view(),),
     path('loadTest/', LoadTestingView.as_view(),),
+    path('loadTest/booking/', BookingCreation_LoadTest.as_view(),),
 
     path('load-csrf', csrf_exempt(get_csrf_token)),
     path('token-logout', csrf_exempt(LogoutView.as_view()), name='auth_logout'),

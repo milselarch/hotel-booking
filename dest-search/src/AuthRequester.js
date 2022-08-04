@@ -16,11 +16,21 @@ class AuthRequester {
     
     self.store = store
     self.auth_failed = false
+    // flag to save auth token to vuex upon refresh
+    self.autosave_auth_token = true
     self.load_credentials()
+  }
+
+  disable_save_auth = () => this._disable_save_auth()
+  _disable_save_auth() {
+    // disable saving refresh-generated auth token 
+    // automatically into the vuex store during requests
+    this.autosave_auth_token = false
   }
 
   load_credentials = () => this._load_credentials()
   _load_credentials() {
+    // load auth and refresh tokens from vuex into this class
     const self = this;
     const state = self.store.state
     self.auth_token = state.Persistent.auth_token
@@ -91,7 +101,11 @@ class AuthRequester {
     console.log('REFRESH SUCCESS')
     const auth_token = response.data.access
     // TODO: commit auth token to vuex store
-    self.store.commit('save_auth_token', auth_token)
+    if (self.autosave_auth_token) {
+      console.log('REGEN TOKEN SAVE')
+      self.store.commit('save_auth_token', auth_token)
+    }
+    
     self.auth_token = auth_token
     return true
   }
