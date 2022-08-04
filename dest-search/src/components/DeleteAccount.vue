@@ -7,7 +7,7 @@
             </header>
 
             <section class="modal-card-body">
-                <b-field label="Confirm password to delete account">
+                <b-field label="Confirm password to delete account"
                     class = "input-field"
                     :type="{ 'is-danger': hasError }"
                     :message="password_error">

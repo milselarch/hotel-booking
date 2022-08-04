@@ -104,6 +104,28 @@ describe('Home.vue Test', () => {
     expect(wrapper.vm.$options.name).toMatch('Home')
   })
 
+  it('check date formatter', () => {
+    /*
+    verify date formatting and parsing use by datepicker
+    componenet is correct
+    */
+    const date_now = new Date();
+    const stripped_date = new Date(date_now)
+    stripped_date.setUTCHours(0, 0, 0, 0)
+    
+    const date_str = wrapper.vm.format_date(date_now)
+    // regex for date format dd/mm/yyyy
+    const regex = new RegExp('^[0-3][0-9]\/[0-1][0-9]\/[0-9]{4}$');
+    // make sure converted date string has correct format
+    expect(regex.test(date_str)).toBe(true)
+    // make sure the date string that we parse is the same
+    // as the original date object used to create the string
+    const converted_date = wrapper.vm.parse_date(date_str)
+    console.log('CONVERTED DATE', converted_date)
+    console.log('DATE NOW', stripped_date, date_now)
+    expect(stripped_date).toStrictEqual(converted_date)
+  }) 
+
   it('check hotel search unresponsive text', async () => {
     // this test checks that we fail to load hotels
     // if the backend is down and we do a hotel search
