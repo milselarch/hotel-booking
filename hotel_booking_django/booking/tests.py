@@ -1,3 +1,5 @@
+from unittest import mock
+from unittest.mock import Mock
 from django.test import TestCase
 from accounts.models import user_account
 from booking.models import booking_order
@@ -77,6 +79,7 @@ class TestBooking(TestCase):
             "user_account": str(self.user_1.uid),
             "hotel_id": "h_id_1",
             "room_type_id": "r_id_1",
+            "room_breakfast_info": "r_breakfast_1",
             "booking_id": "b_id_1",
             "check_in_date": "2022-08-24",
             "check_out_date": "2022-08-30",
@@ -93,7 +96,7 @@ class TestBooking(TestCase):
             "cost_in_sgd": "99",
             "name_on_card": "Daniel",
             "card_number": "5105105105105100",
-            "expiry_date": "2024-08-01",
+            "expiry_date": "2028-08-01",
             "security_code": "233",
             "billing_address_address": "59 Changi South Avenue 1",
             "billing_address_country": "Singapore",
@@ -113,6 +116,7 @@ class TestBooking(TestCase):
             "user_account": str(self.user_2.uid),
             "hotel_id": "h_id_2",
             "room_type_id": "r_id_2",
+            "room_breakfast_info": "r_breakfast_2",
             "booking_id": "b_id_2",
             "check_in_date": "2022-08-25",
             "check_out_date": "2022-08-03",
@@ -129,7 +133,7 @@ class TestBooking(TestCase):
             "cost_in_sgd": "199",
             "name_on_card": "Johnny",
             "card_number": "4111 1111 1111 1111",
-            "expiry_date": "2024-08-01",
+            "expiry_date": "2028-08-01",
             "security_code": "244",
             "billing_address_address": "59 Changi South Avenue 2",
             "billing_address_country": "Singapore",
@@ -165,7 +169,9 @@ class TestBooking(TestCase):
     
     # check if user can create booking without logging in
     # expected result: no
-    def test_make_booking_without_login(self):
+    @mock.patch('booking.views.user_booking_data.room_details_get_request', return_value = None)
+    @mock.patch('booking.views.user_booking_data.verify_hotel_price_from_ascenda_api_matches_with_request_from_client', return_value = None)
+    def test_make_booking_without_login(self, mock_output_room_details_get_request, mock_output_verify_hotel_price):
         booking_endpoint = '/booking/'
 
         response1 = self.client.post(
@@ -185,7 +191,9 @@ class TestBooking(TestCase):
 
     # check if user can create bookings after logging in
     # expected result: yes
-    def test_make_booking_with_login(self):
+    @mock.patch('booking.views.user_booking_data.room_details_get_request', return_value = None)
+    @mock.patch('booking.views.user_booking_data.verify_hotel_price_from_ascenda_api_matches_with_request_from_client', return_value = None)
+    def test_make_booking_with_login(self, mock_output_room_details_get_request, mock_output_verify_hotel_price ):
         # fixed endpoint from Djoser to login
         login_url = '/auth/jwt/create/' 
         booking_endpoint = '/booking/'

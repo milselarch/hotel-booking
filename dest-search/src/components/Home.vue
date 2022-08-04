@@ -82,6 +82,8 @@
 
             <b-field 
               id="guests-field" expanded class="custom-label"
+              :type="num_guests_has_error ? 'is-danger': 'text'"
+              :message="guests_validation_error"
             >
               <div class="label-header">
                 <div class="line"></div>
@@ -93,6 +95,7 @@
                 label="test" ref="guests_input"
                 type="number" icon="user" 
                 v-model.number="num_guests"
+                :use-html5-validation="false"
 
                 min="1" :max="max_num_guests" default="1"
                 pattern="[0-9]+" required
@@ -115,6 +118,8 @@
               placeholder="Select check in and checkout dates"
               v-model="dates" 
               icon="calendar"
+              :date-formatter="format_date"
+              :date-parser="parse_date"
               :icon-right="dates_are_valid ? 'check': ''"
               :unselectable-dates="should_exclude_date"
               :disabled="is_loading"
@@ -200,6 +205,7 @@ import { faL } from '@fortawesome/free-solid-svg-icons'
 import router from '../router'
 
 const LOAD_FAIL_MSG = "failed to load hotels\n●︿●";
+const DATE_FORMAT = 'DD/MM/YYYY'
 
 const print_error = () => {
   // print to console if we're not running a unit test
@@ -211,6 +217,7 @@ const print_error = () => {
 export default {
   name: 'Home',
   LOAD_FAIL_MSG: LOAD_FAIL_MSG,
+  DATE_FORMAT: DATE_FORMAT,
 
   data () {
     return {
@@ -276,6 +283,32 @@ export default {
       const date_now = moment(this.current_date)
       const cutoff_date = date_now.add(24, 'h').toDate();
       this.current_date = cutoff_date
+    },
+
+    format_date(date) {
+      console.log('INPUT-DATE', date)
+
+      if (date instanceof Date) {
+        const date_str = moment(date).format(DATE_FORMAT);
+        console.log("DATE-STR", date, date_str)
+        return date_str
+      } else if (Array.isArray(date)) {
+        assert(date.length <= 2)
+        if (date.length === 0) { return '' }
+        assert(date.length === 2)
+
+        const date_str1 = this.format_date(date[0])
+        const date_str2 = this.format_date(date[1])
+        return `${date_str1} - ${date_str2}`
+      }
+
+      throw `BAD DATE ${date}`
+    },
+
+    parse_date(date_str) {
+      console.log('DATE STR-PARSE', date_str)
+      const date = moment(date_str, DATE_FORMAT).toDate();
+      return date
     },
 
     should_exclude_date(date) {
@@ -387,19 +420,31 @@ export default {
       return true
     },
 
-    render_more_hotels() {
+    render_more_hotels(num_to_load=9) {
       /*
       loads hotel cards such the entirety
-      of the last row is filled. 
+      of the last row is filled. We will attempt smart loading
+      (load cards to fill the entirety of the last row) if
+      hotel card width and hotel card holder width is avaliable.
+      Otherwise, we will load a fixed number of cards
       */
+      assert(typeof num_to_load === 'number')
+      assert(Number.isInteger(num_to_load))
+      assert(num_to_load > 0)
+
+      // console.log('NUM_TO_LOAD', num_to_load)
       const self = this;
       let smart_loading = true;
-      let num_to_load = 9;
       
       if (
         (self.card_width === null) ||
-        (self.card_holder_width === null)
+        (self.card_width === 0) ||
+        (self.card_holder_width === null) ||
+        (self.card_holder_width === 0)
       ) {
+        // if we don't know either the width of a single
+        // card, or the width of the card holder, we will
+        // disable smart loading
         smart_loading = false;
       }
 
@@ -476,7 +521,10 @@ export default {
       }
 
       assert(this.price_search_loading.hasOwnProperty(search_stamp))
-      console.log('PRICE_RESP', price_resp)
+      if (process.env.NODE_ENV !== 'test') {
+        console.log('PRICE_RESP', price_resp)
+      }
+
       const price_data = price_resp.data;
       // const price_data = price_resp.data;
       const price_mapping = {}
@@ -534,11 +582,11 @@ export default {
       // pricing api has missing destinations (e.g. TXQ5)
       // [Aswan Dam, Aswan, Egypt] - TXQ5 fails for example
       const get_params = {
-          destination_id: dest_id, partner_id: 1,
-          checkin: start_date_str, checkout: end_date_str,
-          lang: "en_US", currency: "SGD",
-          country_code: "SG", guests: guests_query
-        }
+        destination_id: dest_id, partner_id: 1,
+        checkin: start_date_str, checkout: end_date_str,
+        lang: "en_US", currency: "SGD",
+        country_code: "SG", guests: guests_query
+      }
 
       // keep making the price request
       // till we get that completed is true
@@ -554,6 +602,8 @@ export default {
       search_stamp
     }) {
       assert(typeof search_stamp === 'number')
+      // declare that the price search for the current
+      // search stamp is ongoing
       this.price_search_loading[search_stamp] = true
       let price_resp = {}
 
@@ -564,6 +614,8 @@ export default {
       } catch (e) {
         console.log('PRICING FAIL', search_stamp)
       } finally {
+        // declare that the price search for the current
+        // search stamp is complete
         this.price_search_loading[search_stamp] = false
       }
 
@@ -670,22 +722,27 @@ export default {
       TODO-P2: dynamic card shrinking + pinterest gallery style layout
       */
       
-      const price_loader = self.load_prices({
+      self.load_prices({
         dest_id: dest_id, dates: dates, 
         num_guests: self.num_guests, num_rooms: self.num_rooms,
         search_stamp: self.search_stamp
       })
+      
       const hotel_request = axios.get("proxy/hotels", {
         params: {destination_id: dest_id}
       });
+
       try {
         // wait for both requests to complete
         let response = await hotel_request;
+        const status_code = response.data.status_code
         console.warn('HOTELS RESPONSE', response)
-        console.log('CODE', response.data.status_code)
-        if (response.status !== 200) {
+        console.log('CODE', status_code)
+
+        if (status_code !== 200) {
           throw response.statusText;
         }
+        
         self.hotels = response.data.proxy_json;
         self.hotels.sort((hotel1, hotel2) => {
           if (hotel1.rating < hotel2.rating) {
@@ -719,6 +776,63 @@ export default {
       }
 
       return true
+    },
+
+    unpack_destinations(destinations_data) {
+      /*
+      we expect destinations_data to be an array
+      with two arrays inside. the first inner array is a list
+      of all the destination IDs, and the second inner array
+      contains all the destinations name. For every destination i
+      the destination uid is at index i of the 1st inner array
+      and the destination name is at index i of the 2nd inner array
+      */
+      assert(destinations_data.length == 2)
+      const [uids, names] = destinations_data
+      // console.log('DEST', destinations_data, uids, names)
+      
+      assert(uids.length === names.length)
+      const destination_mappings = {};
+
+      for (let k=0; k<uids.length; k++) {
+        const uid = uids[k];
+        const name = names[k];
+        destination_mappings[name] = uid
+      }
+
+      return [names, destination_mappings]
+    },
+
+    fuzzy_search(search_input, input_names) {
+      // return a reordering of input_names where 
+      // sorted in order of name that matches the search_input
+      // best (first element of output) to name that matches the
+      // search_input worst (last element of output)
+      search_input = search_input.trim()
+      const matches = fuzzysort.go(search_input, input_names)
+      if ((matches.length) === 0) { return [] }
+      
+      let names = []
+      const length = Math.min(matches.length, 50)
+      for (let k=0; k<length; k++) {
+        // console.log(k, matches[k])
+        const destinationName = matches[k]['target'];
+        names.push(destinationName)
+      }
+
+      if (input_names.includes(search_input)) {
+        // if an exact match exsits in input_names
+        // remmove it from our fuzzy search and prepend
+        // it to the search results
+        const search_index = names.indexOf(search_input)
+        if (search_index !== -1) {
+          names.splice(search_index, 1)
+        }
+
+        names = [search_input, ...names]
+      }
+
+      return names
     }
   },
 
@@ -732,21 +846,17 @@ export default {
     const checkout_date = date_now.add(96 , 'h').toDate();
     self.dates = [checkin_date, checkout_date]
 
-    const on_destinations_loaded = async (destinations) => {
+    const on_destinations_loaded = async (destinations_data) => {
       // await sleep(10000); // simulate json load delay
       // console.log('DESINATIONS JSON LOADED')
       // console.log('DATA LENGTH', destinations.length)
+      const [names, dest_mappings] = self.unpack_destinations(
+        destinations_data
+      )
 
-      for (let destination of destinations) {
-        const destinationID = destination["uid"]
-        const destinationName = destination["term"]
-        self.destination_names.push(destinationName)
-        // console.log(destinationName, destinationID)
-        self.destination_mappings[destinationName] = destinationID
-      };
-
-      // const length = Object.keys(self.destination_mappings).length
-      // console.log('LENGTH', length)
+      self.destination_names = names
+      self.destination_mappings = dest_mappings
+      // console.log('MAPPING', self.destination_mappings)
       self.destinations_loaded = true;
     }
 
@@ -769,9 +879,9 @@ export default {
         on_destinations_loaded(data);
       }
 
-      const load_path = '../assets/destinations.json'
+      const load_path = '../assets/destinations_flat.json'
       const abs_load_path = path.resolve(__dirname, load_path)
-      fs.readFile(abs_load_path, 'utf8',fs_read_handler)
+      fs.readFile(abs_load_path, 'utf8', fs_read_handler)
 
     } else {
       /*
@@ -779,7 +889,7 @@ export default {
       if we're actually running the website
       */
       // console.log('RUNNING ON: BROWSER')
-      const loader = import('@/assets/destinations.json')
+      const loader = import('@/assets/destinations_flat.json')
       loader.then(on_destinations_loaded);
     }
 
@@ -866,6 +976,20 @@ export default {
   },
 
   computed: {
+    guests_validation_error() {
+      if (!this.num_guests_has_error) { return '' }
+      if (!Number.isInteger(this.num_guests)) {
+        return 'Please enter a whole number'
+      }
+
+      const search_range = `1 and ${this.max_num_guests}`
+      return `Guests must be a number between ${search_range}`
+    },
+
+    num_guests_has_error() {
+      return !this.is_valid_guests(this.num_guests)
+    },
+
     search_success() {
       return (
         (this.load_error === false) &&
@@ -972,6 +1096,9 @@ export default {
     },
 
     all_hotels_loaded() {
+      console.log(
+        'H_LOADED', this.hotels.length, this.hotels_loaded.length
+      );
       return (
         this.hotels.length ===
         this.hotels_loaded.length
@@ -987,20 +1114,9 @@ export default {
     },
 
     filtered_search_matches() {
-      const matches = fuzzysort.go(
+      return this.fuzzy_search(
         this.destination_input, this.destination_names
-      )
-      
-      if ((matches.length) === 0) { return [] }
-      
-      const names = []
-      const length = Math.min(matches.length, 50)
-      for (let k=0; k<length; k++) {
-        // console.log(k, matches[k])
-        const destinationName = matches[k]['target'];
-        names.push(destinationName)
-      }
-      return names
+      );
     },
 
     is_destination_valid() {

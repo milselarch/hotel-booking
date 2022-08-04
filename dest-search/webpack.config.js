@@ -2,6 +2,7 @@ var path = require('path')
 var webpack = require('webpack')
 
 require("babel-polyfill");
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: ['babel-polyfill', './src/main.js'],
@@ -110,7 +111,11 @@ module.exports = {
   performance: {
     hints: false
   },
+  plugins: [
+    new Dotenv()
+  ],
   devtool: '#eval-source-map'
+  
 }
 
 if (process.env.NODE_ENV === 'production') {

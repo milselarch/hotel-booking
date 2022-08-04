@@ -16,21 +16,13 @@
                     <div style="align-self: center">
                       Are you the primary guest?&nbsp;
                     </div>
-                    <b-radio-button
-                      v-model="primaryGuestRadioButton"
-                      native-value="Nope"
-                      type="is-danger is-light is-outlined"
-                      disabled
-                    >
+                    <b-radio-button v-model="primaryGuestRadioButton" native-value="Nope"
+                      type="is-danger is-light is-outlined" disabled>
                       <span>No</span>
                     </b-radio-button>
 
-                    <b-radio-button
-                      v-model="primaryGuestRadioButton"
-                      native-value="Yes"
-                      type="is-success is-light is-outlined"
-                      disabled
-                    >
+                    <b-radio-button v-model="primaryGuestRadioButton" native-value="Yes"
+                      type="is-success is-light is-outlined" disabled>
                       <b-icon icon="check"></b-icon>
                       <span>Yes</span>
                     </b-radio-button>
@@ -41,12 +33,9 @@
 
             <div class="columns is-mobile">
               <div class="column is-one-third">
-                <b-field
-                  label="Title"
-                  :type="{ 'is-danger': Object.keys(title_error).length > 0 }"
-                  :message="title_error"
-                >
-                  <b-select v-model="title" placeholder="Title" expanded>
+                <b-field label="Title" :type="{ 'is-danger': Object.keys(title_error).length > 0 }"
+                  :message="title_error">
+                  <b-select id="title_select_field" v-model="title" placeholder="Title" expanded>
                     <option value="MR">Mr.</option>
                     <option value="MS">Ms.</option>
                     <option value="MRS">Mrs.</option>
@@ -55,57 +44,29 @@
               </div>
 
               <div class="column is-one-third">
-                <b-field
-                  label="First name"
-                  class="input-field"
-                  :type="{
-                    'is-danger': Object.keys(first_name_error).length > 0,
-                  }"
-                  :message="first_name_error"
-                >
-                  <b-input
-                    value=""
-                    maxlength="30"
-                    placeholder="John"
-                    v-model="first_name"
-                  ></b-input>
+                <b-field label="First name" class="input-field" :type="{
+                  'is-danger': Object.keys(first_name_error).length > 0,
+                }" :message="first_name_error">
+                  <b-input id="first_name_field" value="" maxlength="30" placeholder="John" v-model="first_name"></b-input>
                 </b-field>
               </div>
 
               <div class="column is-one-third">
-                <b-field
-                  label="Last name"
-                  class="input-field"
-                  :type="{
-                    'is-danger': Object.keys(last_name_error).length > 0,
-                  }"
-                  :message="last_name_error"
-                >
-                  <b-input
-                    value=""
-                    maxlength="30"
-                    placeholder="Doe"
-                    v-model="last_name"
-                  ></b-input>
+                <b-field label="Last name" class="input-field" :type="{
+                  'is-danger': Object.keys(last_name_error).length > 0,
+                }" :message="last_name_error">
+                  <b-input id="last_name_field" value="" maxlength="30" placeholder="Doe" v-model="last_name"></b-input>
                 </b-field>
               </div>
             </div>
 
             <div class="columns is-mobile">
               <div class="column is-one-third">
-                <b-field
-                  label="Country code"
-                  :type="{
-                    'is-danger':
-                      Object.keys(countryCodeSelect_error).length > 0,
-                  }"
-                  :message="countryCodeSelect_error"
-                >
-                  <b-select
-                    v-model="countryCodeSelect"
-                    placeholder="Country code"
-                    expanded
-                  >
+                <b-field label="Country code" :type="{
+                  'is-danger':
+                    Object.keys(countryCodeSelect_error).length > 0,
+                }" :message="countryCodeSelect_error">
+                  <b-select id="country_phone_select_field" v-model="countryCodeSelect" placeholder="Country code" expanded>
                     <option value="Afghanistan +93">Afghanistan +93</option>
                     <option value="Albania +355">Albania +355</option>
                     <option value="Algeria +213">Algeria +213</option>
@@ -312,9 +273,7 @@
                     <option value="International Freephone Service +800">
                       International Freephone Service +800
                     </option>
-                    <option
-                      value="International Shared Cost Service (ISCS) +808"
-                    >
+                    <option value="International Shared Cost Service (ISCS) +808">
                       International Shared Cost Service (ISCS) +808
                     </option>
                     <option value="Iran +98">Iran +98</option>
@@ -409,9 +368,7 @@
                     <option value="Norfolk Island +672">
                       Norfolk Island +672
                     </option>
-                    <option
-                      value="Northern Marianas Islands (Saipan, Rota & Tinian) +1-670"
-                    >
+                    <option value="Northern Marianas Islands (Saipan, Rota & Tinian) +1-670">
                       Northern Marianas Islands (Saipan, Rota & Tinian) +1-670
                     </option>
                     <option value="Norway +47">Norway +47</option>
@@ -529,9 +486,7 @@
                     <option value="US Virgin Islands +1-340">
                       US Virgin Islands +1-340
                     </option>
-                    <option
-                      value="Universal Personal Telecommunications (UPT) +878"
-                    >
+                    <option value="Universal Personal Telecommunications (UPT) +878">
                       Universal Personal Telecommunications (UPT) +878
                     </option>
                     <option value="Uruguay +598">Uruguay +598</option>
@@ -553,75 +508,28 @@
                 </b-field>
               </div>
               <div class="column is-one-third">
-                <b-field
-                  label="Phone"
-                  :type="{ 'is-danger': Object.keys(phone_error).length > 0 }"
-                  :message="phone_error"
-                >
-                  <b-input
-                    v-model="phone"
-                    name="phone"
-                    placeholder="912345678"
-                    pattern="[0-9]*"
-                    minlength="8"
-                    maxlength="12"
-                    v-cardformat:restrictNumeric
-                  ></b-input>
-                  <!-- <b-input v-model="phone"
-                name="phone"
-                v-validate
-                :message="phone_error" 
-                placeholder="912345678"
-                pattern="[0-9]*"
-                validation-message="Enter valid 8 to 12 digits phone number"
-                minlength="8" 
-                maxlength="12" 
-                v-cardformat:restrictNumeric
-                ></b-input> -->
+                <b-field label="Phone" :type="{ 'is-danger': Object.keys(phone_error).length > 0 }"
+                  :message="phone_error">
+                  <b-input id="phone_num_field" v-model="phone" name="phone" placeholder="912345678" pattern="[0-9]*" minlength="8"
+                    maxlength="12" v-cardformat:restrictNumeric></b-input>
                 </b-field>
               </div>
 
               <div class="column is-one-third">
-                <b-field
-                  label="Email"
-                  class="input-field"
-                  :type="{ 'is-danger': Object.keys(email_error).length > 0 }"
-                  :message="email_error"
-                >
-                  <b-input
-                    name="email"
-                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                    maxlength="30"
-                    placeholder="nobody@nowhere.com"
-                    v-model="email"
-                  ></b-input>
-                  <!-- <b-input
-                v-validate
-                :message="email_error"
-                name="email"
-                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                validation-message="Enter valid email address"
-                maxlength="30" placeholder="nobody@nowhere.com"
-                v-model="email"                
-              ></b-input> -->
+                <b-field label="Email" class="input-field" :type="{ 'is-danger': Object.keys(email_error).length > 0 }"
+                  :message="email_error">
+                  <b-input id="email_field" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" maxlength="30"
+                    placeholder="nobody@nowhere.com" v-model="email"></b-input>
                 </b-field>
               </div>
             </div>
 
             <div class="field">
-              <b-field
-                label="Special requests"
-                :type="{
-                  'is-danger': Object.keys(special_requests_error).length > 0,
-                }"
-                :message="special_requests_error"
-              >
-                <b-input
-                  v-model="special_requests"
-                  maxlength="500"
-                  type="textarea"
-                  placeholder="We will pass on the requests to the hotel. Please note that all requests are at the hotel's discretion and not guaranteed."
-                >
+              <b-field label="Special requests" :type="{
+                'is-danger': Object.keys(special_requests_error).length > 0,
+              }" :message="special_requests_error">
+                <b-input id="special_requests_field" v-model="special_requests" maxlength="500" type="textarea"
+                  placeholder="We will pass on the requests to the hotel. Please note that all requests are at the hotel's discretion and not guaranteed.">
                 </b-input>
               </b-field>
             </div>
@@ -633,106 +541,35 @@
 
             <div class="columns mobile">
               <div class="column is-three-fifth">
-                <b-field
-                  label="Credit Card Number"
-                  class="input-field"
-                  :type="{
-                    'is-danger': Object.keys(cc_number_error).length > 0,
-                  }"
-                  :message="cc_number_error"
-                >
-                  <b-input
-                    name="cc_number"
-                    value=""
-                    placeholder="5555-5555-5555-5555"
-                    maxlength="19"
-                    v-model="cc_number"
-                    v-cardformat:formatCardNumber
-                  ></b-input>
-                  <!-- <b-input
-                  v-validate
-                  name="cc_number"
-                  value="" 
-                  placeholder="5555-5555-5555-5555"
-                  maxlength="19"
-                  minlength="16"
-                  validation-message="Enter valid credit card"
-                  v-model="cc_number"
-                  v-cardformat:formatCardNumber                 
-                ></b-input> -->
+                <b-field label="Credit Card Number" class="input-field" :type="{
+                  'is-danger': Object.keys(cc_number_error).length > 0,
+                }" :message="cc_number_error">
+                  <b-input id="cc_num_field" name="cc_number" value="" placeholder="5555-5555-5555-5555" maxlength="19"
+                    v-model="cc_number" v-cardformat:formatCardNumber></b-input>
                 </b-field>
               </div>
               <div class="column is-two-fifth">
-                <b-field
-                  label="Name on Card"
-                  class="input-field"
-                  :type="{ 'is-danger': Object.keys(cc_name_error).length > 0 }"
-                  :message="cc_name_error"
-                >
-                  <b-input
-                    value=""
-                    maxlength="30"
-                    placeholder="John Doe"
-                    v-model="cc_name"
-                  ></b-input>
+                <b-field label="Name on Card" class="input-field"
+                  :type="{ 'is-danger': Object.keys(cc_name_error).length > 0 }" :message="cc_name_error">
+                  <b-input id="cc_name_field" value="" maxlength="30" placeholder="John Doe" v-model="cc_name"></b-input>
                 </b-field>
               </div>
             </div>
 
             <div class="columns mobile">
               <div class="column is-one-third">
-                <b-field
-                  label="Expiry date (MM / YYYY)"
-                  :type="{
-                    'is-danger': Object.keys(cc_expiry_date_error).length > 0,
-                  }"
-                  :message="cc_expiry_date_error"
-                >
-                  <b-input
-                    id="cc_expiry_date"
-                    name="cc_expiry_date"
-                    v-model="cc_expiry_date"
-                    placeholder="MM / YYYY"
-                    v-cardformat:formatCardExpiry
-                    minlength="6"
-                    maxlength="9"
-                  ></b-input>
-                  <!-- <b-input id="cc_expiry_date" 
-                      name="cc_expiry_date"
-                      v-model="cc_expiry_date" placeholder="06 / 2026"
-                      v-cardformat:formatCardExpiry
-                      minlength="6" 
-                      maxlength="9" 
-                      v-validate
-                      validation-message="Enter credit card expiry date in MM/YYYY format"
-                      ></b-input> -->
+                <b-field label="Expiry date (MM / YYYY)" :type="{
+                  'is-danger': Object.keys(cc_expiry_date_error).length > 0,
+                }" :message="cc_expiry_date_error">
+                  <b-input id="cc_expiry_date_field" name="cc_expiry_date" v-model="cc_expiry_date" placeholder="MM / YYYY"
+                    v-cardformat:formatCardExpiry minlength="6" maxlength="9"></b-input>
                 </b-field>
               </div>
               <div class="column is-one-third">
-                <b-field
-                  label="CVV/CVC"
-                  :type="{ 'is-danger': Object.keys(cc_cvc_error).length > 0 }"
-                  :message="cc_cvc_error"
-                >
-                  <b-input
-                    v-model="cc_cvc"
-                    name="cc_cvc"
-                    placeholder="000"
-                    minlength="3"
-                    maxlength="3"
-                    v-cardformat:restrictNumeric
-                  ></b-input>
-                  <!-- <b-input 
-                      v-model="cc_cvc" 
-                      name="cc_cvc"
-                      placeholder="000"
-                      :message="cc_cvc_error"
-                      minlength="3" 
-                      maxlength="3" 
-                      v-validate
-                      validation-message="Enter valid 3 digits CVV/CCVC number"
-                      v-cardformat:restrictNumeric
-                    ></b-input> -->
+                <b-field label="CVV/CVC" :type="{ 'is-danger': Object.keys(cc_cvc_error).length > 0 }"
+                  :message="cc_cvc_error">
+                  <b-input v-model="cc_cvc" id="cvc_field" name="cc_cvc" placeholder="000" minlength="3" maxlength="3"
+                    v-cardformat:restrictNumeric></b-input>
                 </b-field>
               </div>
             </div>
@@ -743,14 +580,10 @@
 
             <div class="columns mobile">
               <div class="column is-two-fifth">
-                <b-field
-                  label="Country"
-                  :type="{
-                    'is-danger': Object.keys(ba_country_error).length > 0,
-                  }"
-                  :message="ba_country_error"
-                >
-                  <b-select v-model="ba_country" expanded>
+                <b-field label="Country" :type="{
+                  'is-danger': Object.keys(ba_country_error).length > 0,
+                }" :message="ba_country_error">
+                  <b-select id="country_select_field" v-model="ba_country" expanded>
                     <option value="Afghanistan">Afghanistan</option>
                     <option value="Albania">Albania</option>
                     <option value="Algeria">Algeria</option>
@@ -970,64 +803,28 @@
               </div>
 
               <div class="column is-two-fifth">
-                <b-field
-                  label="City"
-                  class="input-field"
-                  :type="{ 'is-danger': Object.keys(ba_city_error).length > 0 }"
-                  :message="ba_city_error"
-                >
-                  <b-input
-                    value=""
-                    maxlength="30"
-                    placeholder="Singapore"
-                    v-model="ba_city"
-                  ></b-input>
+                <b-field label="City" class="input-field" :type="{ 'is-danger': Object.keys(ba_city_error).length > 0 }"
+                  :message="ba_city_error">
+                  <b-input id="city_field" value="" maxlength="30" placeholder="Singapore" v-model="ba_city"></b-input>
                 </b-field>
               </div>
             </div>
 
             <div class="columns mobile">
               <div class="column is-two-third">
-                <b-field
-                  label="Billing Address"
-                  :type="{
-                    'is-danger': Object.keys(ba_address_error).length > 0,
-                  }"
-                  :message="ba_address_error"
-                >
-                  <b-input
-                    v-model="ba_address"
-                    placeholder="Blk 100 Hougang Ave 3 #10-10"
-                  ></b-input>
+                <b-field label="Billing Address" :type="{
+                  'is-danger': Object.keys(ba_address_error).length > 0,
+                }" :message="ba_address_error">
+                  <b-input id="address_field" v-model="ba_address" placeholder="Blk 100 Hougang Ave 3 #10-10"></b-input>
                 </b-field>
               </div>
 
               <div class="column is-one-third">
-                <b-field
-                  label="Postal code"
-                  :type="{
-                    'is-danger': Object.keys(ba_postal_code_error).length > 0,
-                  }"
-                  :message="ba_postal_code_error"
-                >
-                  <b-input
-                    v-model="ba_postal_code"
-                    name="ba_postal_code"
-                    placeholder="111111"
-                    minlength="5"
-                    maxlength="6"
-                    v-cardformat:restrictNumeric
-                  ></b-input>
-                  <!-- <b-input 
-                    v-model="ba_postal_code"
-                    name="ba_postal_code"
-                    placeholder="111111"
-                    :message="ba_postal_code_error"
-                    minlength="5" 
-                    maxlength="6" 
-                    v-validate
-                    validation-message="Enter valid 6 digits postal code or valid 5 digits zip code (US)"
-                    v-cardformat:restrictNumeric></b-input> -->
+                <b-field label="Postal code" :type="{
+                  'is-danger': Object.keys(ba_postal_code_error).length > 0,
+                }" :message="ba_postal_code_error">
+                  <b-input id="postal_field" v-model="ba_postal_code" name="ba_postal_code" placeholder="111111" minlength="5"
+                    maxlength="6" v-cardformat:restrictNumeric></b-input>
                 </b-field>
               </div>
             </div>
@@ -1035,36 +832,22 @@
 
           <!-- Checkbox-->
           <div class="">
-            <b-field
-              :type="{
-                'is-danger': Object.keys(termsCheckBoxGroup_error).length > 0,
-              }"
-            >
-              <b-checkbox
-                v-model="termsCheckBoxGroup"
-                native-value="true"
-                :message="termsCheckBoxGroup_error"
-              >
-                I've read the terms and condition
+            <b-field :type="{
+              'is-danger': Object.keys(termsCheckBoxGroup_error).length > 0,
+            }">
+              <b-checkbox id="checkbox_field" v-model="termsCheckBoxGroup" native-value="true" :message="termsCheckBoxGroup_error">
+                I've read the terms and conditions
               </b-checkbox>
             </b-field>
           </div>
 
-          <b-message
-            type="is-danger"
-            has-icon
-            style="white-space: pre-line"
-            v-show="other_errors !== ''"
-            >{{ other_errors }}</b-message
-          >
+          <b-message type="is-danger" has-icon style="white-space: pre-line" v-show="other_errors !== ''">{{
+              other_errors
+          }}</b-message>
 
           <div class="center">
-            <b-button
-              class="button is-primary bigbutton"
-              @click="makeBooking()"
-              :disabled="pending || !allow_booking"
-              >Confirm Booking</b-button
-            >
+            <b-button id="booking_button" class="button is-primary bigbutton" @click="makeBooking()" :disabled="pending || !allow_booking">
+              Confirm Booking</b-button>
           </div>
         </form>
       </div>
@@ -1075,11 +858,11 @@
           <h3 class="title is-4">Summary</h3>
           <p><b>Hotel</b>: {{ hotel_name }}</p>
           <p><b>Location</b>: {{ destination_region }}</p>
-          <p><b>Room Type</b>: {{ room_type }}</p>
+          <p><b>Room Type</b>: {{ room_type }} {{check_breakfast(room_breakfast_info)}}</p>
           <p><b>Number of Rooms</b>: {{ number_of_rooms }}</p>
           <p><b>Number of Guests per Room</b>: {{ number_of_guests }}</p>
-          <p><b>Check In Date</b>: {{ check_in_date }}</p>
-          <p><b>Check Out Date</b>: {{ check_out_date }}</p>
+          <p><b>Check In Date</b>: {{ formate_date(check_in_date) }}</p>
+          <p><b>Check Out Date</b>: {{ formate_date(check_out_date) }}</p>
           <p><b>Total Cost</b>: SGD ${{ total_cost }}</p>
         </div>
       </div>
@@ -1120,8 +903,9 @@ export default {
       destination_region: "my_destination_region", //display only
       hotel_id: "my_hotel_id", //this.hotel_id,
       hotel_name: "my_hotel_name", //display only
-      room_id: "my_room_id", //this.room_id,
+      room_type_id: "my_room_type_id", //this.room_type_id,
       room_type: "my_room_type", //display only
+      room_breakfast_info: "my_room_breakfast_info", //this.room_breakfast_info,
       booking_id: "",
       check_in_date: "2022-01-01", //this.check_in_date,
       check_out_date: "2022-01-31", //this.check_out_date,
@@ -1134,16 +918,12 @@ export default {
       last_name: "",
       phone: "",
       email: "",
-      //countryCodeSelect: "",,
-      //primary_guest_passport_number: "",
-      //primary_guest_passport_country: "",
 
       cc_name: "",
       cc_number: "",
       cc_expiry_date: "",
       cc_cvc: "",
       ba_address: "",
-      //ba_country: "",
       ba_city: "",
       ba_postal_code: "",
 
@@ -1194,16 +974,18 @@ export default {
 
     window.scrollTo({ top: 0, behavior: "auto" });
 
-    this.hotel_name = this.$store.state.Store.hotelName;
-    this.room_type = this.$store.state.Store.roomName;
-    this.destination_region = this.$store.state.Store.destination;
-    this.check_in_date = this.$store.state.Store.checkindate;
-    this.check_out_date = this.$store.state.Store.checkoutdate;
-    this.number_of_rooms = this.$store.state.Store.numrooms;
-    this.number_of_guests = this.$store.state.Store.numguests;
-    this.total_cost = this.$store.state.Store.roomprice * this.number_of_rooms;
-    this.destination_id = this.$store.state.Store.destid;
-    this.hotel_id = this.$store.state.Store.hotelId;
+    this.hotel_name = this.$store.state.Persistent.hotelName;
+    this.room_type = this.$store.state.Persistent.roomName;
+    this.room_type_id = this.$store.state.Persistent.roomTypeId;
+    this.room_breakfast_info = this.$store.state.Persistent.roomBreakfastInfo;
+    this.destination_region = this.$store.state.Persistent.destination;
+    this.check_in_date = this.$store.state.Persistent.checkindate;
+    this.check_out_date = this.$store.state.Persistent.checkoutdate;
+    this.number_of_rooms = this.$store.state.Persistent.numrooms;
+    this.number_of_guests = this.$store.state.Persistent.numguests;
+    this.total_cost = this.$store.state.Persistent.roomprice * this.number_of_rooms;
+    this.destination_id = this.$store.state.Persistent.destid;
+    this.hotel_id = this.$store.state.Persistent.hotelId;
 
     if (
       !this.hotel_id ||
@@ -1213,7 +995,9 @@ export default {
       !this.check_out_date ||
       !this.number_of_guests ||
       !this.total_cost ||
-      !this.room_type
+      !this.room_type ||
+      !this.room_type_id ||
+      !this.room_breakfast_info
     ) {
       //display error
       this.all_key_info_exists = false;
@@ -1225,6 +1009,38 @@ export default {
     }
   },
   methods: {
+    formate_date(date_str){
+      let mydate = new Date(date_str);
+      let month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][mydate.getMonth()];
+      let str = ('0' + mydate.getDate()).slice(-2) + '-' + month + '-' + mydate.getFullYear();
+      return str;
+    },
+    check_breakfast_func(breakfastInfo) {
+      if (!breakfastInfo){
+        return ""
+      }
+      else if (breakfastInfo == "hotel_detail_breakfast_included"){
+        return "Breakfast included"
+      }
+      else if (breakfastInfo == "hotel_detail_room_only"){
+        return "Breakfast not included"
+      }
+      else {
+        breakfastInfo = breakfastInfo.replace("hotel_detail_","")
+        breakfastInfo = breakfastInfo.replace(/_/g," ")
+        breakfastInfo = breakfastInfo.charAt(0).toUpperCase() + breakfastInfo.slice(1).toLowerCase()
+        let temp_breakfastInfo = breakfastInfo
+        if(!temp_breakfastInfo.toLowerCase().includes('breakfast'.toLowerCase())) {
+          breakfastInfo = "Breakfast: " + breakfastInfo
+        }
+        
+        return breakfastInfo
+      }
+    },
+    check_breakfast(breakfastInfo){
+      return "(" + this.check_breakfast_func(breakfastInfo) + ")"
+    },
     makeBooking: function (e) {
       const self = this;
       self.pending = true;
@@ -1240,12 +1056,11 @@ export default {
             throw myerr;
           }
           requester.load_credentials();
-          let header_val = requester.build_headers();
-          self.makeBookingPostReq(header_val);
+          self.makeBookingPostReq(requester);
         })
         .catch((requester_error) => {
           let errors;
-          if(requester_error.hasOwnProperty("response") ) {
+          if (requester_error.hasOwnProperty("response")) {
             errors = requester_error.response.data;
           } else {
             errors = undefined;
@@ -1279,7 +1094,7 @@ export default {
         });
     },
 
-    makeBookingPostReq(header_val) {
+    makeBookingPostReq(requester) {
       const self = this;
       // format_data = "%d/%m/%y",
       this.temp_expiry_date_str = this.cc_expiry_date;
@@ -1294,12 +1109,12 @@ export default {
       const formdata = {
         destination_id: this.destination_id,
         hotel_id: this.hotel_id,
-        room_type_id: this.room_id,
-
+        room_type_id: this.room_type_id,
+        room_breakfast_info: this.room_breakfast_info,
         destination_region: this.destination_region,
         hotel_name: this.hotel_name,
         room_type: this.room_type,
-        
+
         booking_id: "", //generated_in_backend
         check_in_date: this.check_in_date,
         check_out_date: this.check_out_date,
@@ -1326,7 +1141,7 @@ export default {
         billing_address_post_code: this.ba_postal_code,
       };
 
-      console.log("formdata",formdata);
+      console.log("formdata", formdata);
 
       (self.first_name_error = {}),
         (self.last_name_error = {}),
@@ -1347,28 +1162,16 @@ export default {
         (self.other_errors = ""),
         (self.hasError = false);
 
-      axios
-        .post("booking/", formdata, header_val)
-        .then((response) => {
-          console.log("success!");
 
-          let toast_type, message;
-          const status_code = response.status;
-          toast_type = "is-dark";
-          message = "booking was made succesfully";
-
-          this.$buefy.toast.open({
-            duration: 5000,
-            message: message,
-            type: toast_type,
-            pauseOnHover: true,
-          });
-
-          // redirect to booking history page
-          router.push("/bookinghistory");
-        })
-        .catch((err_resp) => {
-          let errors = err_resp.response.data;
+      let responseBooking;
+      (async () => {
+        console.log('BOOKING REQ START')
+        try {
+          responseBooking = await requester.post("booking/", formdata)
+          self.load_success = true
+        } catch (error) {
+          console.log("error", error)
+          let errors = error.response.data;
           const other_errors = [];
           other_errors.push(
             "Please resolve errors in this form before proceeding!"
@@ -1397,6 +1200,9 @@ export default {
           }
           if (errors.hasOwnProperty("room_type_id")) {
             other_errors.push(errors["room_type_id"]);
+          }
+          if (errors.hasOwnProperty("room_breakfast_info")) {
+            other_errors.push(errors["room_breakfast_info"]);
           }
           if (errors.hasOwnProperty("booking_id")) {
             other_errors.push(errors["booking_id"]);
@@ -1486,13 +1292,36 @@ export default {
 
           self.other_errors = other_errors.join("\n");
           self.hasError = true;
-        })
-        .finally(() => {
-          // simulate a delay for loading a response
-          // setTimeout(() => { self.pending = false }, 1000)
+        }
+        finally {
           self.pending = false;
-          //console.log('RESPIBSE', response);
+        }
+
+        if (!self.load_success) {
+          self.load_success = false
+          return false;
+        }
+
+        console.log("success!");
+
+        let toast_type, message;
+        const status_code = responseBooking.status;
+        toast_type = "is-dark";
+        message = "Booking was made succesfully";
+
+        this.$buefy.toast.open({
+          duration: 5000,
+          message: message,
+          type: toast_type,
+          pauseOnHover: true,
         });
+
+        // redirect to booking history page
+        router.push("/bookinghistory");
+
+
+      })();
+
     },
 
     logout(toast = false) {
@@ -1518,16 +1347,27 @@ export default {
   computed: {
     allow_booking() {
       return (
+        this.first_name !== null &&
         this.first_name.trim() !== "" &&
+        this.last_name.trim() !== null &&
         this.last_name.trim() !== "" &&
+        this.email.trim() !== null &&
         this.email.trim() !== "" &&
+        this.phone.trim() !== null &&
         this.phone.trim() !== "" &&
+        this.cc_name.trim() !== null &&
         this.cc_name.trim() !== "" &&
+        this.cc_number.trim() !== null &&
         this.cc_number.trim() !== "" &&
+        this.cc_expiry_date.trim() !== null &&
         this.cc_expiry_date.trim() !== "" &&
+        this.cc_cvc.trim() !== null &&
         this.cc_cvc.trim() !== "" &&
+        this.ba_address.trim() !== null &&
         this.ba_address.trim() !== "" &&
+        this.ba_city.trim() !== null &&
         this.ba_city.trim() !== "" &&
+        this.ba_postal_code.trim() !== null &&
         this.ba_postal_code.trim() !== "" &&
         this.termsCheckBoxGroup == true
       );

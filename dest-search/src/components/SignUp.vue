@@ -43,6 +43,7 @@
           <b-input 
             value="" type="password" maxlength="30"
             placeholder="password123" v-model="password"
+            password-reveal
           ></b-input>
         </b-field>
 
@@ -52,6 +53,7 @@
           <b-input 
             value="" type="password" maxlength="30"
             placeholder="password123" v-model="re_password"
+            password-reveal
           ></b-input>
         </b-field>
 

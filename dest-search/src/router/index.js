@@ -6,6 +6,7 @@ import Home from '../components/Home.vue'
 import About from '../components/About.vue'
 import Profile from '../components/Profile.vue'
 import HotelInfo from '../components/HotelInfo.vue'
+import PageNotFound from '../components/PageNotFound.vue'
 
 Vue.use(VueRouter)
 
@@ -13,6 +14,10 @@ const routes = [{
     path: '/',
     name: 'Home',
     component: Home
+  }, {
+    path: '*',
+    name: 'PageNotFound',
+    component: PageNotFound
   }, {
     path: '/about',
     name: 'About',

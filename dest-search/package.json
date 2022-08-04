@@ -19,13 +19,16 @@
     "buefy": "^0.9.21",
     "chromedriver": "^103.0.0",
     "crypto": "^1.0.1",
+    "dotenv-webpack": "^8.0.0",
     "flush-promises": "^1.0.2",
+    "fuzzer": "^0.2.1",
     "fuzzysort": "^2.0.1",
     "geckodriver": "^3.0.2",
     "jquery": "^3.6.0",
     "jquery.cookie": "^1.4.1",
     "lodash": "^4.17.21",
     "moment": "^2.29.3",
+    "random-seed": "^0.3.0",
     "segfault-handler": "^1.3.0",
     "selenium-webdriver": "^4.3.1",
     "vue": "^2.5.11",
@@ -64,6 +67,8 @@
     "jest-localstorage-mock": "^2.4.21",
     "node-sass": "^4.5.3",
     "sass-loader": "^6.0.6",
+    "string.prototype.replaceall": "^1.0.6",
+    "string.prototype.trim": "^1.2.6",
     "url-loader": "^4.1.1",
     "vitest": "^0.18.0",
     "vue-loader": "^13.0.5",
@@ -97,7 +102,11 @@
     "resetMocks": false,
     "setupFiles": [
       "jest-localstorage-mock"
-    ]
+    ],
+    "setupFilesAfterEnv": [
+      "./setup-jest.js"
+    ],
+    "preset": "@vue/cli-plugin-unit-jest/presets/no-babel"
   },
   "license": "GPLV3"
 }

@@ -4,6 +4,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from common.models import common_attribute_model
 import uuid
 from django_cryptography.fields import encrypt
+from encrypted_fields import fields
+import os
 
 
 class user_account_manager(BaseUserManager):
@@ -43,7 +45,9 @@ class user_account_manager(BaseUserManager):
 
 
 class user_account(AbstractBaseUser, PermissionsMixin, common_attribute_model):
-    email = models.EmailField(max_length=100, unique = True)
+    _email_data = fields.EncryptedEmailField()
+    email = fields.SearchField(hash_key=os.environ.get("EMAIL_HASH_KEY"), encrypted_field_name="_email_data", unique = True)
+    
 
     first_name = encrypt(models.CharField(max_length=100, blank=True, null=True))
     last_name = encrypt(models.CharField(max_length=100, blank=True, null=True))

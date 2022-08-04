@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_m^!o==$#uagk$r^n-rs9&6azd&z6=g4_c+4qrbk-7^$!p=y-^'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = str(os.environ.get('DEBUG')) == '1'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -39,12 +40,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'djoser',
     'accounts',
     'booking',
     'common',
     'payment',
+    "encrypted_fields",
+    "api_proxy"
 ]
 
 
@@ -106,11 +110,11 @@ WSGI_APPLICATION = 'hotel_booking_django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'hotel_booking',
-        'USER': 'esc_server',
-        'PASSWORD': 'AS12qw34!@',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
     }
 }
 
@@ -180,5 +184,11 @@ DJOSER = {
         "current_user": 'accounts.serializers.UserCreateSerializer',
     }
 }
+
+# A list of hex-encoded 32 byte keys
+# You only need one unless/until rotating keys
+FIELD_ENCRYPTION_KEYS = [
+    os.environ.get('FIELD_ENCRYPTION_KEY'),
+]
 
 AUTH_USER_MODEL = 'accounts.user_account'
