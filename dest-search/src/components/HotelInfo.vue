@@ -321,7 +321,6 @@ div#amenities {
   padding-left: 1rem;
 }
 #breakfast {
-  // padding-left: 19rem;
   margin-left: 1rem;
 }
 div#room-cards {
