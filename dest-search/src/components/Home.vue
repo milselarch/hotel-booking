@@ -93,7 +93,7 @@
 
               <b-input placeholder="Guests"
                 label="test" ref="guests_input"
-                type="number" icon="user" 
+                type="number" icon="user" id="guests-input"
                 v-model.number="num_guests"
                 :use-html5-validation="false"
 
@@ -128,9 +128,9 @@
           </b-field>
 
           <b-button
-            id="search_button"
+            id="search-button"
             type="is-dark" expanded
-            @click="begin_search"
+            @click.native="begin_search"
             :disabled="!allow_search || is_loading"
           > Search
           </b-button>
