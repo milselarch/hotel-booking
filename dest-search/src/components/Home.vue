@@ -193,7 +193,7 @@
 <script>
 // v-html="hotel['description']"
 import fuzzysort from 'fuzzysort'
-import moment from 'moment'
+import moment, { utc } from 'moment'
 import sleep from 'await-sleep'
 import assert from 'assert'
 import axios from 'axios'
@@ -287,9 +287,9 @@ export default {
 
     format_date(date) {
       console.log('INPUT-DATE', date)
-
       if (date instanceof Date) {
-        const date_str = moment(date).format(DATE_FORMAT);
+        const moment_date = moment(date).seconds(0).milliseconds(0)
+        const date_str = moment_date.format(DATE_FORMAT);
         console.log("DATE-STR", date, date_str)
         return date_str
       } else if (Array.isArray(date)) {
@@ -307,7 +307,11 @@ export default {
 
     parse_date(date_str) {
       console.log('DATE STR-PARSE', date_str)
-      const date = moment(date_str, DATE_FORMAT).toDate();
+      const test_date = new Date();
+      const offset = test_date.getTimezoneOffset();
+      const utc_date = moment.utc(date_str, DATE_FORMAT)
+      const date = utc_date.utcOffset(offset).toDate();
+      console.log('DATES-PARSE', utc_date.toDate(), date)
       return date
     },
 
@@ -428,6 +432,7 @@ export default {
       hotel card width and hotel card holder width is avaliable.
       Otherwise, we will load a fixed number of cards
       */
+      if (num_to_load === 0) { return false }
       assert(typeof num_to_load === 'number')
       assert(Number.isInteger(num_to_load))
       assert(num_to_load > 0)
@@ -482,6 +487,8 @@ export default {
 
         this.hotels_loaded.push(this.hotels[hotel_index])
       }
+
+      return true
     },
 
     search_params_match(
