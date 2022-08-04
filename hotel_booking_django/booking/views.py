@@ -117,11 +117,7 @@ class user_booking_data(APIView):
             payment = payment_serializer.save()
 
             # update the request with the payment id obtained
-            
-            _mutable = request.data._mutable
-            request.data._mutable = True
             request.data['payment_id'] = payment.uid
-            request.data._mutable = _mutable
                 
 
             # serializer to serialize all the data in the request
