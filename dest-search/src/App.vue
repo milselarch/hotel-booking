@@ -36,6 +36,52 @@
           <b-navbar-item href="#">
             <router-link to="/">Home</router-link>
           </b-navbar-item>
+
+          <b-navbar-item
+            class="mobile-nav"
+            aria-role="listitem" v-show="!authenticated"
+            @click="open_login()"
+          >
+            Login
+          </b-navbar-item>
+
+          <b-navbar-item
+            class="mobile-nav"
+            aria-role="listitem" v-show="!authenticated"
+            @click="open_signup()"
+          >
+            Register
+          </b-navbar-item>
+
+          <b-navbar-item
+            class="mobile-nav"
+            aria-role="listitem"
+            v-show="authenticated"
+            @click="goto_profile_page"
+          >
+            Profile
+          </b-navbar-item>
+          <!-- 
+          needs to be click.native for jest unittests
+          to register click event properly
+          -->
+          <b-navbar-item
+            class="mobile-nav"
+            v-show="authenticated"
+            @click="gotto_booking_order_history"
+            aria-role="listitem"
+          >
+            Booking Order History
+          </b-navbar-item>
+
+          <b-navbar-item
+            class="mobile-nav"
+            v-show="authenticated" @click.native="logout"
+            aria-role="listitem" id="logout-button"
+          >
+            Logout
+          </b-navbar-item>
+
           <!-- <b-navbar-item href="#">
             <router-link to="/about">About Us</router-link>
           </b-navbar-item>
@@ -45,6 +91,7 @@
           
           <b-navbar-item
             tag="div" id="profile-icon"
+            class="desktop-nav"
           >
             <section>
               <b-dropdown
@@ -158,11 +205,14 @@ export default {
     // ensure that the navbar's height is being used
     // to offset the rest of the page's content
     // (ensure content and navbar don't overlap)
-    navbar.ready(() => {
+    const navbar_height_updator = () => {
       const height = navbar.height()
       console.log('NAVBAR PAD HEIGHT', height)
       $('body').css("padding-top", height);
-    });
+    }
+
+    navbar.ready(navbar_height_updator);
+    $(window).resize(navbar_height_updator);
 
     /*
     continuously poll for CSRF token from
@@ -357,6 +407,19 @@ body {
   width: 100%;
   // height: 100%;
 }
+
+@media screen and (min-width: 1024px) {
+  nav .mobile-nav {
+    display: none !important;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  nav .desktop-nav {
+    display: none !important;
+  }
+}
+
 
 body > div#app > #router-view {
   padding: 0px;
