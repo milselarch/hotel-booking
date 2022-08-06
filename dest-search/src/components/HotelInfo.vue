@@ -2,11 +2,11 @@
   <div id="hotel-info">
     <h2 id="name"><b>{{hotelName}}</b></h2>
     <div id="figures">
-      <b-carousel id="carousel" :indicator=true indicator-custom indicator-inside=false pause-text="paused" indicator-custom-size="is-medium">
+      <b-carousel id="carousel" v-if="check_carousel" :indicator=true indicator-custom indicator-inside=false pause-text="paused" indicator-custom-size="is-medium">
       <b-carousel-item id="carouselimg" v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
         <b-image class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
       </b-carousel-item>
-      <template #indicators="props">
+      <template #indicators="props" v-if="check_carousel">
           <figure :draggable="false">
               <img id="gallery" :draggable="false" :src="build_carousel(props.i)" :title="props.i">
           </figure>
@@ -36,20 +36,23 @@
         @click="select_room(room)" style="cursor:pointer;"
       >
         <div class="card-image">
-            <img :src="build_image(room)"
-            class="card-image" 
-            @error="replace_default_image"
-            alt="Room image not found">
+          <img :src="build_image(room)"
+          class="card-image" 
+          @error="replace_default_image"
+          alt="Room image not found">
         </div>
-        <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
-        <p style="padding-left: 19rem;"><b>{{ check_breakfast(room) }}</b></p>
-        <div class="card-content">
+        <div id="room-details">
           
-          <ul v-for="(am, key) in room.amenities" v-bind:key="key">
-            <li>{{am}}</li>
-          </ul>
+          
+          <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
+          <p id="breakfast"><b>{{ check_breakfast(room) }}</b></p>
+          <div class="card-content">
+            <ul v-for="(am, key) in room.amenities" v-bind:key="key">
+              <li>{{am}}</li>
+            </ul>
+          </div>
+          <div class="price" style="font-size:1.8em">SGD <b>{{ room.price }}</b></div>
         </div>
-        <div class="price" style="font-size:1.8em">SGD <b>{{ room.price }}</b></div>
       </div>
     </div>
   </div>
@@ -57,7 +60,7 @@
 
 <script>
 import axios from 'axios'
-import BLANK_IMAGE from "@/assets/image_not_found.png"
+import BLANK_IMAGE from "@/assets/cityscape.jpg"
 import router from '../router'
 
 export default {
@@ -100,6 +103,7 @@ export default {
       latitude: 'lat',
       longitude: 'long',
 
+      noimage: false
     }
   },
   methods: {
@@ -117,7 +121,10 @@ export default {
       actually does not exist in the server
       */
       // https://stackoverflow.com/questions/39009538
-      if (e.target.src === BLANK_IMAGE) { return; }
+      this.noimage = true
+      if (e.target.src === BLANK_IMAGE) { 
+        return; 
+      }
       e.target.src = BLANK_IMAGE;
     },
     build_image(room){
@@ -240,6 +247,12 @@ export default {
         return false
       }
     },
+    check_carousel(){
+      if (this.noimage == true){
+        return false;
+      }
+      else {return true;}
+    }
   }
 }
 </script>
@@ -266,7 +279,7 @@ h2#name{
   // grid-template-columns: auto 25%;
   // justify-content: center;
   // align-items: center;
-  width: 35%;
+  width: 30rem;
   height: 30rem;
   // border: solid;
 }
@@ -286,6 +299,7 @@ h2#name{
 #map{
   // float: right;
   margin: auto;
+  margin-bottom: 3rem;
 }
 
 div#descbox {
@@ -299,13 +313,15 @@ div#description {
   width: 70%;
   margin-top: 3rem;
   text-align: justify;
+  padding-left: 2rem;
 }
 div#amenities {
   padding: 1.5rem;
   padding-left: 2.5rem;
   margin-top: 3rem;
   margin-left: 5rem;
-  width: 35%;
+  width: 24rem;
+  min-width: max-content;
   background-color: rgb(255, 248, 233);
   height: max-content;
   line-height: 2rem;
@@ -313,7 +329,10 @@ div#amenities {
 #roomname {
   margin-top: 1rem;
   margin-bottom: 0.5rem;
-  padding-left: 19rem;
+  padding-left: 1rem;
+}
+#breakfast {
+  margin-left: 1rem;
 }
 div#room-cards {
   padding: 5rem;
@@ -326,33 +345,42 @@ div#room-cards {
 
   & > .card {
     margin: 1rem;
-    width: 60%;
+    width: fit-content;
     height: fit-content;
-
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
   & img.card-image {
     // preserve aspect ratio for card images
     object-fit: cover;
     height: 17rem;
-    width: 18rem;
-    float: left;
-  }
-
-  & > .card-content{
-    text-overflow: ellipsis;
-    height: 9rem;
-    overflow-y: scroll;
-    padding: 0;
-    padding-left: 1rem;
-  }
-
-  & > .price{
-    float: right;
-    padding-right: 2rem;
-    margin-bottom: 0.5rem;
-    // align-items: baseline;
-  }
+    max-width: 18rem;
+    // float: left;
   }
 }
+#room-details {
+  display: flex;
+  flex-direction: column;
+  max-height: 17rem;
+  width: 33rem;
+}
+.card-content{
+  text-overflow: ellipsis;
+  height: 11rem;
+  overflow-y: scroll;
+  padding: 0;
+  padding-left: 1rem;
+}
+.price{
+  float: right;
+  margin-right: 1rem;
+  margin-bottom: 0.5rem;
+  margin-left: 1rem;
+  align-self: flex-end;
+}
+
 a {
   text-align: center;
   margin: 0;
