@@ -93,7 +93,7 @@
 
               <b-input placeholder="Guests"
                 label="test" ref="guests_input"
-                type="number" icon="user" 
+                type="number" icon="user" id="guests-input"
                 v-model.number="num_guests"
                 :use-html5-validation="false"
 
@@ -128,9 +128,9 @@
           </b-field>
 
           <b-button
-            id="search_button"
+            id="search-button"
             type="is-dark" expanded
-            @click="begin_search"
+            @click.native="begin_search"
             :disabled="!allow_search || is_loading"
           > Search
           </b-button>
@@ -1198,6 +1198,10 @@ div#front-cover {
     "~assets/alena-aenami-serenity-1k.jpg"
   );
 
+  @media screen and (max-width: 1024px) {
+    flex-direction: column;
+  }
+
   & > div.description-wrapper {
     flex-grow: 1;
     display: flex;
@@ -1215,9 +1219,13 @@ div#front-cover {
       }
 
       & > p#short-info {
-        text-align: left !important;
+        text-align: left;
         margin-bottom: 0rem;
         $highlight: rgba(233,246,244, 0.7);
+
+        @media screen and (max-width: 1024px) {
+          text-align: center;
+        }
 
         & > span {
           background-color: $highlight;
@@ -1231,10 +1239,15 @@ div#front-cover {
 
       & > h1 {
         font-family: "Babas Neue";
-        text-align: left !important;
+        text-align: left;
         line-height: 5rem;
         margin-bottom: 1rem;
         max-width: 40rem;
+
+        @media screen and (max-width: 1024px) {
+          max-width: none;
+          text-align: center;
+        }
       }
 
       & > div.buttons {
@@ -1253,6 +1266,13 @@ div#front-cover {
     margin-bottom: auto;    
     margin-left: 11%;
     margin-right: 0px;
+
+    @media screen and (max-width: 1024px) {
+      margin-left: auto;
+      margin-right: auto;
+      background-color: rgba(255, 255, 255, 0.9);
+      margin-top: 2rem;
+    }
     
     background-color: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(5px);
