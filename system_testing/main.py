@@ -11,12 +11,13 @@ from selenium.webdriver.firefox.service import Service as FirefoxService
 from webdriver_manager.firefox import GeckoDriverManager
 
 
-
 class Login_Signup(unittest.TestCase):
 
     def setUp(self):
+        date = datetime.datetime.now().strftime("%y%m%d-%H%M%S")
         self.driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
-        self.email = "johndoe15@gmail.com"
+        # self.email = "johndoe15@gmail.com"
+        self.email = date + "@gmail.com"
         self.first_name = "John"
         self.last_name = "Doe"
         self.password = "ASqw!@12"
@@ -53,6 +54,7 @@ class Login_Signup(unittest.TestCase):
         login_title = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "login-title")))
         expected_title = "LOGIN"
+        time.sleep(1)
         self.assertEqual(login_title.text, expected_title)
 
         # login to account

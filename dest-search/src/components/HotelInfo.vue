@@ -2,11 +2,11 @@
   <div id="hotel-info">
     <h2 id="name"><b>{{hotelName}}</b></h2>
     <div id="figures">
-      <b-carousel id="carousel" :indicator=true indicator-custom indicator-inside=false pause-text="paused" indicator-custom-size="is-medium">
+      <b-carousel id="carousel" v-if="check_carousel" :indicator=true indicator-custom indicator-inside=false pause-text="paused" indicator-custom-size="is-medium">
       <b-carousel-item id="carouselimg" v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
         <b-image class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
       </b-carousel-item>
-      <template #indicators="props">
+      <template #indicators="props" v-if="check_carousel">
           <figure :draggable="false">
               <img id="gallery" :draggable="false" :src="build_carousel(props.i)" :title="props.i">
           </figure>
@@ -60,7 +60,7 @@
 
 <script>
 import axios from 'axios'
-import BLANK_IMAGE from "@/assets/image_not_found.png"
+import BLANK_IMAGE from "@/assets/cityscape.jpg"
 import router from '../router'
 
 export default {
@@ -103,6 +103,7 @@ export default {
       latitude: 'lat',
       longitude: 'long',
 
+      noimage: false
     }
   },
   methods: {
@@ -120,7 +121,10 @@ export default {
       actually does not exist in the server
       */
       // https://stackoverflow.com/questions/39009538
-      if (e.target.src === BLANK_IMAGE) { return; }
+      this.noimage = true
+      if (e.target.src === BLANK_IMAGE) { 
+        return; 
+      }
       e.target.src = BLANK_IMAGE;
     },
     build_image(room){
@@ -243,6 +247,12 @@ export default {
         return false
       }
     },
+    check_carousel(){
+      if (this.noimage == true){
+        return false;
+      }
+      else {return true;}
+    }
   }
 }
 </script>
@@ -289,6 +299,7 @@ h2#name{
 #map{
   // float: right;
   margin: auto;
+  margin-bottom: 3rem;
 }
 
 div#descbox {
@@ -357,7 +368,7 @@ div#room-cards {
 }
 .card-content{
   text-overflow: ellipsis;
-  max-height: 9rem;
+  height: 11rem;
   overflow-y: scroll;
   padding: 0;
   padding-left: 1rem;
@@ -368,7 +379,6 @@ div#room-cards {
   margin-bottom: 0.5rem;
   margin-left: 1rem;
   align-self: flex-end;
-  // align-items: baseline;
 }
 
 a {
