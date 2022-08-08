@@ -390,19 +390,19 @@ class BookingCreation_LoadTest(APIView):
         if payment_serializer.is_valid():
 
             # obtain the user_payment_credit_card_details object
-            payment = payment_serializer.save()
+            payment = "1029484823845954"
 
             # update the request with the payment id obtained
             _mutable = request.data._mutable
             request.data._mutable = True
-            request.data['payment_id'] = payment.uid
+            request.data['payment_id'] = payment
             request.data._mutable = _mutable
 
             # serializer to serialize all the data in the request
             serializer = booking_serializer(data=request.data)
 
             if serializer.is_valid():
-                serializer.save()
+                # return response without saving the booking
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
             else:
