@@ -4,7 +4,9 @@ from django.test import TestCase
 from accounts.models import user_account
 from booking.models import booking_order
 from booking import serializers as bookingSerializer
+from booking.views import valid_credit_card
 import copy
+from faker import Faker
 
 class TestBooking(TestCase):
 
@@ -149,7 +151,14 @@ class TestBooking(TestCase):
             "destination_region": "Merlion, Singapore"
             
         }
-        
+    
+    # fuzzing to check the robustness of our credit card checker
+    # ensuring no false negative
+    def test_credit_card_checker(self):
+        faker = Faker()
+        for x in range(1000000):
+            card_number = faker.credit_card_number()
+            self.assertTrue(valid_credit_card(card_number))
 
     # check if the booking can be created internally
     # expected result: yes
