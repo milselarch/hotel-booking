@@ -6,8 +6,8 @@ export const options = {
     insecureSkipTLSVerify: true,
     noConnectionReuse: false,
     stages:[
-        {duration: '1m', target:10}, 
-        {duration: '10m', target:20},
+        {duration: '5m', target:50}, 
+        {duration: '10m', target:80},
         {duration: '5m', target:0}, 
     ],
     thresholds: {
@@ -51,52 +51,6 @@ export function setup() {
   const authToken = loginRes.json('access');
   check(authToken, { 'logged in successfully': () => authToken !== '' });
 
-  // makec 1 booking
-  const HEADERS = {
-    "Authorization": `JWT ${authToken}`,
-    'Content-Type': 'application/x-www-form-urlencoded'
-  }
-
-    const payload = {
-      "destination_id": "kbgr",
-      "hotel_id": "zqBa",
-      "room_type_id": "314254542",
-      "room_breakfast_info": "b_info",
-      "destination_region": "DEST_REGION",
-      "hotel_name": "h_name",
-      "room_type": "room_type",
-      "booking_id": "b_id", //generated_in_backend
-      "check_in_date": "2022-08-30",
-      "check_out_date": "2022-09-03",
-      "cost_in_sgd": "99", //will be recalculated_in_backend
-      "number_of_rooms": "1",
-      "number_of_guests_per_rooms": "2",
-      "special_request": "nahh",
-      "primary_guest_title": "MR",
-      "primary_guest_first_name": "Johnny",
-      "primary_guest_last_name": "Depp",
-      "primary_guest_email": "Johnny_Depp@gmail.com",
-      "primary_guest_phone": "95634586",
-      "primary_guest_phone_country": "Singapore",
-      "did_primary_guest_accept_tnc": true,
-      "name_on_card": "Johnny Depp",
-      "card_number": "4263982640269299",
-      "billing_address_address": "235 Sixth Avenue Very Rich Building",
-      "billing_address_country": "Singapore",
-      "billing_address_city": "Singapore",
-      "billing_address_post_code": "024543",
-      "security_code": "593",
-      "expiry_date": "2024-01-01"
-    };
-
-    const booking_creation_res = http.post(`${BASE_URL}/loadTest/booking/`, payload, { headers: HEADERS });
-    if (check(booking_creation_res, { 'Booking created correctly': (booking_creation_res) => booking_creation_res.status === 201 })) {
-      console.log("Booking Created")
-    } else {
-      console.log(`Unable to create a Booking ${booking_creation_res.status} ${booking_creation_res.body}`);
-    }
-
-
   return authToken;
 }
 
@@ -123,10 +77,55 @@ export default (authToken) => {
     sleep(5)
   });
 
-  group('Retrieve booking', () => {
-    let url = `${BASE_URL}/booking/`;
-    let booking_res = http.get(url, requestConfigWithTag());
-    check(booking_res, { 'Booking retrieved': (booking_res) => booking_res.status === 200 });
+  group('Create and Retrieve booking', () => {
+    group('Create booking', () => {
+      const payload = {
+        "destination_id": "kbgr",
+        "hotel_id": "zqBa",
+        "room_type_id": "314254542",
+        "room_breakfast_info": "b_info",
+        "destination_region": "DEST_REGION",
+        "hotel_name": "h_name",
+        "room_type": "room_type",
+        "booking_id": "b_id",
+        "check_in_date": "2022-08-30",
+        "check_out_date": "2022-09-03",
+        "cost_in_sgd": "99",
+        "number_of_rooms": "1",
+        "number_of_guests_per_rooms": "2",
+        "special_request": "nahh",
+        "primary_guest_title": "MR",
+        "primary_guest_first_name": "Johnny",
+        "primary_guest_last_name": "Depp",
+        "primary_guest_email": "Johnny_Depp@gmail.com",
+        "primary_guest_phone": "95634586",
+        "primary_guest_phone_country": "Singapore",
+        "did_primary_guest_accept_tnc": true,
+        "name_on_card": "Johnny Depp",
+        "card_number": "4263982640269299",
+        "billing_address_address": "235 Sixth Avenue Very Rich Building",
+        "billing_address_country": "Singapore",
+        "billing_address_city": "Singapore",
+        "billing_address_post_code": "024543",
+        "security_code": "593",
+        "expiry_date": "2024-01-01"
+      };
+  
+      const booking_creation_res = http.post(`${BASE_URL}/loadTest/booking/`, payload, requestConfigWithTag());
+      if (check(booking_creation_res, { 'Booking created correctly': (booking_creation_res) => booking_creation_res.status === 201 })) {
+        // pass
+      } else {
+        console.log(`Unable to create a Booking ${booking_creation_res.status} ${booking_creation_res.body}`);
+      }
+
+    })
+
+    group('Retrieve booking', () => {
+      const url = `${BASE_URL}/booking/`;
+      const booking_res = http.get(url, requestConfigWithTag());
+      check(booking_res, { 'Booking retrieved': (booking_res) => booking_res.status === 200 });
+    })
+    
 
   });
 
