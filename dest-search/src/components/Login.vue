@@ -40,9 +40,9 @@
           <a href="#" id="signup" @click="open_signup_modal()">
             Sign Up
           </a>
-          <a target="_blank" href="https://youtu.be/dQw4w9WgXcQ">
+          <!-- <a target="_blank" href="https://youtu.be/dQw4w9WgXcQ">
             Forgot Password
-          </a>
+          </a> -->
         </div>
       </section>
 

@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import BLANK_IMAGE from "@/assets/image_not_found.png"
+import BLANK_IMAGE from "@/assets/cityscape.jpg"
 import assert from 'assert'
 
 export default {
