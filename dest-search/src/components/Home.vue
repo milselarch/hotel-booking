@@ -795,7 +795,12 @@ export default {
       and the destination name is at index i of the 2nd inner array
       */
       assert(destinations_data.length == 2)
-      const [uids, names] = destinations_data
+      // destinations_data is actually an object, not an array
+      // when deployed in production, so we can't use 
+      // array destructuring to get uids and names
+      const uids = destinations_data[0];
+      const names = destinations_data[1];
+      // const [uids, names] = destinations_data
       // console.log('DEST', destinations_data, uids, names)
       
       assert(uids.length === names.length)
@@ -857,6 +862,7 @@ export default {
       // await sleep(10000); // simulate json load delay
       // console.log('DESINATIONS JSON LOADED')
       // console.log('DATA LENGTH', destinations.length)
+      console.log("DEST-RAW-DATA", destinations_data);
       const [names, dest_mappings] = self.unpack_destinations(
         destinations_data
       )
@@ -896,8 +902,11 @@ export default {
       if we're actually running the website
       */
       // console.log('RUNNING ON: BROWSER')
-      const loader = import('@/assets/destinations_flat.json')
+      const loader = import('../assets/destinations_flat.json')
       loader.then(on_destinations_loaded);
+      loader.catch(err => {
+        console.log("LOAD ERR", err)
+      })
     }
 
     (async () => {
@@ -1195,7 +1204,7 @@ div#front-cover {
   width: 100%;
   
   background-image: url(
-    "~assets/alena-aenami-serenity-1k.jpg"
+    "../assets/alena-aenami-serenity-1k.jpg"
   );
 
   @media screen and (max-width: 1024px) {
