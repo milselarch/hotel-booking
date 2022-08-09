@@ -1,11 +1,4 @@
-from types import SimpleNamespace
-from weakref import proxy
-from django.shortcuts import render
-
-from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView
-from requests import RequestException
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,11 +6,10 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import booking_order
 from .serializers import booking_serializer, booking_history_serializer
 from payment.serializers import user_payment_credit_card_details_serializer
-from api_proxy.views import proxy_view, proxy_request
+from api_proxy.views import proxy_view
 from datetime import datetime, date
 import re
 import json
-from ast import literal_eval
 
 # function used to validate credit card number
 # credits: https://www.geeksforgeeks.org/luhn-algorithm/
@@ -388,15 +380,6 @@ class BookingCreation_LoadTest(APIView):
         # save the payment info first to generate the payment id
         payment_serializer = user_payment_credit_card_details_serializer(data=request.data)
         if payment_serializer.is_valid():
-
-            # obtain the user_payment_credit_card_details object
-            payment = "1029484823845954"
-
-            # update the request with the payment id obtained
-            _mutable = request.data._mutable
-            request.data._mutable = True
-            request.data['payment_id'] = payment
-            request.data._mutable = _mutable
 
             # serializer to serialize all the data in the request
             serializer = booking_serializer(data=request.data)

@@ -6,9 +6,9 @@ export const options = {
     insecureSkipTLSVerify: true,
     noConnectionReuse: false,
     stages:[
-        {duration: '5m', target:50}, 
-        {duration: '10m', target:80},
-        {duration: '5m', target:0}, 
+        {duration: '2m', target:100}, 
+        {duration: '2m', target:150}, // limit is around 180 concurrent users at the same time
+        {duration: '2m', target:0}, 
     ],
     thresholds: {
         http_req_duration: ["p(99)<150"]
@@ -74,7 +74,7 @@ export default (authToken) => {
     check(statuses, {
       'Endpoints returned successfully': allAreTrue(statuses),
     });
-    sleep(5)
+    sleep(1)
   });
 
   group('Create and Retrieve booking', () => {
@@ -129,22 +129,5 @@ export default (authToken) => {
 
   });
 
-  sleep(2);
+  sleep(1);
 };
-
-export function teardown(PASSWORD) {
-  const current_pw = {
-    current_password: PASSWORD,
-  }
-  const delete_user_endpoint = `${BASE_URL}/auth/users/me/`;
-  const delRes = http.del(delete_user_endpoint, current_pw, requestConfigWithTag());
-
-  const isSuccessfulDelete = check(delRes, {
-    'User was deleted correctly': () => delRes.status === 204,
-  });
-
-  if (!isSuccessfulDelete) {
-    console.log(`Booking was not deleted properly`);
-    return;
-  }
-}
