@@ -133,9 +133,9 @@ class AuthRequester {
       const request = request_func(endpoint, data, options)
       return await request
     } catch (access_error) {
+      console.warn('FAIL ERR', access_error)
       const status_code = access_error.response.status
       console.warn('FAIL STATUS CODE', status_code)
-      console.warn('FAIL ERR', access_error)
 
       if (status_code === 401) {
         let refresh_success = false

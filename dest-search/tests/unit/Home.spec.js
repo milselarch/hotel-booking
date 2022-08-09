@@ -66,6 +66,7 @@ const load_suggestions = (wrapper) => {
 }
 
 describe('Home.vue Test', () => {
+  jest.setTimeout(10 * 1000);
   let saved_wrapper, wrapper, store;
   const france_dest = "Gap, France"
 
