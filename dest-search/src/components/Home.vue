@@ -6,11 +6,14 @@
           <h1>The Bestest Hotels in the Multiverse</h1>
           <p id="short-info">
             <span>
-              Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
+              <!-- Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
               both veterans of the lifestyle and loyalty space, have 
               found a way to credit customers up to ten times the volume 
               of miles that can be earned elsewhere. That is for booking 
-              the same hotel at the same or similar rates.
+              the same hotel at the same or similar rates. -->
+              Use Ascenda's white label UIs and content aggregation hub 
+              to deploy a hassle-free, OTA-level travel booking experience 
+              for your rewards program.
             </span>
           </p>
 
