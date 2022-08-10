@@ -126,6 +126,7 @@
               :icon-right="dates_are_valid ? 'check': ''"
               :unselectable-dates="should_exclude_date"
               :disabled="is_loading"
+              :mobile-native="false"
               range>
             </b-datepicker>
           </b-field>
@@ -1212,6 +1213,8 @@ div#front-cover {
 
   @media screen and (max-width: 1024px) {
     flex-direction: column;
+    padding-left: 7%;
+    padding-right: 7%;
   }
 
   & > div.description-wrapper {
@@ -1252,13 +1255,14 @@ div#front-cover {
       & > h1 {
         font-family: "Babas Neue";
         text-align: left;
-        line-height: 5rem;
+        line-height: 4rem;
         margin-bottom: 1rem;
         max-width: 40rem;
 
         @media screen and (max-width: 1024px) {
           max-width: none;
           text-align: center;
+          font-size: 4rem;
         }
       }
 
@@ -1284,6 +1288,11 @@ div#front-cover {
     margin-right: 0px;
 
     @media screen and (max-width: 1024px) {
+      // width: 16rem;
+      // flex-shrink: 1;
+      max-width: 20rem;
+      padding: 0.5rem;
+
       margin-left: auto;
       margin-right: auto;
       background-color: rgba(255, 255, 255, 0.9);
