@@ -1255,7 +1255,8 @@ div#front-cover {
       & > h1 {
         font-family: "Babas Neue";
         text-align: left;
-        line-height: 4rem;
+        line-height: 5rem;
+        font-size: 5rem;
         margin-bottom: 1rem;
         max-width: 40rem;
 
@@ -1263,6 +1264,7 @@ div#front-cover {
           max-width: none;
           text-align: center;
           font-size: 4rem;
+          line-height: 4rem;
         }
       }
 
