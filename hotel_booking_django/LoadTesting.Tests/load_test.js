@@ -6,9 +6,9 @@ export const options = {
     insecureSkipTLSVerify: true,
     noConnectionReuse: false,
     stages:[
-        {duration: '2m', target:100}, 
-        {duration: '2m', target:150}, // limit is around 180 concurrent users at the same time
-        {duration: '2m', target:0}, 
+        {duration: '5m', target:100}, 
+        {duration: '10m', target:250},
+        {duration: '5m', target:0}, 
     ],
     thresholds: {
         http_req_duration: ["p(99)<150"]
