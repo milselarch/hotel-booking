@@ -34,7 +34,7 @@ class SystemTest(unittest.TestCase):
         self.cardnum1 = "4111"
         self.cardnum2 = "1111"
         self.cardnum3 = "1111"
-        self.cardnum4 = "1111"
+        self.cardnum4 = " 1111"
         self.cardname = "Chris P. Bacon"
         self.expmonth = "5"
         self.expyear = "2030"
@@ -87,8 +87,9 @@ class SystemTest(unittest.TestCase):
         time.sleep(1)
 
         hotelCards = driver.find_elements(By.CLASS_NAME, "card")
-        WebDriverWait(driver, 8).until(EC.presence_of_element_located((By.ID, "price")))
-        time.sleep(1.5)
+        WebDriverWait(driver, 8).until(EC.invisibility_of_element_located((By.CLASS_NAME, "flat-progress-bar")))
+
+        time.sleep(1)
         for i in range(len(hotelCards)):
             valid = hotelCards[i].find_element(By.ID, "price")
             if valid.is_displayed():
@@ -150,9 +151,13 @@ class SystemTest(unittest.TestCase):
         driver = self.logindriver
         driver.get("http://localhost:8080/")
         driver.maximize_window()
+        time.sleep(1)
 
         # Signup
         signup_button = driver.find_element(By.XPATH, r"/html/body/div/div/div/div[1]/div[1]/div/div/button[2]")
+        driver.execute_script("arguments[0].style.border='3px solid red'", signup_button)
+        time.sleep(1)
+        driver.execute_script("arguments[0].style.border='none'", signup_button)
         signup_button.click()
 
         signup_email_field = driver.find_element(By.XPATH, r"/html/body/div/div[1]/div[2]/div[2]/div/section/div[1]/div/input")
@@ -170,7 +175,7 @@ class SystemTest(unittest.TestCase):
         signup_re_password_field = driver.find_element(By.XPATH, r"/html/body/div/div[1]/div[2]/div[2]/div/section/div[4]/div/input")
         signup_re_password_field.send_keys(self.login_password)
 
-        time.sleep(1)
+        time.sleep(1.5)
 
         signup_page_button = driver.find_element(By.XPATH, r"/html/body/div/div[1]/div[2]/div[2]/div/section/div[5]/button")
         signup_page_button.click()
@@ -194,15 +199,27 @@ class SystemTest(unittest.TestCase):
         # user account deletion after testing
         # driver = self.logindriver
         account_icon = driver.find_element(By.XPATH, "/html/body/div/nav/div[2]/div[2]/div/div/section/div/div[1]/button")
+        driver.execute_script("arguments[0].style.border='3px solid red'", account_icon)
+        time.sleep(0.7)
+        driver.execute_script("arguments[0].style.border='none'", account_icon)
         account_icon.click()
-        time.sleep(1)
+        time.sleep(1.5)
         profile_link = driver.find_element(By.XPATH, "/html/body/div/nav/div[2]/div[2]/div/div/section/div/div[3]/div/a[3]")
+        driver.execute_script("arguments[0].style.border='3px solid red'", profile_link)
+        time.sleep(0.7)
+        driver.execute_script("arguments[0].style.border='none'", profile_link)
         profile_link.click()
+        time.sleep(1.5)
+
+        driver.execute_script("window.scrollTo({top: 2000, behavior: 'smooth'})")
+
         time.sleep(1)
 
         delete_account_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "delete_account_button")))
         delete_account_button.click()
+
+        time.sleep(1.5)
 
         confirm_delete_password_input = driver.find_element(By.ID, "delete_account_password_field")
         confirm_delete_password_input.send_keys(self.login_password)

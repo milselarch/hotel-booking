@@ -27,7 +27,10 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(os.environ.get('DEBUG')) == '1'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'localhost', '127.0.0.1', 'backend.milselarch.com', 'hotels.milselarch.com',
+    'ascenda-52c6d.web.app'
+]
 
 
 # Application definition
@@ -64,9 +67,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
+    "http://localhost:8080", "https://ascenda-52c6d.web.app",
+    "https://hotels.milselarch.com"
 ]
 # set CSRF hosts allowed to be the same as for CORS
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS

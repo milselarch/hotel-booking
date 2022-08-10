@@ -1,5 +1,6 @@
 from django.test import TestCase
 from accounts.models import user_account
+import copy
 
 class TestAuthentication(TestCase):
 
@@ -107,6 +108,64 @@ class TestAuthentication(TestCase):
         self.assertEquals(status_code3, 201)
         self.assertEquals(response3.data['email'], self.TEST_USER3_SIGNUP['email'])
 
+    # test if the user can signup with data that is not valid
+    def test_signup_api_invalid_data(self):
+            
+        signup_url = '/auth/users/'
+
+        short_password = copy.deepcopy(self.TEST_USER3_SIGNUP)
+        short_password['password'] = 'qwe123'
+        short_password['re_password'] = 'qwe123'
+
+        # test if user3 can signup with a short password
+        response1 = self.client.post(signup_url, short_password)
+        status_code1 = response1.status_code
+
+        # user should not be able to create an account since the password <8 characters
+        self.assertEquals(status_code1, 400)
+
+        common_password = copy.deepcopy(self.TEST_USER3_SIGNUP)
+        common_password['password'] = 'password123'
+        common_password['re_password'] = 'password123'
+
+        # test if user3 can signup with a common password
+        response2 = self.client.post(signup_url, common_password)
+        status_code2 = response2.status_code
+
+        # user should not be able to create an account since password is too common
+        self.assertEquals(status_code2, 400)
+
+        numeric_password = copy.deepcopy(self.TEST_USER3_SIGNUP)
+        numeric_password['password'] = '1234123412'
+        numeric_password['re_password'] = '1234123412'
+
+        # test if user3 can signup
+        response3 = self.client.post(signup_url, numeric_password)
+        status_code3 = response3.status_code
+
+        # user should not be able to create an account since password is fully numeric
+        self.assertEquals(status_code3, 400)
+
+        username_password = copy.deepcopy(self.TEST_USER3_SIGNUP)
+        username_password['password'] = username_password["email"]
+        username_password['re_password'] = username_password["email"]
+
+        # test if user3 can signup
+        response4 = self.client.post(signup_url, username_password)
+        status_code4 = response4.status_code
+
+        # user should not be able to create an account since password is the same as username
+        self.assertEquals(status_code4, 400)
+
+        invalid_email = copy.deepcopy(self.TEST_USER3_SIGNUP)
+        invalid_email['email'] = 'test3test.com'
+        
+        # test if user3 can signup
+        response4 = self.client.post(signup_url, invalid_email)
+        status_code4 = response4.status_code
+
+        # user should not be able to create an account since email format is invalid
+        self.assertEquals(status_code4, 400)
 
     # test if user is able to get successfully authenticated by Djoser's /jwt/create/ endpoint
     def test_login_api(self):
@@ -123,6 +182,7 @@ class TestAuthentication(TestCase):
         response2 = self.client.post(login_url, self.TEST_USER2_LOGIN)
         status_code2 = response2.status_code
         self.assertEquals(status_code2, 200)
+        
 
     # test if user can use the JWT token obtained to access parts of the
     # site that requires login
@@ -177,3 +237,24 @@ class TestAuthentication(TestCase):
         self.assertEquals(user2_first_name, self.TEST_USER2['first_name'])
         user2_last_name = response2.data['last_name']
         self.assertEquals(user2_last_name, self.TEST_USER2['last_name'])
+
+    def test_login_invalid_credentials(self):
+
+        # fixed endpoint from Djoser to login
+        login_url = '/auth/jwt/create/'
+
+        unregistered_email = copy.deepcopy(self.TEST_USER1_LOGIN)
+        unregistered_email['email'] = "no_use@gmail.com"
+
+        # test if user1 can login
+        response1 = self.client.post(login_url, unregistered_email)
+        status_code1 = response1.status_code
+        self.assertEquals(status_code1, 401)
+
+        wrong_password = copy.deepcopy(self.TEST_USER1_LOGIN)
+        wrong_password['password'] = "wrong_password"
+
+        # test if user1 can login
+        response2 = self.client.post(login_url, wrong_password)
+        status_code2 = response2.status_code
+        self.assertEquals(status_code2, 401)

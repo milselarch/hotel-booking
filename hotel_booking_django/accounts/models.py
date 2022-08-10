@@ -6,6 +6,7 @@ import uuid
 from django_cryptography.fields import encrypt
 from encrypted_fields import fields
 import os
+import re
 
 
 class user_account_manager(BaseUserManager):
@@ -18,6 +19,11 @@ class user_account_manager(BaseUserManager):
             raise ValueError("Users must have a last name")
         if password == None:
             raise ValueError("Users must have a password")
+        
+        email = email.replace(" ", "")    
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        if not (re.fullmatch(regex, email)):
+            raise ValueError("Invalid Email Address")
 
         email = self.normalize_email(email)
         
