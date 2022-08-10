@@ -23,7 +23,14 @@ import * as VueGoogleMaps from 'vue2-google-maps';
 
 const infiniteScroll =  require('vue-infinite-scroll');
 
+console.log('NODE_ENV', process.env.NODE_ENV)
 axios.defaults.baseURL = "http://127.0.0.1:8000/"
+if (process.env.NODE_ENV === 'production') {
+  console.log('IN PRODUCTION MODE')
+  // point base url to the google cloud server instance
+  axios.defaults.baseURL = "https://backend.milselarch.com/django/"
+}
+
 
 Vue.use(Vuex)
 // const store = new Vuex.Store(VuexStore);

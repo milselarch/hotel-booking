@@ -6,11 +6,14 @@
           <h1>The Bestest Hotels in the Multiverse</h1>
           <p id="short-info">
             <span>
-              Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
+              <!-- Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
               both veterans of the lifestyle and loyalty space, have 
               found a way to credit customers up to ten times the volume 
               of miles that can be earned elsewhere. That is for booking 
-              the same hotel at the same or similar rates.
+              the same hotel at the same or similar rates. -->
+              Use Ascenda's white label UIs and content aggregation hub 
+              to deploy a hassle-free, OTA-level travel booking experience 
+              for your rewards program.
             </span>
           </p>
 
@@ -123,6 +126,7 @@
               :icon-right="dates_are_valid ? 'check': ''"
               :unselectable-dates="should_exclude_date"
               :disabled="is_loading"
+              :mobile-native="false"
               range>
             </b-datepicker>
           </b-field>
@@ -795,7 +799,12 @@ export default {
       and the destination name is at index i of the 2nd inner array
       */
       assert(destinations_data.length == 2)
-      const [uids, names] = destinations_data
+      // destinations_data is actually an object, not an array
+      // when deployed in production, so we can't use 
+      // array destructuring to get uids and names
+      const uids = destinations_data[0];
+      const names = destinations_data[1];
+      // const [uids, names] = destinations_data
       // console.log('DEST', destinations_data, uids, names)
       
       assert(uids.length === names.length)
@@ -857,6 +866,7 @@ export default {
       // await sleep(10000); // simulate json load delay
       // console.log('DESINATIONS JSON LOADED')
       // console.log('DATA LENGTH', destinations.length)
+      console.log("DEST-RAW-DATA", destinations_data);
       const [names, dest_mappings] = self.unpack_destinations(
         destinations_data
       )
@@ -896,8 +906,11 @@ export default {
       if we're actually running the website
       */
       // console.log('RUNNING ON: BROWSER')
-      const loader = import('@/assets/destinations_flat.json')
+      const loader = import('../assets/destinations_flat.json')
       loader.then(on_destinations_loaded);
+      loader.catch(err => {
+        console.log("LOAD ERR", err)
+      })
     }
 
     (async () => {
@@ -1195,11 +1208,14 @@ div#front-cover {
   width: 100%;
   
   background-image: url(
-    "~assets/alena-aenami-serenity-1k.jpg"
+    "../assets/alena-aenami-serenity-1k.jpg"
   );
 
   @media screen and (max-width: 1024px) {
+    padding-top: 2.5rem;
     flex-direction: column;
+    padding-left: 7%;
+    padding-right: 7%;
   }
 
   & > div.description-wrapper {
@@ -1241,17 +1257,24 @@ div#front-cover {
         font-family: "Babas Neue";
         text-align: left;
         line-height: 5rem;
+        font-size: 5rem;
         margin-bottom: 1rem;
         max-width: 40rem;
 
         @media screen and (max-width: 1024px) {
           max-width: none;
           text-align: center;
+          font-size: 4rem;
+          line-height: 4rem;
         }
       }
 
       & > div.buttons {
         margin-top: 2rem;
+        @media screen and (max-width: 1024px) {
+          display: flex;
+          justify-content: center;
+        }
       }
     }
   }
@@ -1268,6 +1291,11 @@ div#front-cover {
     margin-right: 0px;
 
     @media screen and (max-width: 1024px) {
+      // width: 16rem;
+      // flex-shrink: 1;
+      max-width: 20rem;
+      padding: 0.5rem;
+
       margin-left: auto;
       margin-right: auto;
       background-color: rgba(255, 255, 255, 0.9);

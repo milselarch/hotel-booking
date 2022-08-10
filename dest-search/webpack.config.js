@@ -3,6 +3,7 @@ var webpack = require('webpack')
 
 require("babel-polyfill");
 const Dotenv = require('dotenv-webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   entry: ['babel-polyfill', './src/main.js'],
@@ -76,7 +77,7 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: /node_modules/,
+        // exclude: /node_modules/,
         query: {
           presets: ['@babel/preset-env']
         }
@@ -115,7 +116,6 @@ module.exports = {
     new Dotenv()
   ],
   devtool: '#eval-source-map'
-  
 }
 
 if (process.env.NODE_ENV === 'production') {

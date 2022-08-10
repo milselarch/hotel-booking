@@ -136,12 +136,15 @@ export default {
       // console.log(Object.values(url)[0]);
       return Object.values(url)[0];
     },
-    build_map(lat, long){
+    build_map(lat, long) {
+      // console.log('PROCESS_ENV', process.env)
+      // console.log('MAPS-KEY', process.env.VUE_APP_GOOGLE_API_KEY)
       return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${long}
       &size=500x400
       &markers=${lat},${long}
       &key=${process.env.VUE_APP_GOOGLE_API_KEY}`
     },
+    
     check_breakfast_func(breakfastInfo) {
       if (breakfastInfo == "hotel_detail_breakfast_included"){
         return "Breakfast included"

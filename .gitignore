@@ -13,6 +13,9 @@ node_modules/
 # C extensions
 *.so
 
+# firebase deployment folder
+.firebase
+
 # Distribution / packaging
 .Python
 build/

@@ -7,6 +7,7 @@ from booking import serializers as bookingSerializer
 from booking.views import valid_credit_card
 import copy
 from faker import Faker
+from datetime import datetime as dt, timedelta
 
 class TestBooking(TestCase):
 
@@ -93,8 +94,6 @@ class TestBooking(TestCase):
             "primary_guest_last_name": "Depp",
             "primary_guest_phone": "95068345",
             "primary_guest_phone_country": "Singapore +65",
-            #"primary_guest_passport_number": "E28401J",
-            # "primary_guest_passport_country": "",
             "cost_in_sgd": "99",
             "name_on_card": "Daniel",
             "card_number": "5105105105105100",
@@ -121,7 +120,7 @@ class TestBooking(TestCase):
             "room_breakfast_info": "r_breakfast_2",
             "booking_id": "b_id_2",
             "check_in_date": "2022-08-25",
-            "check_out_date": "2022-08-03",
+            "check_out_date": "2022-08-28",
             "number_of_rooms": "1",
             "number_of_guests_per_rooms": "1",
             "special_request": "",
@@ -130,8 +129,6 @@ class TestBooking(TestCase):
             "primary_guest_last_name": "Depp 2",
             "primary_guest_phone": "80000000",
             "primary_guest_phone_country": "Singapore +65",
-            #"primary_guest_passport_number": "E28401G",
-            # "primary_guest_passport_country": "",
             "cost_in_sgd": "199",
             "name_on_card": "Johnny",
             "card_number": "4111 1111 1111 1111",
@@ -197,6 +194,88 @@ class TestBooking(TestCase):
         # check if number of bookings in the system is 0
         booking_count = booking_order.objects.all().count()
         self.assertEquals(booking_count, 0)
+
+    # check if user can create bookings after logging in
+    # expected result: yes
+    @mock.patch('booking.views.user_booking_data.room_details_get_request', return_value = None)
+    @mock.patch('booking.views.user_booking_data.verify_hotel_price_from_ascenda_api_matches_with_request_from_client', return_value = None)
+    def test_make_booking_with_login_with_faker(self, mock_output_room_details_get_request, mock_output_verify_hotel_price ):
+        # fixed endpoint from Djoser to login
+        login_url = '/auth/jwt/create/' 
+        booking_endpoint = '/booking/'
+
+        # generate access token for user1
+        response1 = self.client.post(
+            login_url, 
+            content_type='application/json', 
+            data = self.TEST_USER1_LOGIN)
+
+        USER1_ACCESS_TOKEN = response1.data['access']
+
+        auth_header = {
+            'HTTP_AUTHORIZATION': "JWT " + USER1_ACCESS_TOKEN,
+        }
+
+        number_of_booking = 1000
+        faker = Faker()
+        for x in range(number_of_booking):
+            test_start_date = faker.date_between(start_date='today',end_date='+7d')
+            test_end_date = faker.date_between(start_date='+8d',end_date='+15d')
+
+            #Create TEST_BOOKING DATA using faker
+            self.TEST_BOOKING_FUZZ_JSON = {
+            "user_account": str(self.user_2.uid),
+            "hotel_id": faker.lexify(text='??????????'),
+            "room_type_id": faker.lexify(text='??????????'),
+            "room_breakfast_info": faker.lexify(text='??????????'),
+            "booking_id": faker.lexify(text='??????????'),
+            "check_in_date":str(test_start_date),
+            "check_out_date": str(test_end_date),
+            "number_of_rooms": str(faker.random_digit_not_null()),
+            "number_of_guests_per_rooms": str(faker.random_digit_not_null()),
+            "special_request": faker.paragraph(nb_sentences=5),
+            "primary_guest_title": str(faker.random_choices(elements=('MR', 'MS', 'MRS'), length=1)[0]),
+            "primary_guest_first_name": faker.first_name(),
+            "primary_guest_last_name": faker.last_name(),
+            "primary_guest_phone": str(faker.random_int(min=10000000, max=99999999)),
+            "primary_guest_phone_country": str(faker.country()) + " " + str(faker.country_calling_code()),
+            "cost_in_sgd": str(faker.random_int(min=1, max=100000)),
+            "name_on_card": faker.name(),
+            "card_number": str(faker.credit_card_number()),
+            "expiry_date": str(faker.date_between(start_date='today',end_date='+5y')),
+            "security_code": str(faker.random_number(digits=3,fix_len=True)),
+            "billing_address_address": faker.street_address(),
+            "billing_address_country": faker.country(),
+            "billing_address_city": faker.city(),
+            "billing_address_post_code": faker.postcode(),
+            
+            "destination_id": faker.lexify(text='??????????'),
+            "did_primary_guest_accept_tnc": "true",
+            "primary_guest_email": faker.email(),
+
+            "hotel_name": "Hotel:"+faker.paragraph(nb_sentences=1),
+            "room_type": "Room:"+faker.paragraph(nb_sentences=1),
+            "destination_region": faker.city() + ", " + faker.country(),
+
+        }
+            # print("Count:"+str(x+1))
+            # print(self.TEST_BOOKING_FUZZ_JSON)
+
+            response2 = self.client.post(
+                booking_endpoint, 
+                content_type='application/json', 
+                data = self.TEST_BOOKING_FUZZ_JSON, 
+                **auth_header)
+
+            status_code2 = response2.status_code
+            self.assertEquals(status_code2, 201)
+
+        # check if there are x number_of_booking bookings in the database
+        # expected number of bookings = number_of_booking
+        booking_count = booking_order.objects.all().count()
+        self.assertEquals(booking_count, number_of_booking)
+
+        
 
     # check if user can create bookings after logging in
     # expected result: yes

@@ -141,7 +141,9 @@
           this.$emit('open-login', formdata)
   
         }).catch(err_resp => {
-          // console.log('ERR-RESP', err_resp)
+          console.log('ERR-RESP', err_resp)
+          console.log('ERR-RESP.response', err_resp.response)
+          console.log('ERR-RESP.response.data', err_resp.response.data)
           let errors = err_resp.response.data
           const other_errors = []
 
@@ -160,6 +162,13 @@
             self.password_error = errors['password']
           } if (errors.hasOwnProperty('re_password')) {
             self.re_password_error = errors['re_password']
+          }
+
+          if(isHTML(errors)){
+            // temp workaround to check if email has error
+            self.email_error = "The email address format is invalid."
+            errors = []
+            errors['email'] = "The email address format is invalid."
           }
 
           console.error('ERRORS', errors)
@@ -199,6 +208,16 @@
     }
   };
 
+function isHTML(str) {
+  var a = document.createElement('div');
+  a.innerHTML = str;
+
+  for (var c = a.childNodes, i = c.length; i--; ) {
+    if (c[i].nodeType == 1) return true; 
+  }
+
+  return false;
+}
   
 
 </script>
