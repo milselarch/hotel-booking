@@ -1212,6 +1212,7 @@ div#front-cover {
   );
 
   @media screen and (max-width: 1024px) {
+    padding-top: 2.5rem;
     flex-direction: column;
     padding-left: 7%;
     padding-right: 7%;
