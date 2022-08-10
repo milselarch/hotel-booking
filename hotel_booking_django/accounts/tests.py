@@ -157,15 +157,13 @@ class TestAuthentication(TestCase):
         # user should not be able to create an account since password is the same as username
         self.assertEquals(status_code4, 400)
 
-        invalid_email = copy.deepcopy(self.TEST_USER3_SIGNUP)
+        invalid_email = copy.deepcopy(self.TEST_USER1)
         invalid_email['email'] = 'test3test.com'
         
-        # test if user3 can signup
-        response4 = self.client.post(signup_url, invalid_email)
-        status_code4 = response4.status_code
-
-        # user should not be able to create an account since email format is invalid
-        self.assertEquals(status_code4, 400)
+        # test if user3 can signup  with invalid email
+        with self.assertRaises(ValueError):
+            user_creation = user_account.objects.create_user(**invalid_email)
+  
 
     # test if user is able to get successfully authenticated by Djoser's /jwt/create/ endpoint
     def test_login_api(self):
