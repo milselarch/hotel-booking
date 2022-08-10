@@ -20,7 +20,7 @@
       <div id="amenities" v-if="check_amenities">
         <p><font size="4rem"><b>Amenities</b></font></p>
         <ul v-for="(am, key) in this.hotelAmenities" v-bind:key="key">
-          <font-awesome-icon icon="fa-solid fa-check" color="green"/><li>{{formatAmenities(key)}}</li>
+          <font-awesome-icon v-show="formatAmenities(key)!=null" icon="fa-solid fa-check" color="green"/><li v-show="formatAmenities(key)!=null">{{formatAmenities(key)}}</li>
         </ul>
         <!-- <p>{{hotelAmenities}}</p> -->
       </div>
@@ -173,10 +173,15 @@ export default {
     },
     formatAmenities(am){
       //amenities are read as exampleAmenityTV
-      var str = am
-      str = str[0].toUpperCase() + str.slice(1)
-      str = str.match(/[A-Z]?[a-z]+|[0-9]+|[A-Z]+(?![a-z])/g).join(" ")
-      return str
+      if (am === ""){
+        return null
+      }
+      else {
+        var str = am
+        str = str[0].toUpperCase() + str.slice(1)
+        str = str.match(/[A-Z]?[a-z]+|[0-9]+|[A-Z]+(?![a-z])/g).join(" ")
+        return str
+      }
     },
     select_room(room){
       console.log("room:", room);
