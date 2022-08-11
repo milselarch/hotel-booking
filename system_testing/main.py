@@ -141,7 +141,7 @@ class SystemTest(unittest.TestCase):
 
         driver.execute_script("window.scrollTo({top: 800, behavior: 'smooth'})")
 
-        time.sleep(3)
+        time.sleep(5)
 
         # driver = self.bookdriver
         driver.close()
@@ -177,7 +177,7 @@ class SystemTest(unittest.TestCase):
         signup_re_password_field = driver.find_element(By.XPATH, r"/html/body/div/div[1]/div[2]/div[2]/div/section/div[4]/div/input")
         signup_re_password_field.send_keys(self.login_password)
 
-        time.sleep(1.5)
+        time.sleep(2)
 
         signup_page_button = driver.find_element(By.XPATH, r"/html/body/div/div[1]/div[2]/div[2]/div/section/div[5]/button")
         signup_page_button.click()
