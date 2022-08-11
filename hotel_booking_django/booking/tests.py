@@ -153,7 +153,7 @@ class TestBooking(TestCase):
     # ensuring no false negative
     def test_credit_card_checker(self):
         faker = Faker()
-        for x in range(1000000):
+        for x in range(10000):
             card_number = faker.credit_card_number()
             self.assertTrue(valid_credit_card(card_number))
 
@@ -216,6 +216,7 @@ class TestBooking(TestCase):
             'HTTP_AUTHORIZATION': "JWT " + USER1_ACCESS_TOKEN,
         }
 
+
         number_of_booking = 1000
         faker = Faker()
         for x in range(number_of_booking):
@@ -256,8 +257,8 @@ class TestBooking(TestCase):
             "hotel_name": "Hotel:"+faker.paragraph(nb_sentences=1),
             "room_type": "Room:"+faker.paragraph(nb_sentences=1),
             "destination_region": faker.city() + ", " + faker.country(),
-
         }
+
             # print("Count:"+str(x+1))
             # print(self.TEST_BOOKING_FUZZ_JSON)
 
