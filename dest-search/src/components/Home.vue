@@ -210,6 +210,7 @@ import router from '../router'
 
 const LOAD_FAIL_MSG = "failed to load hotels\n●︿●";
 const DATE_FORMAT = 'DD/MM/YYYY'
+const MAX_SUGGESTIONS = 50;
 
 const print_error = () => {
   // print to console if we're not running a unit test
@@ -222,6 +223,7 @@ export default {
   name: 'Home',
   LOAD_FAIL_MSG: LOAD_FAIL_MSG,
   DATE_FORMAT: DATE_FORMAT,
+  MAX_SUGGESTIONS: MAX_SUGGESTIONS,
 
   data () {
     return {
@@ -229,7 +231,9 @@ export default {
       destinations_loaded: false,
       destination_names: [], // array of destination names
       destination_mappings: {}, // map destination name to ID
-      
+      // cap on the number of autocomplete suggestions to show
+      num_suggestions: 1,
+
       hotels: [],
       hotels_loaded: [],
       selected: null,
@@ -819,17 +823,50 @@ export default {
       return [names, destination_mappings]
     },
 
-    fuzzy_search(search_input, input_names) {
-      // return a reordering of input_names where 
-      // sorted in order of name that matches the search_input
-      // best (first element of output) to name that matches the
-      // search_input worst (last element of output)
+    fuzzy_search(
+      search_input, input_names, num_suggestions=1
+    ) {
+      /*
+      return a reordering of input_names where 
+      sorted in order of name that matches the search_input
+      best (first element of output) to name that matches the
+      search_input worst (last element of output)
+
+      num_suggestions: max number of suggestions we can load
+      */
+      const self = this
+      assert(num_suggestions >= 1)
       search_input = search_input.trim()
       const matches = fuzzysort.go(search_input, input_names)
       if ((matches.length) === 0) { return [] }
       
       let names = []
-      const length = Math.min(matches.length, 50)
+      // get num of suggestions to load given current cap
+      // on max number of suggestions we can load right now
+      const length = Math.min(matches.length, num_suggestions)
+      // max num of suggestions to load if all html elements are laoded
+      const max_length = Math.min(matches.length, MAX_SUGGESTIONS)
+
+      if (max_length > length) {
+        /*
+        asynchronously increase max number 
+        of autocomplete suggestionms that can be loaded
+        The reason we need to do this asynchronously and incrementally
+        is because showing all 50 autocomplete suggestions right at
+        the start will actually lag the autocomplete search bar
+        quite a fair bit right at the start (lag is gone after though)
+        */ 
+        (async () => {
+          await sleep(1);
+          // wait for autocomplete suggestion elements to load
+          await self.$nextTick()
+          self.num_suggestions = Math.min(
+            num_suggestions + 1,
+            MAX_SUGGESTIONS
+          )
+        })();
+      }
+
       for (let k=0; k<length; k++) {
         // console.log(k, matches[k])
         const destinationName = matches[k]['target'];
@@ -1135,7 +1172,8 @@ export default {
 
     filtered_search_matches() {
       return this.fuzzy_search(
-        this.destination_input, this.destination_names
+        this.destination_input, this.destination_names,
+        this.num_suggestions
       );
     },
 

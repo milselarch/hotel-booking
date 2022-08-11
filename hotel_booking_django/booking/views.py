@@ -14,8 +14,15 @@ import json
 # function used to validate credit card number
 # credits: https://www.geeksforgeeks.org/luhn-algorithm/
 def valid_credit_card(cardNo):
-
+    #check if card number is all int
+    if(not cardNo.isdigit()):
+        return False
+    
     nDigits = len(cardNo)
+
+    if not (nDigits >= 8 and nDigits <= 19):
+        return False
+
     nSum = 0
     isSecond = False
 
@@ -193,7 +200,6 @@ class user_booking_data(APIView):
                     request.data["user_account"] = request.user.uid
                     # mask credit card
                     request.data['card_number'] = card_number[-4:]
-
                 else:
                     Error_Responses["card_number"] = "Invalid Credit Card Number"
             else:

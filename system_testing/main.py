@@ -51,16 +51,18 @@ class SystemTest(unittest.TestCase):
         driver.maximize_window()
         driver.implicitly_wait(5)
 
+        time.sleep(2)
+
         loginpop = driver.find_element(By.ID, "login")
         loginpop.click()
         time.sleep(0.5)
         driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div[2]/div[1]/div/section/div[1]/div/input").send_keys(self.book_email)
         time.sleep(0.5)
         driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div[2]/div[1]/div/section/div[2]/div/input").send_keys(self.book_password)
-        time.sleep(0.5)
+        time.sleep(1.5)
         driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div[2]/div[1]/div/section/div[3]/button").click()
 
-        time.sleep(1)
+        time.sleep(1.5)
 
         destField = driver.find_element(By.ID, "dest_search_field")
         searchButton = driver.find_element(By.ID, "search-button")
@@ -84,7 +86,7 @@ class SystemTest(unittest.TestCase):
 
         time.sleep(2)
         driver.execute_script("window.scrollTo({ top: 700, behavior: 'smooth'})")
-        time.sleep(1)
+        time.sleep(1.5)
 
         hotelCards = driver.find_elements(By.CLASS_NAME, "card")
         WebDriverWait(driver, 8).until(EC.invisibility_of_element_located((By.CLASS_NAME, "flat-progress-bar")))
@@ -106,11 +108,11 @@ class SystemTest(unittest.TestCase):
         if roomCards[0].is_displayed():
             roomCards[0].click()
 
-        time.sleep(1)
+        time.sleep(1.5)
 
         title = driver.find_element(By.XPATH, "//form[@id='bookingForm']/div[1]/div[2]/div/div/div")
         title.click()
-        time.sleep(0.4)
+        time.sleep(1)
         driver.find_element(By.XPATH, "//form[@id='bookingForm']/div[1]/div[2]/div/div/div/span/select/option[3]").click()
         driver.find_element(By.ID, "first_name_field").send_keys(self.book_firstname)
         driver.find_element(By.ID, "last_name_field").send_keys(self.book_lastname)
@@ -151,7 +153,7 @@ class SystemTest(unittest.TestCase):
         driver = self.logindriver
         driver.get("http://localhost:8080/")
         driver.maximize_window()
-        time.sleep(1)
+        time.sleep(2)
 
         # Signup
         signup_button = driver.find_element(By.XPATH, r"/html/body/div/div/div/div[1]/div[1]/div/div/button[2]")
@@ -184,7 +186,7 @@ class SystemTest(unittest.TestCase):
         login_title = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "login-title")))
         expected_title = "LOGIN"
-        time.sleep(1)
+        time.sleep(1.5)
         self.assertEqual(login_title.text, expected_title)
 
         # login to account
@@ -213,7 +215,7 @@ class SystemTest(unittest.TestCase):
 
         driver.execute_script("window.scrollTo({top: 2000, behavior: 'smooth'})")
 
-        time.sleep(1)
+        time.sleep(1.5)
 
         delete_account_button = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.ID, "delete_account_button")))
@@ -223,7 +225,7 @@ class SystemTest(unittest.TestCase):
 
         confirm_delete_password_input = driver.find_element(By.ID, "delete_account_password_field")
         confirm_delete_password_input.send_keys(self.login_password)
-        time.sleep(1)
+        time.sleep(1.5)
         confirm_delete_account_button = driver.find_element(By.ID, "confirm_delete_account_button")
         confirm_delete_account_button.click()
 
