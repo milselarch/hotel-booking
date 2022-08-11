@@ -1,6 +1,8 @@
 from django.test import TestCase
 from accounts.models import user_account
 import copy
+from faker import Faker
+import random
 
 class TestAuthentication(TestCase):
 
@@ -163,6 +165,32 @@ class TestAuthentication(TestCase):
         # test if user3 can signup  with invalid email
         with self.assertRaises(ValueError):
             user_creation = user_account.objects.create_user(**invalid_email)
+
+    
+    def test_signup_using_fuzzing(self):
+        signup_url = '/auth/users/'
+        faker = Faker()
+
+        # test if user3 can signup with fuzzed signup data
+        fuzzing_iterations = 500
+        for _ in range(fuzzing_iterations):
+            signup_password = faker.password()
+            fuzzed_signup_data = {
+                # to add randomness and avoid generating the same email twice
+                'email': str(random.randint(1,1000)) + faker.ascii_email(),
+                'first_name': faker.first_name(),
+                'last_name': faker.last_name(),
+                'password': signup_password,
+                're_password': signup_password,
+            }
+
+            response1 = self.client.post(signup_url, fuzzed_signup_data)
+            status_code1 = response1.status_code
+
+            # user should be able to create an account for the fuzzed data
+            # expected HTTP status code = 201 for account created
+            self.assertEquals(status_code1, 201)
+        
   
 
     # test if user is able to get successfully authenticated by Djoser's /jwt/create/ endpoint
