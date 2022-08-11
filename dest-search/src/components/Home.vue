@@ -506,9 +506,10 @@ export default {
       dest_name
     ) {
       if (
-        (this.last_dest_id === dest_id) &&
-        (this.last_dest_name === dest_name) &&
-        (_.isEqual(this.searched_dates, dates)) &&
+        (this.last_dest_id === dest_id) && (
+          (this.last_dest_name === dest_name) ||
+          (dest_name === undefined) 
+        ) && (_.isEqual(this.searched_dates, dates)) &&
         (this.searched_num_guests === num_guests) &&
         (this.searched_num_rooms === num_rooms)
       ) {
@@ -531,7 +532,7 @@ export default {
 
     async load_prices({
       dest_id, dates, num_guests, num_rooms,
-      search_stamp, dest_name
+      search_stamp
     }) {
       assert(typeof search_stamp === 'number')
       assert(!this.price_search_loading.hasOwnProperty(search_stamp))
@@ -575,7 +576,7 @@ export default {
       }
 
       const search_params_match = this.search_params_match(
-        dest_id, dates, num_guests, num_rooms, dest_name
+        dest_id, dates, num_guests, num_rooms
       )
 
       if (
@@ -750,7 +751,7 @@ export default {
       self.load_prices({
         dest_id: dest_id, dates: dates, 
         num_guests: self.num_guests, num_rooms: self.num_rooms,
-        search_stamp: self.search_stamp, dest_name: self.dest_name
+        search_stamp: self.search_stamp
       })
       
       const hotel_request = axios.get("proxy/hotels", {
@@ -913,7 +914,7 @@ export default {
       // await sleep(10000); // simulate json load delay
       // console.log('DESINATIONS JSON LOADED')
       // console.log('DATA LENGTH', destinations.length)
-      console.log("DEST-RAW-DATA", destinations_data);
+      // console.log("DEST-RAW-DATA", destinations_data);
       const [names, dest_mappings] = self.unpack_destinations(
         destinations_data
       )
