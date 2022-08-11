@@ -155,7 +155,7 @@ class TestBooking(TestCase):
     # ensuring no false negative
     def test_credit_card_checker(self):
         faker = Faker()
-        for x in range(1000000):
+        for x in range(10000):
             card_number = faker.credit_card_number()
             # print(f"count:{x}")
             # print(card_number)
