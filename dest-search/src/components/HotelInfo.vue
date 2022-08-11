@@ -16,7 +16,7 @@
     </div>
     
     <div id="descbox">
-      <div id="description" v-html="hotelDetails"></div>
+      <div id="description" v-html="sanitised_hotel_details"></div>
       <div id="amenities" v-if="check_amenities">
         <p><font size="4rem"><b>Amenities</b></font></p>
         <ul v-for="(am, key) in this.hotelAmenities" v-bind:key="key">
@@ -62,6 +62,7 @@
 import axios from 'axios'
 import BLANK_IMAGE from "@/assets/cityscape.jpg"
 import router from '../router'
+import DOMPurify from 'dompurify'
 
 export default {
   name: 'HotelInfo',
@@ -246,7 +247,7 @@ export default {
     this.longitude = this.$store.state.Persistent.longitude;
   },
   computed: {
-    check_amenities(){  
+    check_amenities() {  
       if (Object.keys(this.hotelAmenities).length != 0){
         console.log(Object.keys(this.hotelAmenities));
         return true
@@ -255,11 +256,17 @@ export default {
         return false
       }
     },
-    check_carousel(){
+    check_carousel() {
       if (this.noimage == true){
         return false;
       }
       else {return true;}
+    },
+    sanitised_hotel_details() {
+      // strips injected hotel details HTML from any
+      // unwanted javascript to prevent XSS attacks
+      const cleaned = DOMPurify.sanitize(this.hotelDetails);
+      return cleaned
     }
   }
 }

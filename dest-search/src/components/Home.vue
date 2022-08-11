@@ -861,7 +861,7 @@ export default {
           // wait for autocomplete suggestion elements to load
           await self.$nextTick()
           self.num_suggestions = Math.min(
-            self.num_suggestions + 1,
+            num_suggestions + 1,
             MAX_SUGGESTIONS
           )
         })();
