@@ -261,6 +261,7 @@ export default {
       is_loading: false,
       load_error: false,
       last_dest_id: null,
+      last_dest_name: null,
 
       scrollable: false,
       
@@ -367,8 +368,9 @@ export default {
         return false;
       }
       
-      const dest_id = this.destination_mappings[this.destination];
-      this.last_dest_id = dest_id;
+      const dest_id = this.destination_mappings[this.destination]
+      this.last_dest_id = dest_id
+      this.last_dest_name = this.destination
       // load_hotels is an async method
       this.load_hotels(dest_id)
       assert(this.is_loading)
@@ -500,19 +502,27 @@ export default {
     },
 
     search_params_match(
-      dest_id, dates, num_guests, num_rooms
+      dest_id, dates, num_guests, num_rooms,
+      dest_name
     ) {
       if (
         (this.last_dest_id === dest_id) &&
+        (this.last_dest_name === dest_name) &&
         (_.isEqual(this.searched_dates, dates)) &&
         (this.searched_num_guests === num_guests) &&
         (this.searched_num_rooms === num_rooms)
       ) {
-        // skip price map update if we already searched
-        // the same destination previously already
-        // successfully (i.e. no errors) and in the same
-        // booking date range and same number of guests 
-        // and same number of rooms as previously as well
+        /*
+        return true if we already searched
+        the same destination previously already
+        successfully (i.e. no errors) and in the same
+        booking date range and same number of guests 
+        and same number of rooms as previously as well
+
+        we need to check both destination name and id
+        as some destinations map different destination names
+        to the same destination id
+        */
         return true;
       }
 
@@ -521,7 +531,7 @@ export default {
 
     async load_prices({
       dest_id, dates, num_guests, num_rooms,
-      search_stamp
+      search_stamp, dest_name
     }) {
       assert(typeof search_stamp === 'number')
       assert(!this.price_search_loading.hasOwnProperty(search_stamp))
@@ -565,7 +575,7 @@ export default {
       }
 
       const search_params_match = this.search_params_match(
-        dest_id, dates, num_guests, num_rooms
+        dest_id, dates, num_guests, num_rooms, dest_name
       )
 
       if (
@@ -701,7 +711,7 @@ export default {
       return price_request
     },
 
-    async load_hotels(dest_id) {
+    async load_hotels(dest_id, dest_name) {
       const self = this;
       const dates = self.dates
       
@@ -740,7 +750,7 @@ export default {
       self.load_prices({
         dest_id: dest_id, dates: dates, 
         num_guests: self.num_guests, num_rooms: self.num_rooms,
-        search_stamp: self.search_stamp
+        search_stamp: self.search_stamp, dest_name: self.dest_name
       })
       
       const hotel_request = axios.get("proxy/hotels", {
@@ -1119,7 +1129,8 @@ export default {
 
       const dest_id = mappings[this.destination_input]
       const params_match = this.search_params_match(
-        dest_id, this.dates, this.num_guests, this.num_rooms
+        dest_id, this.dates, this.num_guests, this.num_rooms,
+        this.destination_input
       )
       if (params_match && (this.load_error === false)) {
         // skip search if we already searched
