@@ -45,6 +45,7 @@ localVue.use(Vuex)
 localVue.use(Buefy)
 
 describe('Signup Test', () => {
+  jest.setTimeout(10 * 1000);
   const user = new User()
   let signed_up = false;
   let store;
@@ -58,6 +59,86 @@ describe('Signup Test', () => {
     const attacher = new VuexAttach(localVue);
     store = attacher.create_store(mock.modules);
     store.commit('initialize_store');
+  })
+
+  it('boundary signup no email domain test', async () => {
+    /*    
+    (boundary value test)
+    check that if we can't signup if we our email domain
+    has no TLD after the .
+    */
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+
+    wrapper.vm.email = 'testuser@domain'
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = user.password
+    wrapper.vm.re_password = user.password
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(true);
+    console.log("SIGNUP-ATTR", signup_button)
+    // make sure the sign up button is not disabled now
+    expect(signup_button.attributes().disabled).toBe(undefined);
+    expect(wrapper.vm.pending).toBe(false)
+
+    await signup_button.vm.$listeners.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.has_error).toBe(true)
+  })
+
+  it('boundary signup no email domain test v2', async () => {
+    /*
+    (boundary value test)
+    check that if we can't signup if we our email domain
+    has no TLD (without the dot as well)
+    */
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+
+    wrapper.vm.email = 'testuser@domain.'
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = user.password
+    wrapper.vm.re_password = user.password
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(true);
+    console.log("SIGNUP-ATTR", signup_button)
+    // make sure the sign up button is not disabled now
+    expect(signup_button.attributes().disabled).toBe(undefined);
+    expect(wrapper.vm.pending).toBe(false)
+
+    await signup_button.vm.$listeners.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.has_error).toBe(true)
   })
 
   it('signup password mismatch test', async () => {
@@ -79,6 +160,190 @@ describe('Signup Test', () => {
       // I know this is unbelievably improbable, but whatever
       false_password = crypto.randomBytes(6).toString('hex');
     }
+
+    // set the form data variables
+    assert(false_password !== user.password)
+    wrapper.vm.email = user.email
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = user.password
+    wrapper.vm.re_password = false_password
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(true);
+    console.log("SIGNUP-ATTR", signup_button)
+    // make sure the sign up button is not disabled now
+    expect(signup_button.attributes().disabled).toBe(undefined);
+    expect(wrapper.vm.pending).toBe(false)
+
+    await signup_button.vm.$listeners.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+    await wrapper.vm.$nextTick()
+
+    const error_message = "The two password fields didn't match."
+    // console.log("ERR-MSG", [wrapper.vm.other_errors])
+    expect(wrapper.vm.other_errors).toBe(error_message)
+  })
+
+  it('empty password signup test', async () => {
+    // (boundary value test)
+    // make sure we are not allowed to signup with an 
+    // empty confirm password and an empty confirm password
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+
+    wrapper.vm.email = user.email
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = ''
+    wrapper.vm.re_password = ''
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(false);
+    expect(signup_button.attributes().disabled).toBe('true');
+    console.log("SIGNUP-ATTR", signup_button)
+  })
+
+  it('empty password signup test', async () => {
+    // (boundary value test)
+    // make sure we are not allowed to signup with an 
+    // empty confirm password and a non-empty confirm password
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+
+    wrapper.vm.email = user.email
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = user.password
+    wrapper.vm.re_password = ''
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(false);
+    expect(signup_button.attributes().disabled).toBe('true');
+    console.log("SIGNUP-ATTR", signup_button)
+  })
+
+  it('empty confirm password signup test', async () => {
+    // (boundary value test)
+    // make sure we are not allowed to signup with an 
+    // non-empty confirm password and a empty confirm password
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+
+    wrapper.vm.email = user.email
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = ''
+    wrapper.vm.re_password = user.password
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(false);
+    expect(signup_button.attributes().disabled).toBe('true');
+    console.log("SIGNUP-ATTR", signup_button)
+  })
+
+  it('clip boundary signup password mismatch test', async () => {
+    /*
+    check that if we are missing the last character
+    on our password confirmation that the signup fails
+    */
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+
+    // false password has all the characters of
+    // the original password except for one
+    const false_password = user.password.slice(
+      0, user.password.length-1
+    )
+
+    // set the form data variables
+    assert(false_password !== user.password)
+    wrapper.vm.email = user.email
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = user.password
+    wrapper.vm.re_password = false_password
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(true);
+    console.log("SIGNUP-ATTR", signup_button)
+    // make sure the sign up button is not disabled now
+    expect(signup_button.attributes().disabled).toBe(undefined);
+    expect(wrapper.vm.pending).toBe(false)
+
+    await signup_button.vm.$listeners.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+    await wrapper.vm.$nextTick()
+
+    const error_message = "The two password fields didn't match."
+    // console.log("ERR-MSG", [wrapper.vm.other_errors])
+    expect(wrapper.vm.other_errors).toBe(error_message)
+  })
+
+  it('extra boundary signup password mismatch test', async () => {
+    /*
+    check that if we have an extra last character
+    on our password confirmation that the signup fails
+    */
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+
+    // generate a random string of bytes
+    const rand_str = crypto.randomBytes(6).toString('hex');
+    // false password has all the characters of
+    // the original password + an extra one at the end
+    const false_password = user.password + rand_str[0]
 
     // set the form data variables
     assert(false_password !== user.password)

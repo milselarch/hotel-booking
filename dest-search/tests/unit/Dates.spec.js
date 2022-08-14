@@ -221,6 +221,61 @@ describe('Home.vue datepicker Test', () => {
     expect(stripped_date).toStrictEqual(converted_date)
   })
 
+  it('earliest boundary date format & parse consistency', () => {
+    /*
+    (boundary value analysis)
+    Verify when we feed in a date string based off the 
+    earliest date that represents the day in the current timezone
+    current date into our format_date method, our parse_date 
+    method can parse it and return a valid date object
+    that has the same day, month, year as the original
+    date object (in the local timezeone), and that the
+    parsed date is the first possible date of the (local) day
+    */
+    const date_now = new Date();
+    const earliest_date = new Date(date_now)
+    earliest_date.setHours(0, 0, 0, 0)
+    
+    const date_str = wrapper.vm.format_date(earliest_date)
+    // make sure the date string that we parse is the same
+    // as the original date object used to create the string
+    const converted_date = wrapper.vm.parse_date(date_str)
+    expect(converted_date instanceof Date).toBe(true)
+    expect(earliest_date).toStrictEqual(converted_date)
+  })
+
+  it('latest boundary date format & parse consistency', () => {
+    /*
+    (boundary value analysis)
+    Verify when we feed in a date string based off a
+    date that is one millisecond BEFORE the 
+    earliest date that represents the day in the current timezone
+    current date into our format_date method, our parse_date 
+    method can parse it and return a valid date object
+    that has the same day, month, year as the original
+    date object (in the local timezeone)
+
+    The parsed date here should be 1 day behind the original day
+    */
+    const date_now = new Date();
+    const earliest_date = new Date(date_now)
+    earliest_date.setHours(0, 0, 0, 0)
+    const before_date = new Date(
+      earliest_date.getTime() - 1
+    );
+    
+    const ref_date_str = wrapper.vm.format_date(earliest_date)
+    const date_str = wrapper.vm.format_date(before_date)
+    // make sure the date string that we parse is the same
+    // as the original date object used to create the string
+    const converted_date = wrapper.vm.parse_date(date_str)
+    expect(converted_date instanceof Date).toBe(true)
+    expect(date_str).not.toBe(ref_date_str)
+    expect(
+      earliest_date.getTime() - converted_date.getTime()
+    ).toStrictEqual(24 * 3600 * 1000)
+  })
+
   it('iterate fuzz date format & parse consistency', () => {
     /*
     Verify when we feed in date strings
@@ -281,6 +336,41 @@ describe('Home.vue datepicker Test', () => {
       const converted_date = wrapper.vm.parse_date(date_str)
       expect(converted_date instanceof Date).toBe(true)
       expect(stripped_date).toStrictEqual(converted_date)
+    }
+  })
+
+  it('random fuzz boundary date format & parse consistency', () => {
+    /*
+    Verify when we feed in random future date strings
+    (based of the earliest dates that represents their
+    respective days in the current timezone)
+    into our format_date method, our parse_date 
+    method can parse it and return a valid date object
+    that has the same day, month, year as the original
+    date object (in the local timezeone), and that the
+    parsed date is the first possible date of the (local) day
+
+    We only care about future dates because you can't book
+    hotels in the past anyway.
+    */
+    const date_now = new Date();
+    const timestamp = date_now.getTime()
+
+    for (let k=0; k<100; k++) {
+      // generate random dates in the future and make sure that
+      // when we format then parse the date we get back
+      // an equivilant date value (for day, month, and year only)
+      const future_stamp = (1 + Math.random()) * timestamp
+      const date = new Date(future_stamp)
+      const earliest_date = new Date(date)
+      earliest_date.setHours(0, 0, 0, 0)
+      
+      const date_str = wrapper.vm.format_date(earliest_date)
+      // make sure the date string that we parse is the same
+      // as the original date object used to create the string
+      const converted_date = wrapper.vm.parse_date(date_str)
+      expect(converted_date instanceof Date).toBe(true)
+      expect(earliest_date).toStrictEqual(converted_date)
     }
   })
 })

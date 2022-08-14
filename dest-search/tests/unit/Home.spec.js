@@ -169,6 +169,44 @@ describe('Home.vue Test', () => {
     expect(status_text).toBe(search_destination)
   })
 
+  it('boundary empty hotel search status text', async () => {
+    /* 
+    attempt a valid search to a place with no hotels
+    the objective is to check that there are no load errors
+    */
+    // wait for desintations.json to be loaded
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+
+    // this test checks that we fail to load hotels
+    // if the backend is down and we do a hotel search
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+
+    // this is a real place with a real destination id
+    // according to destinations.json, but no hotels
+    const search_destination = 'sadas'
+    wrapper.vm.destination_input = search_destination
+    // wait for vue to update state
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.allow_search).toBe(true)
+
+    // attempt to search on the correct endpoint
+    const search_started = wrapper.vm.begin_search()
+    expect(search_started).toBe(true)
+    // wait for the backend request to complete
+    while (wrapper.vm.is_loading) { await sleep(100); }
+    expect(wrapper.vm.is_loading).toBe(false)
+    await wrapper.vm.$nextTick()
+
+    // expect the backend load error flag to be false
+    expect(wrapper.vm.load_error).toBe(false)
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+    // check that we disallow searching on the same params
+    expect(wrapper.vm.allow_search).toBe(false)
+    const status_text = wrapper.vm.status_text;
+    expect(wrapper.vm.allow_search).toBe(false)
+    expect(status_text).toBe(search_destination)
+  })
+
   it('infinite scroll test', async () => {
     /*
     check that infinite scrolling of hotels for our 

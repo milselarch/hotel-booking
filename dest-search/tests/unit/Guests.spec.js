@@ -77,10 +77,139 @@ describe('Home.vue guests per room input Test', () => {
     }
   });
 
-  it('check guests per room', async () => {
-    // check that if we enter a valid number of guests
-    // into the guests input, and all the other fields are set
-    // that we will be allowed to press the search button
+  it('check min guests per room', async () => {
+    // check that if we enter the minimum (1) number
+    // of guests into the guests input, and all the other fields 
+    // are set that we will be allowed to press the search button
+    // (boundary value test)
+    // wait for destinations.json to be loaded
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+    // select randomly from the list of valid destinations
+    const search_destination = destination_names[
+      Math.floor(Math.random() * destination_names.length)
+    ];
+
+    const search_button = wrapper.find('#search-button');
+    expect(search_button.exists()).toBe(true);
+    // make sure we aren't allowed to press the search button at first
+    expect(search_button.attributes().disabled).toBe('disabled');
+    wrapper.vm.destination_input = search_destination
+
+    const guests_input = wrapper.find('#guests-input')
+    const guests_input_elem = guests_input.element
+    const max_num_guests = wrapper.vm.max_num_guests
+    expect(max_num_guests).toBeGreaterThan(1)
+
+    const input_guests = 1
+    // set guests input to be 1
+    guests_input_elem.value = input_guests
+    guests_input.trigger('input')
+    // wait for vue internal state to update
+    await wrapper.vm.$nextTick()
+    const num_guests = wrapper.vm.num_guests
+    // verify data binding of vue data variable
+    expect(num_guests).toBe(input_guests)
+    // make sure we're allowed to search
+    expect(wrapper.vm.allow_search).toBe(true)
+    expect(search_button.attributes().disabled).toBe(undefined);
+  })
+
+  it('check max guests per room', async () => {
+    // check that if we enter the maximum number
+    // of guests into the guests input, and all the other fields 
+    // are set that we will be allowed to press the search button
+    // (boundary value test)
+    // wait for destinations.json to be loaded
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+    // select randomly from the list of valid destinations
+    const search_destination = destination_names[
+      Math.floor(Math.random() * destination_names.length)
+    ];
+
+    const search_button = wrapper.find('#search-button');
+    expect(search_button.exists()).toBe(true);
+    // make sure we aren't allowed to press the search button at first
+    expect(search_button.attributes().disabled).toBe('disabled');
+    wrapper.vm.destination_input = search_destination
+
+    const guests_input = wrapper.find('#guests-input')
+    const guests_input_elem = guests_input.element
+    const max_num_guests = wrapper.vm.max_num_guests
+    expect(max_num_guests).toBeGreaterThan(1)
+
+    const input_guests = max_num_guests
+    // set guests input to be the max
+    guests_input_elem.value = input_guests
+    guests_input.trigger('input')
+    // wait for vue internal state to update
+    await wrapper.vm.$nextTick()
+    const num_guests = wrapper.vm.num_guests
+    // verify data binding of vue data variable
+    expect(num_guests).toBe(input_guests)
+    // make sure we're allowed to search
+    expect(wrapper.vm.allow_search).toBe(true)
+    expect(search_button.attributes().disabled).toBe(undefined);
+  })
+
+  it('check max + 1 guests per room', async () => {
+    // check that if we enter 1 + the maximum number
+    // of guests into the guests input, and all the other fields 
+    // are set that we will NOT be allowed to press the search
+    // button (boundary value test)
+    // wait for destinations.json to be loaded
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+    // select randomly from the list of valid destinations
+    const search_destination = destination_names[
+      Math.floor(Math.random() * destination_names.length)
+    ];
+
+    const search_button = wrapper.find('#search-button');
+    expect(search_button.exists()).toBe(true);
+    // make sure we aren't allowed to press the search button at first
+    expect(search_button.attributes().disabled).toBe('disabled');
+    wrapper.vm.destination_input = search_destination
+
+    const guests_input = wrapper.find('#guests-input')
+    const guests_input_elem = guests_input.element
+    const max_num_guests = wrapper.vm.max_num_guests
+    expect(max_num_guests).toBeGreaterThan(1)
+
+    const input_guests = max_num_guests + 1
+    // set guests input to be 1
+    guests_input_elem.value = input_guests
+    guests_input.trigger('input')
+    // wait for vue internal state to update
+    await wrapper.vm.$nextTick()
+    const num_guests = wrapper.vm.num_guests
+    // verify data binding of vue data variable
+    expect(num_guests).toBe(input_guests)
+    // make sure we're allowed to search
+    expect(wrapper.vm.allow_search).toBe(false)
+    expect(search_button.attributes().disabled).toBe('disabled');
+  })
+
+  it('check valid guests per room', async () => {
+    // check that if we enter every possible valid number
+    // of guests into the guests input, and all the other fields 
+    // are set that we will be allowed to press the search button
     // wait for destinations.json to be loaded
     while (!wrapper.vm.destinations_loaded) { await sleep(100); }
 

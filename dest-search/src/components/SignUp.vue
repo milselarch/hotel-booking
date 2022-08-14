@@ -141,9 +141,11 @@
           this.$emit('open-login', formdata)
   
         }).catch(err_resp => {
+          /*
           console.log('ERR-RESP', err_resp)
           console.log('ERR-RESP.response', err_resp.response)
           console.log('ERR-RESP.response.data', err_resp.response.data)
+          */
           let errors = err_resp.response.data
           const other_errors = []
 
