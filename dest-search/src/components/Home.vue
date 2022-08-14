@@ -290,14 +290,6 @@ export default {
       this.$emit('open-signup')
     },
 
-    load_store() {
-      const self = this;
-      self.x = self.$store.state.Store.count;
-      self.y = self.$store.state.Persistent.persistent_count;
-      // console.log('STORE', self.$store);
-      // console.log(self.x, self.y)
-    },
-
     fast_forward_date() {
       const date_now = moment(this.current_date)
       const cutoff_date = date_now.add(24, 'h').toDate();
@@ -388,16 +380,6 @@ export default {
       const cutoff_date = date_now.add(12, 'h').toDate();
       // console.log('START DATE CMP', cutoff_date, date)
       return cutoff_date > date
-    },
-
-    add_x() {
-      this.$store.commit('increment')
-      this.load_store()
-    },
-
-    add_y() {
-      this.$store.commit('presist_increment')
-      this.load_store()
     },
 
     begin_search() {
@@ -962,7 +944,6 @@ export default {
 
   mounted: function () {
     const self = this;
-    self.load_store();
 
     self.current_date = new Date()
     const date_now = moment(self.current_date)
