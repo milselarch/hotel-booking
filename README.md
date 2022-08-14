@@ -1,5 +1,7 @@
 # hotel-booking
 
+![Screenshot from 2022-08-13 01-39-38](https://user-images.githubusercontent.com/11241733/184531792-60043299-2f72-4f4d-80ae-1bfc58fae95f.png)
+
 # Backend virtualenv setup
 ## Ubuntu 20.04
 
