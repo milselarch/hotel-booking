@@ -197,6 +197,18 @@ describe('Home.vue Test', () => {
     expect(wrapper.vm.is_loading).toBe(false)
     await wrapper.vm.$nextTick()
 
+    const cards_holder_id ='#hotel-cards'
+    const cards_holder = wrapper.find(cards_holder_id)
+    const cards_holder_elem = cards_holder.element
+
+    let card_elems = $(cards_holder_elem).find('div.card')    
+    const hotels = wrapper.vm.hotels
+    console.log('HCOUNT', hotels.length)
+    // make sure this destination has 23 hotels total
+    expect(hotels.length).toBe(0)
+    // make sure at least 1 hotel card is being shown
+    expect(card_elems.length).toBe(0)
+
     // expect the backend load error flag to be false
     expect(wrapper.vm.load_error).toBe(false)
     expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
@@ -493,56 +505,103 @@ describe('Home.vue Test', () => {
     }
   })
 
-  it('fuzz autocomplete no-search', async () => {
-      while (!wrapper.vm.destinations_loaded) { await sleep(100); }
-      /*
-      This test checks that if we enter a destination name
-      that doesn't match any destination that exists the search
-      button will be disabled. Destination names are fuizzed
-      using string mutation fuzzing
-      */
-      expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
-      const dest_path = 'src/assets/destinations_flat.json'
-      const raw_file_data = await fs.readFileSync(dest_path);
-      const file_data = JSON.parse(raw_file_data);
-      const num_fuzz_tests = 100;
-  
-      const unpack_results = wrapper.vm.unpack_destinations(file_data)
-      const [destination_names, dest_mapping] = unpack_results
-      const fuzzer_seed = rand();
-      fuzzer.seed(fuzzer_seed);
 
-      const search_button = wrapper.find('#search-button');
-      expect(search_button.exists()).toBe(true);
-      // make sure we aren't allowed to press the search button at first
-      expect(search_button.attributes().disabled).toBe('disabled');
+  it('autocomplete no-search', async () => {
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+    /*
+    This test checks that if we enter a destination name
+    that doesn't match any destination that exists the search
+    button will be disabled.
+    */
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+    const num_fuzz_tests = 100;
 
-      for (let k=0; k<num_fuzz_tests; k++) {
-        const search_destination = destination_names[
-          Math.floor(Math.random() * destination_names.length)
-        ];
-  
-        let fuzzed_input = '';
-        while (true) {
-          fuzzed_input = fuzzer.mutate.string(search_destination);
-          
-          if (fuzzed_input.length === 0) {
-            console.log('FUZZED STRING IS EMPTY. SKIPPING')
-            continue;
-          } else if (fuzzed_input === search_destination) {
-            continue
-          }
-          
-          break;
-        }
-  
-        wrapper.vm.destination_input = fuzzed_input
-        await wrapper.vm.$nextTick()
-        // make sure we're not allowed to search
-        expect(wrapper.vm.allow_search).toBe(false)
-        expect(search_button.attributes().disabled).toBe('disabled');
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+    const fuzzer_seed = rand();
+    fuzzer.seed(fuzzer_seed);
+
+    const search_button = wrapper.find('#search-button');
+    expect(search_button.exists()).toBe(true);
+    // make sure we aren't allowed to press the search button at first
+    expect(search_button.attributes().disabled).toBe('disabled');
+    // we take the Gap, Frame destination and chop off the first char
+    const search_destination = france_dest.slice(1)
+
+    let fuzzed_input = '';
+    while (true) {
+      fuzzed_input = fuzzer.mutate.string(search_destination);
+      
+      if (fuzzed_input.length === 0) {
+        console.log('FUZZED STRING IS EMPTY. SKIPPING')
+        continue;
+      } else if (fuzzed_input === search_destination) {
+        continue
       }
-    })
+      
+      break;
+    }
+
+    wrapper.vm.destination_input = fuzzed_input
+    await wrapper.vm.$nextTick()
+    // make sure we're not allowed to search
+    expect(wrapper.vm.allow_search).toBe(false)
+    expect(search_button.attributes().disabled).toBe('disabled');
+  })
+
+  it('fuzz autocomplete no-search', async () => {
+    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
+    /*
+    This test checks that if we enter a destination name
+    that doesn't match any destination that exists the search
+    button will be disabled. Destination names are fuizzed
+    using string mutation fuzzing
+    */
+    expect(wrapper.vm.status_text).not.toBe(Home.LOAD_FAIL_MSG);
+    const dest_path = 'src/assets/destinations_flat.json'
+    const raw_file_data = await fs.readFileSync(dest_path);
+    const file_data = JSON.parse(raw_file_data);
+    const num_fuzz_tests = 100;
+
+    const unpack_results = wrapper.vm.unpack_destinations(file_data)
+    const [destination_names, dest_mapping] = unpack_results
+    const fuzzer_seed = rand();
+    fuzzer.seed(fuzzer_seed);
+
+    const search_button = wrapper.find('#search-button');
+    expect(search_button.exists()).toBe(true);
+    // make sure we aren't allowed to press the search button at first
+    expect(search_button.attributes().disabled).toBe('disabled');
+
+    for (let k=0; k<num_fuzz_tests; k++) {
+      const search_destination = destination_names[
+        Math.floor(Math.random() * destination_names.length)
+      ];
+
+      let fuzzed_input = '';
+      while (true) {
+        fuzzed_input = fuzzer.mutate.string(search_destination);
+        
+        if (fuzzed_input.length === 0) {
+          console.log('FUZZED STRING IS EMPTY. SKIPPING')
+          continue;
+        } else if (fuzzed_input === search_destination) {
+          continue
+        }
+        
+        break;
+      }
+
+      wrapper.vm.destination_input = fuzzed_input
+      await wrapper.vm.$nextTick()
+      // make sure we're not allowed to search
+      expect(wrapper.vm.allow_search).toBe(false)
+      expect(search_button.attributes().disabled).toBe('disabled');
+    }
+  })
 
   // check that autocomplete search results are sensible
   it('fuzz autocomplete suggestions', async () => {
