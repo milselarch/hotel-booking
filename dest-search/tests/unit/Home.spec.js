@@ -641,9 +641,14 @@ describe('Home.vue Test', () => {
         fuzzed_input = fuzzer.mutate.string(search_destination);
         
         if (fuzzed_input.length === 0) {
+          // fuzzed input is empty
           console.log('FUZZED STRING IS EMPTY. SKIPPING')
           continue;
         } else if (fuzzed_input === search_destination) {
+          // fuzzed input matches some current search destination
+          continue
+        } else if (destination_names.indexOf(destination_names) !== -1) {
+          // fuzzed input matches some other search destination
           continue
         }
         
