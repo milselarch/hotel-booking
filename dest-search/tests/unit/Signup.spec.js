@@ -324,6 +324,49 @@ describe('Signup Test', () => {
     expect(wrapper.vm.other_errors).toBe(error_message)
   })
 
+  it('password same as email test', async () => {
+    /*
+    check that signup fails if the password is the
+    same as the email
+    */
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+    const user = new User()
+
+    wrapper.vm.email = user.email
+    wrapper.vm.first_name = user.first_name
+    wrapper.vm.last_name = user.last_name
+    wrapper.vm.password = user.email
+    wrapper.vm.re_password = user.email
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(true);
+    console.log("SIGNUP-ATTR", signup_button)
+    // make sure the sign up button is not disabled now
+    expect(signup_button.attributes().disabled).toBe(undefined);
+    expect(wrapper.vm.pending).toBe(false)
+
+    await signup_button.vm.$listeners.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+    await wrapper.vm.$nextTick()
+
+    const error_message = "The password is too similar to the email."
+    // console.log("ERR-MSG", [wrapper.vm.other_errors])
+    expect(wrapper.vm.password_error).toStrictEqual([error_message])
+  })
+
   it('extra boundary signup password mismatch test', async () => {
     /*
     check that if we have an extra last character
@@ -483,7 +526,7 @@ describe('Signup Test', () => {
       stubs: stubs
     })
 
-    await sleep(1000);
+    await sleep(1000)
     const signup_button = wrapper.find('#signup');
     expect(signup_button.exists()).toBe(true);
     expect(signup_button.attributes().disabled).toBe('true');
