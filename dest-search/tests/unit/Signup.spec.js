@@ -428,7 +428,7 @@ describe('Signup Test', () => {
   it('duplicate signup failure mismatch test', async () => {
     /*
     check that signing up with the same credentials
-    (and especially same username) after the previous signup
+    (and especially same email) after the previous signup
     test fails (as we cannot sign up with the same email twice)
     */
     const wrapper = mount(SignUp, {
@@ -441,22 +441,117 @@ describe('Signup Test', () => {
     expect(signup_button.exists()).toBe(true);
     expect(signup_button.attributes().disabled).toBe('true');
 
-    let false_password = user.password
-    while (false_password === user.password) {
-      // keep generating random differing passwords
-      // the while loop makes sure the regenerated password
-      // does not end up marching the original password
-      // I know this is unbelievably improbable, but whatever
-      false_password = crypto.randomBytes(6).toString('hex');
-    }
-
     // set the form data variables
-    assert(false_password !== user.password)
     wrapper.vm.email = user.email
     wrapper.vm.first_name = user.first_name
     wrapper.vm.last_name = user.last_name
     wrapper.vm.password = user.password
-    wrapper.vm.re_password = false_password
+    wrapper.vm.re_password = user.password
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(true);
+    console.log("SIGNUP-ATTR", signup_button)
+    // make sure the sign up button is not disabled now
+    expect(signup_button.attributes().disabled).toBe(undefined);
+    expect(wrapper.vm.pending).toBe(false)
+
+    await signup_button.vm.$listeners.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.vm.has_error).toBe(true)
+    const err_msg = "user_account with this email already exists."
+    // check that email error message exists and is correct
+    expect(wrapper.vm.email_error).toStrictEqual([err_msg])
+  })
+
+  it('second signup success test', async () => {
+    /*
+    check that we can signup for a second user
+    after signing after the first user (this test is 
+    important as we had a bug once preventing more
+    than one user signup)
+    */
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    await sleep(1000);
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+    expect(store.getters.authenticated).toBe(false)
+    const new_user = new User()
+
+    wrapper.vm.email = new_user.email
+    wrapper.vm.first_name = new_user.first_name
+    wrapper.vm.last_name = new_user.last_name
+    wrapper.vm.password = new_user.password
+    wrapper.vm.re_password = new_user.password
+    
+    // wait for vuejs component to update
+    await wrapper.vm.$nextTick()
+  
+    expect(wrapper.vm.allow_signup).toBe(true);
+    console.log("SIGNUP-ATTR", signup_button)
+    // make sure the sign up button is not disabled now
+    expect(signup_button.attributes().disabled).toBe(undefined);
+    expect(wrapper.vm.pending).toBe(false)
+
+    await signup_button.vm.$listeners.click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.pending).toBe(true)
+    // wait for the sign up axios request to complete
+    while (wrapper.vm.pending) { await sleep(100); }
+    await wrapper.vm.$nextTick()
+
+    const formdata = {
+      email: new_user.email,
+      first_name: new_user.first_name,
+      last_name: new_user.last_name,
+      password: new_user.password,
+      re_password: new_user.password,
+    }
+
+    const event_data = wrapper.emitted('open-login')
+    // console.log('EVENT', event_data)
+    expect(event_data).toStrictEqual([[formdata]])
+    console.log('SIGNUP COMPLETE', formdata)
+    signed_up = true;
+
+    expect(store.getters.authenticated).toBe(false)
+  })
+
+  it('duplicate email failure mismatch test', async () => {
+    /*
+    check that signing up with the same email only
+    after the previous signup test fails 
+    (as we cannot sign up with the same email twice)
+    */
+    const wrapper = mount(SignUp, {
+      store, localVue,
+      //specify custom components
+      stubs: stubs
+    })
+
+    const signup_button = wrapper.find('#signup');
+    expect(signup_button.exists()).toBe(true);
+    expect(signup_button.attributes().disabled).toBe('true');
+    const new_user = new User();
+
+    // set the form data variables
+    wrapper.vm.email = user.email
+    wrapper.vm.first_name = new_user.first_name
+    wrapper.vm.last_name = new_user.last_name
+    wrapper.vm.password = new_user.password
+    wrapper.vm.re_password = new_user.password
     
     // wait for vuejs component to update
     await wrapper.vm.$nextTick()
