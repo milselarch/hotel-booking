@@ -151,11 +151,23 @@ describe('Home.vue Test', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.allow_search).toBe(true)
 
+    const search_button = wrapper.find('#search-button');
+    expect(search_button.exists()).toBe(true);
+    // make sure we are able to press the search button at first
+    expect(search_button.attributes().disabled).not.toBe('disabled');
+
     // attempt to search on the correct endpoint
     const search_started = wrapper.vm.begin_search()
     expect(search_started).toBe(true)
+    await wrapper.vm.$nextTick()
+
     // wait for the backend request to complete
-    while (wrapper.vm.is_loading) { await sleep(100); }
+    while (wrapper.vm.is_loading) {
+      // make sure we are not able press the search button
+      expect(search_button.attributes().disabled).toBe('disabled');
+      expect(wrapper.vm.allow_search).toBe(false)
+      await sleep(100); 
+    }
     expect(wrapper.vm.is_loading).toBe(false)
     await wrapper.vm.$nextTick()
 
