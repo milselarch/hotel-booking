@@ -289,6 +289,61 @@ describe('Home.vue Test', () => {
     expect(hotels).toStrictEqual(loaded_hotels)
   })
 
+  it('hotels load check', async () => {
+    /*
+    Check that the hotels retrieved in our hotel response
+    to match the names shown in the hotel cards
+    */
+    wrapper = saved_wrapper
+    expect(saved_wrapper.vm.destination_input).toBe(france_dest)
+    expect(wrapper.vm.destinations_loaded).toBe(true)
+
+    // wait for price search apu to complete
+    const search_stamp = wrapper.vm.search_stamp
+    while (wrapper.vm.price_search_loading[search_stamp]) {
+      await sleep(100);
+    }
+
+    const hotels = wrapper.vm.hotels;
+    // load all the hotels onto the frontend
+    wrapper.vm.render_more_hotels(hotels.length);
+    await wrapper.vm.$nextTick()
+
+    const loaded_hotels = wrapper.vm.hotels_loaded
+    const cards_holder_id ='#hotel-cards'
+    const cards_holder = wrapper.find(cards_holder_id)
+    const cards_holder_elem = cards_holder.element
+    let card_elems = $(cards_holder_elem).find('div.card')    
+    // verify all hotel cards are loaded
+    expect(card_elems.length).toBeGreaterThan(0)
+    expect(loaded_hotels.length).toBe(hotels.length)
+
+    // map hotel names to hotel ids
+    const hotel_name_mapping = {}
+    for (let k=0; k<hotels.length; k++) {
+      const hotel = hotels[k]
+      hotel_name_mapping[hotel.name] = hotel.id
+    }
+
+    /*
+    for every hotel card, check that the hotel name
+    matches the some hotel in our hotel json response
+    */
+    const hotel_names = [];
+    for (let k=0; k<card_elems.length; k++) {
+      const card_elem = card_elems[k]
+      const title_elem = $(card_elem).find('p.title')
+      const hotel_name = $(title_elem).text().trim()
+
+      // console.log('HOTCARD', k, hotel_name, hotel_price, card_elem)
+      const hotel_id = hotel_name_mapping[hotel_name]
+      expect(hotel_id).not.toBe(undefined)
+      expect(hotel_names).not.toContain(hotel_name)
+      hotel_names.push(hotel_name)
+    }
+  }) 
+
+
   it('price load check', async () => {
     /*
     Check that price info (loaded asynchronously to hotel info)
