@@ -136,10 +136,13 @@ class AuthRequester {
     } catch (access_error) {
       // console.log('TYPOPO', typeof access_error)
       const response = access_error.response;
-      let status_code = -1
-      if (response !== undefined) { 
-        status_code = response.status;
+      if (response === undefined) {
+        // rethrow the error if its not an axios error
+        // that contains a response property
+        throw access_error
       }
+
+      const status_code = response.status;
       // console.warn('FAIL STATUS CODE', status_code)
 
       if (status_code === 401) {
