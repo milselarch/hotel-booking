@@ -208,9 +208,18 @@ import HotelCard from '@/components/HotelCard.vue'
 import { faL } from '@fortawesome/free-solid-svg-icons'
 import router from '../router'
 
+const READ_UTC_OFFSET = () => {
+  const test_date = new Date()
+  // get timezone offset in minutes from UTC+0
+  const utc_offset = -test_date.getTimezoneOffset();
+  return utc_offset
+}
+
+const UTC_OFFSET = READ_UTC_OFFSET()
 const LOAD_FAIL_MSG = "failed to load hotels\n●︿●";
 const DATE_FORMAT = 'DD/MM/YYYY'
-const MAX_SUGGESTIONS = 50;
+// max number of autocomplete suggestions to show
+const MAX_SUGGESTIONS = 50
 
 const print_error = () => {
   // print to console if we're not running a unit test
@@ -224,6 +233,7 @@ export default {
   LOAD_FAIL_MSG: LOAD_FAIL_MSG,
   DATE_FORMAT: DATE_FORMAT,
   MAX_SUGGESTIONS: MAX_SUGGESTIONS,
+  UTC_OFFSET: UTC_OFFSET,
 
   data () {
     return {
@@ -295,12 +305,31 @@ export default {
     },
 
     format_date(date) {
+      /*
+      Format a date object into a date string with format dd/mm/yyyy
+      OR given an array of 2 date objects, return a date string of
+      the form 'dd/mm/yyyy - dd/mm/yyyy' where the 1st and 2nd dates
+      in the array are formatted 1st and 2nd in the string respectively
+      OR given an empty array, return an empty string
+
+      Note that day, month and year are determined relative to the
+      local time zone and not in UTC
+      */
       console.log('INPUT-DATE', date)
+
       if (date instanceof Date) {
         const moment_date = moment(date).seconds(0).milliseconds(0)
-        const date_str = moment_date.format(DATE_FORMAT);
-        console.log("DATE-STR", date, date_str)
+        const local_date = moment_date.local()
+        const utc_offset = local_date.utcOffset()
+        // refresh the page if local timezone has changed
+        // https://stackoverflow.com/questions/50849770
+        if (utc_offset !== UTC_OFFSET) { 
+          // console.error("OFFSET MISMATCH", utc_offset, UTC_OFFSET)
+          window.location.reload()
+        }
+        const date_str = local_date.format(DATE_FORMAT);
         return date_str
+
       } else if (Array.isArray(date)) {
         assert(date.length <= 2)
         if (date.length === 0) { return '' }
@@ -315,13 +344,41 @@ export default {
     },
 
     parse_date(date_str) {
-      console.log('DATE STR-PARSE', date_str)
+      /*
+      Parse a date string in the dd/mm/yyyy format
+      and return the date object at the start of the day
+      that the dd/mm/yyyy date corresponds to
+
+      Note that if we parse a date like '18/08/20222' and print out
+      the parsed date in singapore you would see it printed
+      as 2022-08-17T16:00:00.000Z
+      (date print format is YYYY-MM-DD T HH:MM:SS:MILLISECONDS) Z
+      The Z means that the date being shown has been formatted
+      into a string using a UTC+0 timezone.
+
+      The fact that the date printed has a day of 17 but the date 
+      string has a day of 18 is not a mistake, because the earlist 
+      date on 18/08/2022 in SG time (UTC+8) is 2022-08-18T00:00:00 
+      SG time, which is actually 2022-08-17T16:00:00 UTC time
+      hence the appearence of it as 2022-08-17T16:00:00.000Z
+
+      Dates have been very annoying to work with
+      */
+      // console.log('DATE STR-PARSE', date_str)
       const test_date = new Date();
+      // get UTC offset (in minutes) of the current timezone
       const offset = test_date.getTimezoneOffset();
-      const utc_date = moment.utc(date_str, DATE_FORMAT)
-      const date = utc_date.utcOffset(offset).toDate();
-      console.log('DATES-PARSE', utc_date.toDate(), date)
-      return date
+      const moment_start_date = moment.utc(date_str, DATE_FORMAT)
+      // offset the date to get the local start date of the day
+      const local_moment_start_date = moment_start_date.add(
+        -UTC_OFFSET, "minutes"
+      )
+      // console.log('M_DATE', m_date, m_date2, offset)
+      const local_start_date = local_moment_start_date.toDate()
+      // const utc_date = moment.utc(date_str, DATE_FORMAT)
+      // const date = utc_date.utcOffset(offset).toDate();
+      // console.log('DATES-PARSE', utc_date.toDate(), date)
+      return local_start_date
     },
 
     should_exclude_date(date) {
@@ -547,9 +604,11 @@ export default {
       }
 
       assert(this.price_search_loading.hasOwnProperty(search_stamp))
+      /*
       if (process.env.NODE_ENV !== 'test') {
         console.log('PRICE_RESP', price_resp)
       }
+      */
 
       const price_data = price_resp.data;
       // const price_data = price_resp.data;
@@ -627,6 +686,7 @@ export default {
       dest_id, dates, num_guests, num_rooms,
       search_stamp
     }) {
+      // asynchronously load hotel price info
       assert(typeof search_stamp === 'number')
       // declare that the price search for the current
       // search stamp is ongoing
@@ -762,8 +822,8 @@ export default {
         // wait for both requests to complete
         let response = await hotel_request;
         const status_code = response.data.status_code
-        console.warn('HOTELS RESPONSE', response)
-        console.log('CODE', status_code)
+        // console.warn('HOTELS RESPONSE', response)
+        // console.log('CODE', status_code)
 
         if (status_code !== 200) {
           throw response.statusText;
@@ -980,6 +1040,14 @@ export default {
           // clear the UI date selection if it doens't
           // meet our requirements
           self.dates = []
+        }
+
+        // get timezone offset in minutes from UTC+0
+        const utc_offset = READ_UTC_OFFSET()
+        if (utc_offset !== UTC_OFFSET) {
+          // refresh the page if local timezone has changed
+          // https://stackoverflow.com/questions/50849770
+          window.location.reload()
         }
       }
     })();

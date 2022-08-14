@@ -17,6 +17,7 @@ import { raw } from 'file-loader'
 import $ from 'jquery'
 import exp from 'constants'
 import { wrap } from 'module'
+import { off } from 'process'
 
 // string fuzzing generator
 const fuzzer = require('fuzzer');
@@ -66,6 +67,9 @@ const load_suggestions = (wrapper) => {
 }
 
 describe('Home.vue Test', () => {
+  // unit tests for the home.vue homepage component
+  // mainly regarding its ability to search destinations,
+  // load hotels details and load hotel prices
   jest.setTimeout(10 * 1000);
   let saved_wrapper, wrapper, store;
   const france_dest = "Gap, France"
@@ -97,128 +101,6 @@ describe('Home.vue Test', () => {
       wrapper = null;
     }
   });
-
-  it('check date formatter', () => {
-    /*
-    verify date formatting and parsing use by datepicker
-    componenet is correct
-    */
-    const date_now = new Date();
-    const stripped_date = new Date(date_now)
-    stripped_date.setUTCHours(0, 0, 0, 0)
-    
-    const date_str = wrapper.vm.format_date(date_now)
-    // regex for date format dd/mm/yyyy
-    const regex = new RegExp('^[0-3][0-9]\/[0-1][0-9]\/[0-9]{4}$');
-    // make sure converted date string has correct format
-    expect(regex.test(date_str)).toBe(true)
-    // make sure the date string that we parse is the same
-    // as the original date object used to create the string
-    const converted_date = wrapper.vm.parse_date(date_str)
-    console.log('CONVERTED DATE', converted_date)
-    console.log('DATE NOW', stripped_date, date_now)
-    // expect(stripped_date).toStrictEqual(converted_date)
-  })
-
-
-  it('check date string parse', () => {
-    /*
-    verify when we feed in a date string created by
-    our format_date method, our parse_date method can
-    return a valid date object
-    */
-    const date_now = new Date();
-    const stripped_date = new Date(date_now)
-    stripped_date.setUTCHours(0, 0, 0, 0)
-    
-    const date_str = wrapper.vm.format_date(date_now)
-    // make sure the date string that we parse is the same
-    // as the original date object used to create the string
-    const converted_date = wrapper.vm.parse_date(date_str)
-    expect(converted_date instanceof Date).toBe(true)
-  })
-
-  it('check guests per room', async () => {
-    // check that if we enter a valid number of guests
-    // into the guests input, and all the other fields are set
-    // that we will be allowed to press the search button
-    // wait for destinations.json to be loaded
-    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
-
-    const dest_path = 'src/assets/destinations_flat.json'
-    const raw_file_data = await fs.readFileSync(dest_path);
-    const file_data = JSON.parse(raw_file_data);
-    const unpack_results = wrapper.vm.unpack_destinations(file_data)
-    const [destination_names, dest_mapping] = unpack_results
-    // select randomly from the list of valid destinations
-    const search_destination = destination_names[
-      Math.floor(Math.random() * destination_names.length)
-    ];
-
-    const search_button = wrapper.find('#search-button');
-    expect(search_button.exists()).toBe(true);
-    // make sure we aren't allowed to press the search button at first
-    expect(search_button.attributes().disabled).toBe('disabled');
-    wrapper.vm.destination_input = search_destination
-
-    const guests_input = wrapper.find('#guests-input')
-    const guests_input_elem = guests_input.element
-
-    for (let k=1; k<=wrapper.vm.max_num_guests; k++) {
-      // https://stackoverflow.com/questions/58009868/
-      guests_input_elem.value = k
-      guests_input.trigger('input')
-      // wait for vue internal state to update
-      await wrapper.vm.$nextTick()
-      const num_guests = wrapper.vm.num_guests
-      // verify data binding of vue data variable
-      expect(num_guests).toBe(k)
-      // make sure we're allowed to search
-      expect(wrapper.vm.allow_search).toBe(true)
-      expect(search_button.attributes().disabled).toBe(undefined);
-    }
-  })
-
-  it('check negative guests per room', async () => {
-    // check that if we enter a negative number of guests
-    // into the guests input, and all the other fields are set
-    // that we will not be allowed to press the search button
-    // wait for desintations.json to be loaded
-    while (!wrapper.vm.destinations_loaded) { await sleep(100); }
-
-    const dest_path = 'src/assets/destinations_flat.json'
-    const raw_file_data = await fs.readFileSync(dest_path);
-    const file_data = JSON.parse(raw_file_data);
-    const unpack_results = wrapper.vm.unpack_destinations(file_data)
-    const [destination_names, dest_mapping] = unpack_results
-    // select randomly from the list of valid destinations
-    const search_destination = destination_names[
-      Math.floor(Math.random() * destination_names.length)
-    ];
-
-    const search_button = wrapper.find('#search-button');
-    expect(search_button.exists()).toBe(true);
-    // make sure we aren't allowed to press the search button at first
-    expect(search_button.attributes().disabled).toBe('disabled');
-    wrapper.vm.destination_input = search_destination
-
-    const guests_input = wrapper.find('#guests-input')
-    const guests_input_elem = guests_input.element
-
-    for (let k=-100; k<=0; k++) {
-      // https://stackoverflow.com/questions/58009868/
-      guests_input_elem.value = k
-      guests_input.trigger('input')
-      // wait for vue internal state to update
-      await wrapper.vm.$nextTick()
-      const num_guests = wrapper.vm.num_guests
-      // verify data binding of vue data variable
-      expect(num_guests).toBe(k)
-      // make sure we're allowed to search
-      expect(wrapper.vm.allow_search).toBe(false)
-      expect(search_button.attributes().disabled).toBe('disabled');
-    }
-  })
 
   it('check hotel search unresponsive text', async () => {
     // this test checks that we fail to load hotels
@@ -384,8 +266,6 @@ describe('Home.vue Test', () => {
     const all_price_mappings = wrapper.vm.price_mapping
     console.log('PRICE_MAP', all_price_mappings)
     const price_mapping = all_price_mappings[search_stamp]
-    return true
-
     expect(price_mapping).not.toBe(undefined)
 
     // load all the hotels onto the frontend
@@ -424,7 +304,7 @@ describe('Home.vue Test', () => {
       const str_hotel_price = $(price_elem).text().trim().slice(4)
       const hotel_price = Number(str_hotel_price)
 
-      console.log('HOTCARD', k, hotel_name, hotel_price, card_elem)
+      // console.log('HOTCARD', k, hotel_name, hotel_price, card_elem)
       const hotel_id = hotel_name_mapping[hotel_name]
       expect(hotel_id).not.toBe(undefined)
       expect(typeof hotel_id).toBe('string')

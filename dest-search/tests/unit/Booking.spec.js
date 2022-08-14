@@ -112,7 +112,7 @@ describe('Booking Test', () => {
         persistent[destination_id_key] = "my_destination_id_key"
         persistent[hotel_id_key] = "my_hotel_id_key"
         persistent[roomprice_key] = 100
-        console.log(store_arr)
+        // console.log(store_arr)
         store.hotUpdate(JSON.stringify(store_arr))
 
         Booking.primaryGuestRadioButton = "Nope";

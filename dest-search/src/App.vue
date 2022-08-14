@@ -326,6 +326,15 @@ export default {
       const logout_request = requester.post(
         'token-logout', {
           refresh_token: refresh_token
+        }
+      ).catch(error => {
+        console.error('LOGOUT REQUEST FAILED', error)
+      })
+
+      /*
+      const logout_request = requester.post(
+        'token-logout', {
+          refresh_token: refresh_token
         }, {
           withCredentials: true, 
           headers: {
@@ -336,6 +345,7 @@ export default {
       ).catch(error => {
         console.error('LOGOUT REQUEST FAILED', error)
       })
+      */
 
       this.logout_requests.push(logout_request)
       console.log('LOGOUT-REQUESTS', this.logout_requests)

@@ -131,11 +131,16 @@ class AuthRequester {
 
     try {
       const request = request_func(endpoint, data, options)
-      return await request
+      const response = await request
+      return response
     } catch (access_error) {
-      console.warn('FAIL ERR', access_error)
-      const status_code = access_error.response.status
-      console.warn('FAIL STATUS CODE', status_code)
+      // console.log('TYPOPO', typeof access_error)
+      const response = access_error.response;
+      let status_code = -1
+      if (response !== undefined) { 
+        status_code = response.status;
+      }
+      // console.warn('FAIL STATUS CODE', status_code)
 
       if (status_code === 401) {
         let refresh_success = false
