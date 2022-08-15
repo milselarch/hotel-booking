@@ -1,9 +1,15 @@
 # A+ Ascenda Hotel Booking Web App
 
-50.003 hotel booking 1D project website project for Ascenda hotels (C2G1).  
+50.003 hotel booking 1D project website project for Ascenda hotels (C02G01).  
 Created using VueJS on the frontend, django for the backend, and MySQL as our database. 
 
 ![Screenshot from 2022-08-13 01-39-38](https://user-images.githubusercontent.com/11241733/184531792-60043299-2f72-4f4d-80ae-1bfc58fae95f.png)
+
+Team members:  
+* Lim Thian Yew - [milselarch](https://github.com/milselarch)
+* Koh Aik Hong - [ffeew](https://github.com/ffeew)
+* Kim Si Eun - [joenkim](https://github.com/joenkim)
+* Baarath S/O Sellathurai - [joebaarath](https://github.com/joebaarath)
 
 ## Backend virtualenv install setup (Ubuntu 20.04)
 
