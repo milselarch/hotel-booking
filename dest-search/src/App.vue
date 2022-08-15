@@ -189,7 +189,6 @@ export default {
   name: 'app',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App',
       modal_active: false,
       login_modal_active: false,
       signup_modal_active: false,
