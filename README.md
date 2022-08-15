@@ -37,9 +37,10 @@ source venv/bin/activate
 
 
 ## Backend virtualenv install setup (Windows)
+Pre-Requiste: Ensure Python 3.10 is installed from https://www.python.org/downloads/<br>
+Pre-Requiste: Add Python to PATH environment variables in Windows
 
 ```shell
-# Pre-Requiste: Ensure Python 3.10 is installed
 # go to project folder to setup virtual env
 python -m venv venv
 venv\scripts\activate
