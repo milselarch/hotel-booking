@@ -72,11 +72,11 @@ nvm use 14.19.0
 1) cd to "dest-search" and run `npm install`  
 2) to run the frontend code locally use `npm run dev`  
 	Note that to use the google maps api (used in the HotelInfo page to show hotel location) in the website you will need to provide
-	google map API key credentials in a .env config file to be located in `dest-search`.
-	Refer to dest-searc/.env.example for an example of how the config file should look like.  
+	google map API key credentials in a `.env` config file to be located in `dest-search`.
+	Refer to `dest-search/.env.example` for an example of how the config file should look like.  
 	
-3) to run the 56 frontend unit tests in `dest-search/tests/unit` run `npm run test:unit`
-4) to build the frontend code for production deployment run `npm run build-cli`
+3) to run the 56 frontend unit tests in `dest-search/tests/unit`, run `npm run test:unit`
+4) to build the frontend code for production deployment, run `npm run build-cli`
 5) You can deploy to firebase static hosting after running `npm run build-cli` (and after setting up firebase config in your project) by executing `firebase deploy`	
 
 ## SQL Version Control Flow:
