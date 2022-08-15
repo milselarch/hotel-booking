@@ -3,6 +3,7 @@
 50.003 hotel booking 1D project website project for Ascenda hotels (C02G01).  
 Created using VueJS on the frontend, django for the backend, and MySQL as our database. 
 
+Live Web App: https://hotels.milselarch.com/
 ![Screenshot from 2022-08-13 01-39-38](https://user-images.githubusercontent.com/11241733/184531792-60043299-2f72-4f4d-80ae-1bfc58fae95f.png)
 
 Team members:  
@@ -10,6 +11,8 @@ Team members:
 * Koh Aik Hong - [ffeew](https://github.com/ffeew)
 * Baarath S/O Sellathurai - [joebaarath](https://github.com/joebaarath) and [kingbaarath](https://github.com/kingbaarath)
 * Kim Si Eun - [joenkim](https://github.com/joenkim)
+
+# Webapp Installation Instructions
 
 ## Backend virtualenv install setup (Ubuntu 20.04)
 
@@ -32,8 +35,7 @@ source venv/bin/activate
 (venv)$ python -m pip install -r requirements.txt
 ```
 
-# DB Install Instructions
-## Fresh DB Install Instructions:
+## Fresh DB Installation Instructions:
 1) Install MySql and Workbench (Products: MySQL Server, MySQL Workbench)  
 	and Setup Root password (any password you like)  
 	Install Link: https://dev.mysql.com/downloads/windows/installer/8.0.html  
