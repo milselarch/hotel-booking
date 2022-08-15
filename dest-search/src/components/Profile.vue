@@ -176,7 +176,6 @@ export default {
       destination_region: null,
       hotel_name: null,
       room_type: null,
-      booking_id: null,
       check_in_date: null,
       check_out_date: null,
       number_of_rooms: null,
