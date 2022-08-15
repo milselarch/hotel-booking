@@ -82,7 +82,9 @@ To run the backend code, go to "hotel_booking_django" and run `python manage.py 
 (requires db install instructions and `python manage.py migrate` to have been run already, and for backend .env config file to be setup)  
 
 ## Elaboration on django backend `hotel_booking_django/.env` config file  
-The secret key, email and field hash keys are random generated strings, so if you're setting up the backend for the first time you can just assign randomly generated strings to those config fields. The email and field hash keys are used for ensuring secure encryption and decryption of PII info, while the django secret key is used to ensure secure cryptographic signing by the backend.   
+The secret key is a randomly generated string, while the field encryption key and hash keys are randomly generated 32 byte hexadecimal strings. The email and field hash keys are used for ensuring secure encryption and decryption of PII info, while the django secret key is used to ensure secure cryptographic signing by the backend. If you're setting up the backend for the first time you can use the `env generator.py` under hotel_booking_django to generate the .env file. 
+
+To use `env generator.py`, first open the file and fill in your MySQL database credentials. Next, simply run the file to generate the .env file.
 
 ## Frontend node environment setup (Ubuntu 20.04)
 [instructions were based on this tutorial](https://tecadmin.net/how-to-install-nvm-on-debian-10/)
