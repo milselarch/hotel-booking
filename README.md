@@ -53,8 +53,13 @@ FLUSH PRIVILEGES;
 
 DONE.
 
+Before running the backend, make sure that you provide the environment secret key, email + field hash keys and DB user password in the `.env` config file that should be located in `hotel_booking_django/.env`. For an example of how the backend .env config file should look like do refer to [hotel_booking_django/.env.example](https://github.com/milselarch/hotel-booking/blob/master/hotel_booking_django/.env.example)  
+
 To run the backend code, go to "hotel_booking_django" and run `python manage.py runserver`  
-(requires db install instructions and `python manage.py migrate` to have been run already
+(requires db install instructions and `python manage.py migrate` to have been run already, and for backend .env config file to be setup)  
+
+## Elaboration on django backend `hotel_booking_django/.env` config file  
+The secret key, email and field hash keys are random generated strings, so if you're setting up the backend for the first time you can just assign randomly generated strings to those config fields. The email and field hash keys are used for ensuring secure encryption and decryption of PII info, while the django secret key is used to ensure secure cryptographic signing by the backend.   
 
 ## Frontend node environment setup (Ubuntu 20.04)
 [instructions were based on this tutorial](https://tecadmin.net/how-to-install-nvm-on-debian-10/)
@@ -73,7 +78,7 @@ nvm use 14.19.0
 2) to run the frontend code locally use `npm run dev`  
 	Note that to use the google maps api (used in the HotelInfo page to show hotel location) in the website you will need to provide
 	google map API key credentials in a `.env` config file to be located in `dest-search`.
-	Refer to `dest-search/.env.example` for an example of how the config file should look like.  
+	Refer to [dest-search/.env.example](https://github.com/milselarch/hotel-booking/blob/master/dest-search/.env.example) for an example of how the config file should look like.  
 	
 3) to run the 56 frontend unit tests in `dest-search/tests/unit`, run `npm run test:unit`
 4) to build the frontend code for production deployment, run `npm run build-cli`
