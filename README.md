@@ -2,8 +2,7 @@
 
 ![Screenshot from 2022-08-13 01-39-38](https://user-images.githubusercontent.com/11241733/184531792-60043299-2f72-4f4d-80ae-1bfc58fae95f.png)
 
-# Backend virtualenv setup
-## Ubuntu 20.04
+## Backend virtualenv install setup (Ubuntu 20.04)
 
 ```shell
 sudo apt-get install python3.10
@@ -53,6 +52,32 @@ FLUSH PRIVILEGES;
 5) cd to "hotel_booking_django" and run `python manage.py migrate`
 
 DONE.
+
+To run the backend code, go to "hotel_booking_django" and run `python manage.py runserver`  
+(requires db install instructions and `python manage.py migrate` to have been run already
+
+## Frontend node environment setup (Ubuntu 20.04)
+[instructions were based on this tutorial](https://tecadmin.net/how-to-install-nvm-on-debian-10/)
+
+Run the following to install and use node v14.19.0 on your system
+```bash
+sudo apt install curl 
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+nvm install 14.19.0 
+nvm use 14.19.0  
+```
+
+## Frontend setup instructions
+
+1) cd to "dest-search" and run `npm install`  
+2) to run the frontend code locally use `npm run dev`  
+	Note that to use the google maps api (used in the HotelInfo page to show hotel location) in the website you will need to provide
+	google map API key credentials in a .env config file to be located in `dest-search`.
+	Refer to dest-searc/.env.example for an example of how the config file should look like.  
+	
+3) to run the 56 frontend unit tests in `dest-search/tests/unit` run `npm run test:unit`
+4) to build the frontend code for production deployment run `npm run build-cli`
+5) You can deploy to firebase static hosting after running `npm run build-cli` (and after setting up firebase config in your project) by executing `firebase deploy`	
 
 ## SQL Version Control Flow:
 1) After any "models.py" changes are made in django,  
