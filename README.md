@@ -78,9 +78,9 @@ nvm use 14.19.0
 2) to run the frontend code locally use `npm run dev`  
 	Note that to use the google maps api (used in the HotelInfo page to show hotel location) in the website you will need to provide
 	google map API key credentials in a `.env` config file to be located in `dest-search`.
-	Refer to [dest-search/.env.example](https://github.com/milselarch/hotel-booking/blob/master/dest-search/.env.example) for an example of how the config file should look like.  
+	Refer to [dest-search/.env.example](https://github.com/milselarch/hotel-booking/blob/master/dest-search/.env.example) for an example of how the config file should look like. Also note that you will have to whitelist your google maps api key on the google maps setup site for the various domains that you intend to run your website on as well (such as localhost:8080, hotels.milselarch.com etc. etc.)
 	
-3) to run the 56 frontend unit tests in `dest-search/tests/unit`, run `npm run test:unit`
+3) to run the 56 frontend unit tests in `dest-search/tests/unit`, run `npm run test:unit`. Note that many of the tests require that the backend server also be running at `http://localhost:8000`, so make sure that the backend is running there first before executing the frontend unit tests.
 4) to build the frontend code for production deployment, run `npm run build-cli`
 5) You can deploy to firebase static hosting after running `npm run build-cli` (and after setting up firebase config in your project) by executing `firebase deploy`	
 
