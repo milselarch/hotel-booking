@@ -35,6 +35,17 @@ source venv/bin/activate
 (venv)$ python -m pip install -r requirements.txt
 ```
 
+
+## Backend virtualenv install setup (Windows)
+
+```shell
+# Pre-Requiste: Ensure Python 3.10 is installed
+# go to project folder to setup virtual env
+python -m venv venv
+venv\scripts\activate
+pip install -r requirements.txt
+```
+
 ## Fresh DB Installation Instructions:
 1) Install MySql and Workbench (Products: MySQL Server, MySQL Workbench)  
 	and Setup Root password (any password you like)  
