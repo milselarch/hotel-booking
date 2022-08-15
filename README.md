@@ -8,8 +8,8 @@ Created using VueJS on the frontend, django for the backend, and MySQL as our da
 Team members:  
 * Lim Thian Yew - [milselarch](https://github.com/milselarch)
 * Koh Aik Hong - [ffeew](https://github.com/ffeew)
+* Baarath S/O Sellathurai - [joebaarath](https://github.com/joebaarath) and [kingbaarath](https://github.com/kingbaarath)
 * Kim Si Eun - [joenkim](https://github.com/joenkim)
-* Baarath S/O Sellathurai - [joebaarath](https://github.com/joebaarath)
 
 ## Backend virtualenv install setup (Ubuntu 20.04)
 
