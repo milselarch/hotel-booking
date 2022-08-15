@@ -96,7 +96,7 @@ nvm use 14.19.0
 ```
 
 ## Frontend node environment setup (Windows)
-Note: node >v14 may not work as intended. Hence if you have an existing version of nvm, we recommend using windows nvm (https://github.com/coreybutler/nvm-windows) to manage different versions of node easily.
+Note: node versions higher than v14 may not work as intended. Hence if you have a higher version of node, we recommend using windows nvm (https://github.com/coreybutler/nvm-windows) to manage multiple versions of node easily.
 
 #### Option 1: Using Windows NVM (Recommended)
 Do the following to install and use node v14.19.0 on your system
