@@ -1,60 +1,73 @@
 <template>
   <div id="hotel-info">
     <h2 id="name"><b>{{hotelName}}</b></h2>
-    <div id="figures">
-      <b-carousel id="carousel" v-if="check_carousel" :indicator=true indicator-custom indicator-inside=false pause-text="paused" indicator-custom-size="is-medium">
-      <b-carousel-item id="carouselimg" v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
-        <b-image class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
-      </b-carousel-item>
-      <template #indicators="props" v-if="check_carousel">
-          <figure :draggable="false">
-              <img id="gallery" :draggable="false" :src="build_carousel(props.i)" :title="props.i">
-          </figure>
-      </template>
-    </b-carousel>
-    <a target="_blank" :href="`https://maps.google.com/?q=${this.latitude},${this.longitude}`"> <img id="map" :src="build_map(this.latitude, this.longitude)"> </a>
-    </div>
-    
-    <div id="descbox">
-      <div id="description" v-html="sanitised_hotel_details"></div>
-      <div id="amenities" v-if="check_amenities">
-        <p><font size="4rem"><b>Amenities</b></font></p>
-        <ul v-for="(am, key) in this.hotelAmenities" v-bind:key="key">
-          <font-awesome-icon v-show="formatAmenities(key)!=null" icon="fa-solid fa-check" color="green"/><li v-show="formatAmenities(key)!=null">{{formatAmenities(key)}}</li>
-        </ul>
-        <!-- <p>{{hotelAmenities}}</p> -->
+
+    <div id="wrapper">
+      <div id="figures">
+        <b-carousel id="carousel" v-if="check_carousel" :indicator=true indicator-custom indicator-inside=false pause-text="paused" indicator-custom-size="is-medium">
+        <b-carousel-item id="carouselimg" v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
+          <b-image class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
+        </b-carousel-item>
+        <template #indicators="props" v-if="check_carousel">
+            <figure :draggable="false">
+                <img id="gallery" :draggable="false" :src="build_carousel(props.i)" :title="props.i">
+            </figure>
+        </template>
+        </b-carousel>
+        <a 
+          target="_blank" 
+          :href="`https://maps.google.com/?q=${this.latitude},${this.longitude}`"
+          id="maps-view"
+        >
+          <img id="map" :src="build_map(this.latitude, this.longitude)">
+        </a>
       </div>
-    </div>
-    
-    <div id="room-cards">
-      <!-- <p v-if="!check_avail"><font size="+2"><b>No rooms available. Try changing specifications.</b></font></p> -->
-      <square id="spinner" v-show="is_loading"></square>
-      <p>{{status}}</p>
-      <div
-        class="card" 
-        v-for="(room, key) in roomList.rooms" v-bind:key="key"
-        @click="select_room(room)" style="cursor:pointer;"
-      >
-        <div class="card-image">
-          <img :src="build_image(room)"
-          class="card-image" 
-          @error="replace_default_image"
-          alt="Room image not found">
-        </div>
-        <div id="room-details">
-          
-          
-          <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
-          <p id="breakfast"><b>{{ check_breakfast(room) }}</b></p>
-          <div class="card-content">
-            <ul v-for="(am, key) in room.amenities" v-bind:key="key">
-              <li>{{am}}</li>
+      
+      <div id="description-wrapper">
+        <div id="descbox">
+          <div id="description" v-html="sanitised_hotel_details"></div>
+          <div id="amenities" v-if="check_amenities">
+            <p><font size="4rem"><b>Amenities</b></font></p>
+            <ul v-for="(am, key) in this.hotelAmenities" v-bind:key="key">
+              <font-awesome-icon v-show="formatAmenities(key)!=null" icon="fa-solid fa-check" color="green"/><li v-show="formatAmenities(key)!=null">{{formatAmenities(key)}}</li>
             </ul>
+            <!-- <p>{{hotelAmenities}}</p> -->
           </div>
-          <div class="price" style="font-size:1.8em">SGD <b>{{ room.price }}</b></div>
         </div>
+        
+        <div id="room-cards">
+          <!-- <p v-if="!check_avail"><font size="+2"><b>No rooms available. Try changing specifications.</b></font></p> -->
+          <square id="spinner" v-show="is_loading"></square>
+          <p>{{status}}</p>
+          <div
+            class="card" 
+            v-for="(room, key) in roomList.rooms" v-bind:key="key"
+            @click="select_room(room)" style="cursor:pointer;"
+          >
+            <div class="card-image">
+              <img :src="build_image(room)"
+              class="card-image" 
+              @error="replace_default_image"
+              alt="Room image not found">
+            </div>
+            <div id="room-details">
+              
+              
+              <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
+              <p id="breakfast"><b>{{ check_breakfast(room) }}</b></p>
+              <div class="card-content">
+                <ul v-for="(am, key) in room.amenities" v-bind:key="key">
+                  <li>{{am}}</li>
+                </ul>
+              </div>
+              <div class="price" style="font-size:1.8em">SGD <b>{{ room.price }}</b></div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
+
   </div>
 </template>
 
@@ -280,12 +293,23 @@ h2#name{
   font-size: 4rem;
   // margin-bottom: 1rem;
 }
-#figures{
+
+div#wrapper {
   display: flex;
-  width: 80%;
-  margin: auto;
-  justify-content: space-around;
+  justify-content: center;
+  margin-left: 10%;
+  margin-right: 10%;
 }
+
+div#figures{
+  display: flex;
+  width: fit-content;
+  /* margin: auto; */
+  margin-right: none;
+  justify-content: space-around;
+  flex-direction: column;
+}
+
 #carousel {
   // margin: auto;
   margin-bottom: 3rem;
@@ -318,17 +342,20 @@ h2#name{
 }
 
 div#descbox {
-  display: flex;
-  width: 80%;
-  justify-content: center;
-  margin: auto;
-  border-top: solid;
+  /* display: flex; */
+  margin: 0px;
+  width: fit-content;
+  display: block;
 }
 div#description {
-  width: 70%;
-  margin-top: 3rem;
-  text-align: justify;
+  margin-top: 0rem;
+  text-align: left;
   padding-left: 2rem;
+  max-width: 40rem;
+
+  & > p {
+    margin-top: 1rem !important;
+  }
 }
 div#amenities {
   padding: 1.5rem;
@@ -351,7 +378,9 @@ div#amenities {
 }
 div#room-cards {
   padding: 5rem;
-  margin-top: 5rem;
+  margin-top: 2rem;
+  margin-left: 2rem;
+  margin-right: 2rem;
   background-color: rgb(255, 248, 233);
 
   display: flex;
@@ -401,4 +430,9 @@ a {
   margin: 0;
   height: fit-content;
 }
+
+a#maps-view {
+  width: fit-content;
+}
+
 </style>

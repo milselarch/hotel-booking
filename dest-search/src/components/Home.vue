@@ -1,171 +1,176 @@
 <template>
   <div id="home">
-    <div id="front-cover">
-      <div class="description-wrapper">
-        <div class="description">
-          <h1>The Bestest Hotels in the Multiverse</h1>
-          <p id="short-info">
-            <span>
-              <!-- Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
-              both veterans of the lifestyle and loyalty space, have 
-              found a way to credit customers up to ten times the volume 
-              of miles that can be earned elsewhere. That is for booking 
-              the same hotel at the same or similar rates. -->
-              Use Ascenda's white label UIs and content aggregation hub 
-              to deploy a hassle-free, OTA-level travel booking experience 
-              for your rewards program.
-            </span>
-          </p>
+    <div id="front-wrapper">
+      <div id="front-cover">
+        <div class="description-wrapper">
+          <div class="description">
+            <h1>The Bestest Hotels in the Multiverse</h1>
+            <p id="short-info">
+              <span>
+                <!-- Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
+                both veterans of the lifestyle and loyalty space, have 
+                found a way to credit customers up to ten times the volume 
+                of miles that can be earned elsewhere. That is for booking 
+                the same hotel at the same or similar rates. -->
+                Use Ascenda's white label UIs and content aggregation hub 
+                to deploy a hassle-free, OTA-level travel booking experience 
+                for your rewards program.
+              </span>
+            </p>
 
-          <div class="buttons" v-show="!authenticated">
-            <b-button 
-              type="is-dark" id="login"
-              @click="open_login()"
-            >
-              Login
-            </b-button>
-            <b-button 
-              type="is-dark" id="signup"
-              @click="open_signup()"
-            >
-              Sign Up
-            </b-button>
+            <div class="buttons" v-show="!authenticated">
+              <b-button 
+                type="is-dark" id="login"
+                @click="open_login()"
+              >
+                Login
+              </b-button>
+              <b-button 
+                type="is-dark" id="signup"
+                @click="open_signup()"
+              >
+                Sign Up
+              </b-button>
+            </div>
           </div>
+        </div>
+
+        <div class="search-options">
+          <section>
+            <b-field class="searchbox">
+              <b-field>
+                <b-autocomplete
+                  id="dest_search_field"
+                  v-model="destination_input"
+                  :data="filtered_search_matches"
+                  placeholder="Search Destination e.g. tioman island"
+                  icon="search-location"
+                  :disabled="is_loading"
+                  :clearable="!is_loading"
+                  @select="option => selected = option">
+                  <template #empty>{{ search_empty_message }}</template>
+                </b-autocomplete>
+              </b-field>
+            </b-field>
+
+            <b-field 
+              :type="{ 'is-danger': !(
+                rooms_valid && is_valid_guests(num_guests)
+              )}" expanded
+            >
+              <b-field 
+                id="rooms-field" expanded class="custom-label"
+                :disabled="is_loading"
+              >
+                <div class="label-header">
+                  <div class="line"></div>
+                  <p>Rooms</p>
+                  <div class="line"></div>
+                </div>
+
+                <b-select
+                  placeholder="Rooms" icon="door-closed"
+                  expanded id="room-selector" v-model="num_rooms"
+                  :disabled="is_loading"
+                >
+                  <option 
+                    v-for="(num_rooms, index) in allowed_room_choices"
+                    v-bind:key="index" :value="num_rooms"
+                  >
+                    {{ num_rooms }}
+                  </option>
+                </b-select>
+              </b-field>
+
+              <div class="mid-buffer"></div>
+
+              <b-field 
+                id="guests-field" expanded class="custom-label"
+                :type="num_guests_has_error ? 'is-danger': 'text'"
+                :message="guests_validation_error"
+              >
+                <div class="label-header">
+                  <div class="line"></div>
+                  <p>Guests per room</p>
+                  <div class="line"></div>
+                </div>
+
+                <b-input placeholder="Guests"
+                  label="test" ref="guests_input"
+                  type="number" icon="user" id="guests-input"
+                  v-model.number="num_guests"
+                  :use-html5-validation="false"
+
+                  min="1" :max="max_num_guests" default="1"
+                  pattern="[0-9]+" required
+                  :disabled="is_loading"
+                >
+                </b-input>
+              </b-field>
+
+            </b-field>
+
+
+            <!--
+            <b-field class="searchbox" label="Name">
+              <b-input value="Kevin Garvey"></b-input>
+            </b-field>
+            -->
+
+            <b-field>
+              <b-datepicker
+                placeholder="Select check in and checkout dates"
+                v-model="dates" 
+                icon="calendar"
+                :date-formatter="format_date"
+                :date-parser="parse_date"
+                :icon-right="dates_are_valid ? 'check': ''"
+                :unselectable-dates="should_exclude_date"
+                :disabled="is_loading"
+                :mobile-native="false"
+                range>
+              </b-datepicker>
+            </b-field>
+
+            <b-button
+              id="search-button"
+              type="is-dark" expanded
+              @click.native="begin_search"
+              :disabled="!allow_search || is_loading"
+            > Search
+            </b-button>
+
+            <!--
+            {{ [num_guests] }}
+
+            <b-button @click="fast_forward_date"> 
+              fast foward 1 day
+            </b-button>
+
+            <br/>
+            {{ dates }}
+            <br/>
+            {{ current_date }}
+            -->
+          </section>
         </div>
       </div>
 
-      <div class="search-options">
-        <section>
-          <b-field class="searchbox">
-            <b-field>
-              <b-autocomplete
-                id="dest_search_field"
-                v-model="destination_input"
-                :data="filtered_search_matches"
-                placeholder="Search Destination e.g. tioman island"
-                icon="search-location"
-                :disabled="is_loading"
-                :clearable="!is_loading"
-                @select="option => selected = option">
-                <template #empty>{{ search_empty_message }}</template>
-              </b-autocomplete>
-            </b-field>
-          </b-field>
+      <hr/>
 
-          <b-field 
-            :type="{ 'is-danger': !(
-              rooms_valid && is_valid_guests(num_guests)
-            )}" expanded
-          >
-            <b-field 
-              id="rooms-field" expanded class="custom-label"
-              :disabled="is_loading"
-            >
-              <div class="label-header">
-                <div class="line"></div>
-                <p>Rooms</p>
-                <div class="line"></div>
-              </div>
-
-              <b-select
-                placeholder="Rooms" icon="door-closed"
-                expanded id="room-selector" v-model="num_rooms"
-                :disabled="is_loading"
-              >
-                <option 
-                  v-for="(num_rooms, index) in allowed_room_choices"
-                  v-bind:key="index" :value="num_rooms"
-                >
-                  {{ num_rooms }}
-                </option>
-              </b-select>
-            </b-field>
-
-            <div class="mid-buffer"></div>
-
-            <b-field 
-              id="guests-field" expanded class="custom-label"
-              :type="num_guests_has_error ? 'is-danger': 'text'"
-              :message="guests_validation_error"
-            >
-              <div class="label-header">
-                <div class="line"></div>
-                <p>Guests per room</p>
-                <div class="line"></div>
-              </div>
-
-              <b-input placeholder="Guests"
-                label="test" ref="guests_input"
-                type="number" icon="user" id="guests-input"
-                v-model.number="num_guests"
-                :use-html5-validation="false"
-
-                min="1" :max="max_num_guests" default="1"
-                pattern="[0-9]+" required
-                :disabled="is_loading"
-              >
-              </b-input>
-            </b-field>
-
-          </b-field>
-
-
-          <!--
-          <b-field class="searchbox" label="Name">
-            <b-input value="Kevin Garvey"></b-input>
-          </b-field>
-          -->
-
-          <b-field>
-            <b-datepicker
-              placeholder="Select check in and checkout dates"
-              v-model="dates" 
-              icon="calendar"
-              :date-formatter="format_date"
-              :date-parser="parse_date"
-              :icon-right="dates_are_valid ? 'check': ''"
-              :unselectable-dates="should_exclude_date"
-              :disabled="is_loading"
-              :mobile-native="false"
-              range>
-            </b-datepicker>
-          </b-field>
-
-          <b-button
-            id="search-button"
-            type="is-dark" expanded
-            @click.native="begin_search"
-            :disabled="!allow_search || is_loading"
-          > Search
-          </b-button>
-
-          <!--
-          {{ [num_guests] }}
-
-          <b-button @click="fast_forward_date"> 
-            fast foward 1 day
-          </b-button>
-
-          <br/>
-          {{ dates }}
-          <br/>
-          {{ current_date }}
-          -->
-        </section>
+      <div 
+        v-bind:class="{ bland: is_destination_valid }"
+        id="hotel-load-status"
+      >
+        <div class="blur-background"></div>
+        <div id="status" v-show="true">
+          <p id="status-text">{{ status_text }}</p>
+          <square id="spinner" v-show="is_loading"></square>
+          <p id="search-params" v-show="search_success"
+          >{{ search_params_info }}</p>
+        </div>
       </div>
 
-    </div>
-
-    <div 
-      v-bind:class="{ bland: is_destination_valid }"
-      id="hotel-load-status"
-    >
-      <div id="status" v-show="true">
-        <p id="status-text">{{ status_text }}</p>
-        <square id="spinner" v-show="is_loading"></square>
-        <p id="search-params" v-show="search_success"
-        >{{ search_params_info }}</p>
-      </div>
     </div>
 
     <div
@@ -1296,6 +1301,25 @@ div.label-header {
   }
 }
 
+hr {
+  background-color: #444;
+  margin: 0px;
+}
+
+div#front-wrapper {
+  background-image: url(
+    "../assets/alena-aenami-serenity-1k.jpg"
+  );
+  & div.blur-background {
+    width: 100%;
+    backdrop-filter: grayscale(1);
+    position: absolute;
+    /* z-index: 100; */
+    opacity: 0.85;
+    filter: grayscale(1);
+    height: 100%;  }
+}
+
 div#front-cover {
   display: flex;
   flex-direction: row;
@@ -1305,10 +1329,6 @@ div#front-cover {
   padding-left: 14%;
   padding-right: 14%;
   width: 100%;
-  
-  background-image: url(
-    "../assets/alena-aenami-serenity-1k.jpg"
-  );
 
   @media screen and (max-width: 1024px) {
     padding-top: 2.5rem;
@@ -1457,8 +1477,12 @@ div#hotel-cards {
 }
 
 div#hotel-load-status {
-  padding: 2rem;
-  background-color: #f3eee0;
+  /* backdrop-filter: sepia(0.8); */
+  backdrop-filter: grayscale(0.5);
+
+  & div.blur-background {
+    background-color: #f3eee0;
+  }
 
   display: flex;
   justify-content: center;
@@ -1468,6 +1492,8 @@ div#hotel-load-status {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin: 2rem;
+    z-index: 1;
 
     & > p#status-text {
       font-family: 'Babas Neue';
@@ -1499,7 +1525,9 @@ div#hotel-load-status {
   }
 
   &.bland {
-    background-color: #e7e6d5;
+    & div.blur-background {
+      background-color: #e7e6d5;
+    }
   }
 }
 
