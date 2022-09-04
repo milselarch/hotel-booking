@@ -1302,7 +1302,7 @@ div.label-header {
 }
 
 hr {
-  background-color: #444;
+  background-color: #EEE;
   margin: 0px;
 }
 
@@ -1312,11 +1312,10 @@ div#front-wrapper {
   );
   & div.blur-background {
     width: 100%;
-    backdrop-filter: grayscale(1);
+    backdrop-filter: sepia(0.8);
     position: absolute;
     /* z-index: 100; */
-    opacity: 0.85;
-    filter: grayscale(1);
+    opacity: 0.9;
     height: 100%;  }
 }
 
@@ -1457,6 +1456,11 @@ div#hotel-cards {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+
+  @media screen and (max-width: 1024px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
 
   & > .card {
     margin: 1rem;

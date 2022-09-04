@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import BLANK_IMAGE from "@/assets/cityscape.jpg"
+import BLANK_IMAGE from "@/assets/image_not_found.png"
 import assert from 'assert'
 
 export default {
@@ -128,9 +128,15 @@ p#price {
   opacity: 0;
 }
 
+div.media-content {
+  overflow-x: initial;
+}
+
 .card {
   margin: 1rem;
   cursor: pointer;
+  outline: 2px solid #EEE;
+  box-shadow: none;
 
   & img.card-image {
     // preserve aspect ratio for card images

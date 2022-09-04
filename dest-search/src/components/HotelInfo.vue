@@ -1,5 +1,5 @@
 <template>
-  <div id="hotel-info">
+  <div class="hotel-info">
     <h2 id="name"><b>{{hotelName}}</b></h2>
 
     <div id="wrapper">
@@ -34,37 +34,37 @@
             <!-- <p>{{hotelAmenities}}</p> -->
           </div>
         </div>
-        
-        <div id="room-cards">
-          <!-- <p v-if="!check_avail"><font size="+2"><b>No rooms available. Try changing specifications.</b></font></p> -->
-          <square id="spinner" v-show="is_loading"></square>
-          <p>{{status}}</p>
-          <div
-            class="card" 
-            v-for="(room, key) in roomList.rooms" v-bind:key="key"
-            @click="select_room(room)" style="cursor:pointer;"
-          >
-            <div class="card-image">
-              <img :src="build_image(room)"
-              class="card-image" 
-              @error="replace_default_image"
-              alt="Room image not found">
-            </div>
-            <div id="room-details">
-              
-              
-              <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
-              <p id="breakfast"><b>{{ check_breakfast(room) }}</b></p>
-              <div class="card-content">
-                <ul v-for="(am, key) in room.amenities" v-bind:key="key">
-                  <li>{{am}}</li>
-                </ul>
-              </div>
-              <div class="price" style="font-size:1.8em">SGD <b>{{ room.price }}</b></div>
-            </div>
-          </div>
-        </div>
 
+      </div>
+    </div>
+
+    <div id="room-cards">
+      <!-- <p v-if="!check_avail"><font size="+2"><b>No rooms available. Try changing specifications.</b></font></p> -->
+      <square id="spinner" v-show="is_loading"></square>
+      <p>{{status}}</p>
+      <div
+        class="card" 
+        v-for="(room, key) in roomList.rooms" v-bind:key="key"
+        @click="select_room(room)" style="cursor:pointer;"
+      >
+        <div class="card-image">
+          <img :src="build_image(room)"
+          class="card-image" 
+          @error="replace_default_image"
+          alt="Room image not found">
+        </div>
+        <div id="room-details">
+          
+          
+          <p id="roomname" class="title is-4">{{ room.roomNormalizedDescription }}</p>
+          <p id="breakfast"><b>{{ check_breakfast(room) }}</b></p>
+          <div class="card-content">
+            <ul v-for="(am, key) in room.amenities" v-bind:key="key">
+              <li>{{am}}</li>
+            </ul>
+          </div>
+          <div class="price" style="font-size:1.8em">SGD <b>{{ room.price }}</b></div>
+        </div>
       </div>
     </div>
 
@@ -291,6 +291,11 @@ h2#name{
   padding: 1.5rem;
   text-align: center;
   font-size: 4rem;
+
+  & > b {
+    font-family: 'Babas Neue';
+    text-decoration: underline;
+  }
   // margin-bottom: 1rem;
 }
 
@@ -299,6 +304,10 @@ div#wrapper {
   justify-content: center;
   margin-left: 10%;
   margin-right: 10%;
+
+  @media screen and (max-width: 1024px) {
+    flex-direction: column;
+  }
 }
 
 div#figures{
@@ -306,7 +315,6 @@ div#figures{
   width: fit-content;
   /* margin: auto; */
   margin-right: none;
-  justify-content: space-around;
   flex-direction: column;
 }
 
@@ -335,6 +343,11 @@ div#figures{
   vertical-align: bottom;
   // border: solid;
 }
+div#description-wrapper {
+  max-width: 30rem;
+  margin-left: 2rem;
+}
+
 #map{
   // float: right;
   margin: auto;
@@ -350,21 +363,18 @@ div#descbox {
 div#description {
   margin-top: 0rem;
   text-align: left;
-  padding-left: 2rem;
   max-width: 40rem;
-
-  & > p {
-    margin-top: 1rem !important;
-  }
 }
+
 div#amenities {
   padding: 1.5rem;
   padding-left: 2.5rem;
-  margin-top: 3rem;
-  margin-left: 5rem;
-  width: 24rem;
+  margin-top: 2rem;
+  width: 100%;
   min-width: max-content;
-  background-color: rgb(255, 248, 233);
+  /* background-color: rgb(255, 248, 233); */
+  outline: 2px solid #EEE;
+  border-radius: 8px;
   height: max-content;
   line-height: 2rem;
 }
@@ -377,30 +387,36 @@ div#amenities {
   margin-left: 1rem;
 }
 div#room-cards {
+  /*
   padding: 5rem;
   margin-top: 2rem;
   margin-left: 2rem;
   margin-right: 2rem;
   background-color: rgb(255, 248, 233);
-
+  */
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  margin-top: 5rem;
+  margin-bottom: 5rem;
+
 
   & > .card {
-    margin: 1rem;
     width: fit-content;
     height: fit-content;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: left;
+    outline: 2px solid #EEE;
+    box-shadow: none;
+    margin: 16px;
   }
   & img.card-image {
     // preserve aspect ratio for card images
     object-fit: cover;
     height: 17rem;
-    max-width: 18rem;
+    max-width: 20rem;
     // float: left;
   }
 }
@@ -408,7 +424,8 @@ div#room-cards {
   display: flex;
   flex-direction: column;
   max-height: 17rem;
-  width: 33rem;
+  padding-left: 0.5rem;
+  width: 20rem;
 }
 .card-content{
   text-overflow: ellipsis;

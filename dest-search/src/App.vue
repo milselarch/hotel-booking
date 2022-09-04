@@ -409,6 +409,10 @@ export default {
   font-family: 'Open Sans', sans-serif;
 }
 
+div#description > p:not(:first-child) {
+  margin-top: 1rem !important;
+}
+
 body {
   padding: 0px;
   // display: flex;
