@@ -5,7 +5,6 @@ Created using VueJS on the frontend, django for the backend, and MySQL as our da
 
 Live Web App: https://hotels.milselarch.com/
 ![Screenshot from 2022-09-04 11-16-50](https://user-images.githubusercontent.com/11241733/188295604-0eadd752-ce38-43fa-90cc-46d1c72675cd.png)
-![Screenshot from 2022-09-04 11-18-08](https://user-images.githubusercontent.com/11241733/188295608-e462d16a-3421-436d-86de-a635eceffdc6.png)
 ![Screenshot from 2022-09-04 11-05-44](https://user-images.githubusercontent.com/11241733/188295622-aef653e1-35b4-4895-8d09-bf4a1ed17c1f.png)
 
 
