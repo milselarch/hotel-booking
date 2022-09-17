@@ -1,7 +1,7 @@
 # A+ Ascenda Hotel Booking Web App
 
 50.003 hotel booking 1D project website project for Ascenda hotels (C02G01).  
-Created using VueJS on the frontend, django for the backend, and MySQL as our database. 
+Created using VueJS on the frontend, Django for the backend, and MySQL as our database. 
 
 Live Web App: https://hotels.milselarch.com/
 ![Screenshot from 2022-09-04 11-16-50](https://user-images.githubusercontent.com/11241733/188295604-0eadd752-ce38-43fa-90cc-46d1c72675cd.png)
