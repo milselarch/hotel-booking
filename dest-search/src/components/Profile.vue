@@ -13,7 +13,7 @@
                 <square id="spinner" v-show="is_loading"></square>
                 <b-button 
                   type="is-dark" id="login" outlined
-                  @click="load()" icon-right="sync"
+                  @click="load()" icon-right="refresh"
                   v-show="!(is_loading || load_success)"
                 >
                   try again

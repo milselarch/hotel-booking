@@ -1313,10 +1313,10 @@ div#front-wrapper {
   & div.blur-background {
     width: 100%;
     backdrop-filter: sepia(0.8);
-    position: absolute;
     /* z-index: 100; */
     opacity: 0.9;
-    height: 100%;  }
+    height: 100%;
+  }
 }
 
 div#front-cover {
@@ -1399,6 +1399,7 @@ div#front-cover {
 
   & > div.search-options {
     width: 28rem;
+    z-index: 10;
     flex-shrink: 0;
     flex-grow: 1;
 
@@ -1481,18 +1482,25 @@ div#hotel-cards {
 }
 
 div#hotel-load-status {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr;
   /* backdrop-filter: sepia(0.8); */
   backdrop-filter: grayscale(0.5);
 
   & div.blur-background {
     background-color: #f3eee0;
+    grid-row: 1;
+    grid-column: 1;
   }
 
-  display: flex;
   justify-content: center;
   flex-wrap: wrap;
 
   & > div#status {
+    grid-row: 1;
+    grid-column: 1;
+
     display: flex;
     flex-direction: column;
     justify-content: center;
