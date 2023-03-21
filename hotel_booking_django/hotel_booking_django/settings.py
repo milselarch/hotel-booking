@@ -27,11 +27,20 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(os.environ.get('DEBUG')) == '1'
 
-ALLOWED_HOSTS = [
-    'localhost', '127.0.0.1', 'backend.milselarch.com', 'hotels.milselarch.com',
-    'ascenda-52c6d.web.app'
-]
+# https://stackoverflow.com/questions/24857158
+ALLOWED_HOSTS = ['*']
+"""
+[
+    'localhost', '127.0.0.1', 
+    'backend.milselarch.com', 
+    'hotels.milselarch.com',
+    'ascenda-52c6d.web.app',
 
+    'hotel-booking-django-dev.us-west-2.elasticbeanstalk.com',
+    'hotel-booking-django-dev1.us-west-2.elasticbeanstalk.com',
+    'hotel-booking-django-dev2.us-west-2.elasticbeanstalk.com'
+]
+"""
 
 # Application definition
 

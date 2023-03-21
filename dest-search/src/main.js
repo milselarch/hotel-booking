@@ -24,7 +24,8 @@ import * as VueGoogleMaps from 'vue2-google-maps';
 const infiniteScroll =  require('vue-infinite-scroll');
 
 console.log('NODE_ENV', process.env.NODE_ENV)
-axios.defaults.baseURL = "http://127.0.0.1:8000/"
+axios.defaults.baseURL = "http://hotel-booking-django-dev2.us-west-2.elasticbeanstalk.com/"
+// "http://127.0.0.1:8000/"
 if (process.env.NODE_ENV === 'production') {
   console.log('IN PRODUCTION MODE')
   // point base url to the google cloud server instance
