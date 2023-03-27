@@ -1,0 +1,19 @@
+option_settings:
+  - option_name: SECRET_KEY
+    value: <YOUR_SECRET_KEY>
+  - option_name: DEBUG
+    value: 1
+  - option_name: EMAIL_HASH_KEY
+    value: <YOUR_EMAIL_HASH_KEY>
+  - option_name: FIELD_ENCRYPTION_KEY
+    value: <YOUR_FIELD_ENCRYPTION_KEY>
+  - option_name: DB_NAME
+    value: hotel_booking
+  - option_name: DB_USER
+    value: esc_server
+  - option_name: DB_PASSWORD
+    value: <DB_PASSWORD>
+  - option_name: DB_HOST
+    value: <YOUR_DB_HOST>
+  - option_name: DB_PORT
+    value: 3306
