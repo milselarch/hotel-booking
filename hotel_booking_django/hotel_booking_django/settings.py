@@ -77,9 +77,15 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080", "https://ascenda-52c6d.web.app",
-    "https://hotels.milselarch.com"
+    "http://localhost:8080", 
+    "https://ascenda-52c6d.web.app",
+    "https://hotels.milselarch.com",
+    "https://www.hotel458.rocks.s3-website-ap-southeast-1.amazonaws.com",
+    "http://www.hotel458.rocks.s3-website-ap-southeast-1.amazonaws.com",
+    "http://www.hotel458.rocks",
+    "https://www.hotel458.rocks"
 ]
+
 # set CSRF hosts allowed to be the same as for CORS
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
 CSRF_COOKIE_NAME = "csrftoken"

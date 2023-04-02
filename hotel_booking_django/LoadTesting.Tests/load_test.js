@@ -24,7 +24,7 @@ function randomString(length, charset = '') {
 
 const USERNAME = `${randomString(10)}@example.com`;
 const PASSWORD = 'loadTEST123!@#';
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'http://django-hotels-dev2.us-west-2.elasticbeanstalk.com/';
 
 function allAreTrue(arr) {
   return arr.every(element => element === true);

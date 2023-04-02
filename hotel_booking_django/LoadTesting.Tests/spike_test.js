@@ -15,7 +15,7 @@ export const options = {
 };
 
 export default () => {
-    const url = 'http://localhost:8000/loadTest/';
+    const url = 'http://django-hotels-dev2.us-west-2.elasticbeanstalk.com/loadTest/';
     
     const payload = JSON.stringify({
       email: 'johndoe6@gmail.com',

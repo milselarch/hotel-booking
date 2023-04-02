@@ -21,7 +21,7 @@ class user_account_manager(BaseUserManager):
             raise ValueError("Users must have a password")
         
         email = email.replace(" ", "")    
-        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        regex = r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+'
         if not (re.fullmatch(regex, email)):
             raise ValueError("Invalid Email Address")
 
