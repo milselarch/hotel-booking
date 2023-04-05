@@ -84,6 +84,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://www.hotel458.rocks.s3-website-ap-southeast-1.amazonaws.com",
     "http://www.hotel458.rocks",
     "https://www.hotel458.rocks"
+    "https://is458-backend.milselarch.com",
+    "https://is458.milselarch.com",
+    "https://is458-cf92c.web.app"
 ]
 
 # set CSRF hosts allowed to be the same as for CORS
