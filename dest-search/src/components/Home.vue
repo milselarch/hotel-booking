@@ -7,16 +7,16 @@
             <h1>The Bestest Hotels in the Multiverse</h1>
             <p id="short-info">
               <span>
+                <!--
                 Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
                 both veterans of the lifestyle and loyalty space, have 
                 found a way to credit customers up to ten times the volume 
                 of miles that can be earned elsewhere. That is for booking 
                 the same hotel at the same or similar rates. 
-                <!--
+                -->
                 Use Ascenda's white label UIs and content aggregation hub 
                 to deploy a hassle-free, OTA-level travel booking experience 
                 for your rewards program.
-                -->
                 <!--
                 Welcome to Ascenda: your premier gateway to a seamless
                 travel experience. Leveraging our state-of-the-art 
@@ -181,12 +181,13 @@
         <div id="status" v-show="true">
           <p id="status-text">{{ status_text }}</p>
           <square id="spinner" v-show="is_loading"></square>
+
           <p id="search-params" v-show="search_success">
-            <b-taglist>
-              <b-tag type="is-light" size="is-medium">
+            <b-taglist class="search-taglist">
+              <b-tag class="search-tag" type="is-light" size="is-medium">
                 {{ date_info }}
               </b-tag>
-              <b-tag type="is-light" size="is-medium">
+              <b-tag class="search-tag" type="is-light" size="is-medium">
                 {{ guests_info }}
               </b-tag>
             </b-taglist>
@@ -1305,6 +1306,12 @@ export default {
 }
 </script>
 
+<style lang="scss">
+input {
+  font-family: 'Open Sans', sans-serif !important;
+}
+</style>
+
 <style lang="scss" scoped>
 * {
   font-family: 'Open Sans', sans-serif;
@@ -1583,6 +1590,15 @@ div#hotel-load-status {
       text-align: center;
       display: flex;
       justify-content: center;
+
+      & > .search-taglist {
+        display: flex;
+        justify-content: center;
+      }
+
+      & > .search-tag {
+        margin: auto;
+      }
     }
 
     & > #spinner {
