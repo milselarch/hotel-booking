@@ -7,14 +7,29 @@
             <h1>The Bestest Hotels in the Multiverse</h1>
             <p id="short-info">
               <span>
-                <!-- Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
+                Kaligo co-founders Kyle Armstrong and Sebastian Grobys, 
                 both veterans of the lifestyle and loyalty space, have 
                 found a way to credit customers up to ten times the volume 
                 of miles that can be earned elsewhere. That is for booking 
-                the same hotel at the same or similar rates. -->
+                the same hotel at the same or similar rates. 
+                <!--
                 Use Ascenda's white label UIs and content aggregation hub 
                 to deploy a hassle-free, OTA-level travel booking experience 
                 for your rewards program.
+                -->
+                <!--
+                Welcome to Ascenda: your premier gateway to a seamless
+                travel experience. Leveraging our state-of-the-art 
+                white label UIs and an extensive content aggregation 
+                hub, we empower you to offer an unparalleled OTA-level
+                travel booking journey. Tailored explicitly for rewards
+                programs, Ascenda ensures that your users not only 
+                find the ideal accommodations but also enjoy exclusive
+                benefits and earn rewards with each booking. Dive into
+                a hassle-free, streamlined, and rewarding travel 
+                booking platform that sets new standards in the industry.
+                Choose Ascenda, and let your rewards program stand out!
+                -->
               </span>
             </p>
 
@@ -166,8 +181,16 @@
         <div id="status" v-show="true">
           <p id="status-text">{{ status_text }}</p>
           <square id="spinner" v-show="is_loading"></square>
-          <p id="search-params" v-show="search_success"
-          >{{ search_params_info }}</p>
+          <p id="search-params" v-show="search_success">
+            <b-taglist>
+              <b-tag type="is-light" size="is-medium">
+                {{ date_info }}
+              </b-tag>
+              <b-tag type="is-light" size="is-medium">
+                {{ guests_info }}
+              </b-tag>
+            </b-taglist>
+          </p>
         </div>
       </div>
 
@@ -1146,6 +1169,32 @@ export default {
       const status = `${date_info}\n${guests_info}`
       return status
     },
+    date_info() {
+      let dates = [new Date(), new Date()]
+      if (this.dates_are_valid) {
+        dates = this.dates
+      }
+
+      const [start_date, end_date] = this.searched_dates
+      const start_date_str = moment(start_date).format('DD/MM/YYYY');
+      const end_date_str = moment(end_date).format('DD/MM/YYYY');
+      const date_info = `${start_date_str} – ${end_date_str}`
+      return date_info
+    },
+    guests_info() {
+      const rooms = this.searched_num_rooms
+      const guests = this.searched_num_guests * rooms
+      let rooms_text, guests_text;
+
+      if (rooms > 1) { rooms_text = `${rooms} rooms` }
+      else { rooms_text = `${rooms} room` }
+      if (guests > 1) { guests_text = `${guests} guests` }
+      else { guests_text = `${guests} guest` }
+
+      const guests_info = `${rooms_text}, ${guests_text}`
+      return guests_info
+    },
+
     rooms_valid() {
       return this.allowed_room_choices.includes(this.num_rooms)
     },
@@ -1355,19 +1404,24 @@ div#front-cover {
       & > p#short-info {
         text-align: left;
         margin-bottom: 0rem;
-        $highlight: rgba(233,246,244, 0.7);
+        $highlight: rgba(233,246,244, 0.8);
 
         @media screen and (max-width: 1024px) {
           text-align: center;
         }
 
         & > span {
+          // website description text passive highlight
           background-color: $highlight;
           line-height: 0px;
           box-shadow: 10px 0 0 $highlight, -10px 0 0 $highlight;
           backdrop-filter: blur(5px);
-          padding-top: 0.4rem;
-          padding-bottom: 0.4rem;
+          padding-top: 0.2rem;
+          padding-bottom: 0.2rem;
+
+          -webkit-box-decoration-break: clone;
+          -moz-box-decoration-break: clone; 
+          box-decoration-break: clone;
         }
       }
 
@@ -1527,6 +1581,8 @@ div#hotel-load-status {
       white-space: pre-wrap;
       word-break: break-all;
       text-align: center;
+      display: flex;
+      justify-content: center;
     }
 
     & > #spinner {

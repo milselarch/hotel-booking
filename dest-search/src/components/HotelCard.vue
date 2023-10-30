@@ -34,7 +34,7 @@
       />
 
       <p id="price" v-show="show_price">
-        SGD <b>{{ hotel_price }}</b>
+        SGD {{ hotel_price }}
       </p>
     </div>
   </div>
@@ -116,8 +116,15 @@ p.address {
   margin-bottom: 0.2rem;
 }
 
+p.title {
+  font-size: 2rem;
+  font-weight: 300;
+  font-family: 'Open Sans'
+}
+
 p#price {
   font-size: 1.5rem;
+  font-family: 'Open Sans'
 }
 
 .flat-progress-bar {
