@@ -1399,6 +1399,7 @@ div#front-cover {
 
   & > div.search-options {
     width: 28rem;
+    border-radius: 4px;
     z-index: 10;
     flex-shrink: 0;
     flex-grow: 1;

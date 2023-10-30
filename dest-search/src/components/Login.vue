@@ -161,6 +161,10 @@
 
 <style lang="scss" scoped>
 
+div#wrapper {
+  border-radius: 4px;
+}
+
 div#login-form {
   width: 20rem;
   margin: auto;
