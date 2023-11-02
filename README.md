@@ -88,12 +88,12 @@ pip install -r requirements.txt
 
 5) cd to "hotel_booking_django" and run `python manage.py migrate`
 
-Before running the backend:
+## Backend Setup Instructions:
+
 1) make sure that you provide the environment secret key, email + field hash keys and DB user password in the `.env` config file that should be located in `hotel_booking_django/.env`. For an example of how the backend .env config file should look like do refer to [hotel_booking_django/.env.example](https://github.com/milselarch/hotel-booking/blob/master/hotel_booking_django/.env.example)  
 2) create a settings.py file in the `hotel_booking_django/` backend directory and modify it as needed. Copying over `hotel_booking_django/settings.example.py` into 	settings.py` should work right out of the box if you're using MySQL / MariaDB as the database for running this application.
-
-To run the backend code, go to "hotel_booking_django" and run `python manage.py runserver`  
-(requires db install instructions and `python manage.py migrate` to have been run already, and for backend .env config file to be setup)  
+3) To run the backend code, go to "hotel_booking_django" and run `python manage.py runserver`  
+(requires db install instructions and `python manage.py migrate` to have been run already, and for backend .env config file to be setup, and for a settings.py to have been setup already for the django backend application)  
 
 ## Elaboration on django backend `hotel_booking_django/.env` config file  
 The secret key is a randomly generated string, while the field encryption key and hash keys are randomly generated 32 byte hexadecimal strings. The email and field hash keys are used for ensuring secure encryption and decryption of PII info, while the django secret key is used to ensure secure cryptographic signing by the backend. If you're setting up the backend for the first time you can use the `env_generator.py` under hotel_booking_django to generate the secret, email, and field hash keys.
