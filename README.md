@@ -24,8 +24,6 @@ sudo apt-get install python3.10
 sudo apt-get install python3.10-distutils python3.10-dev
 # required to setup python3.10 venv
 sudo apt-get install python3.10-venv
-# reqiored by django to access mysql database
-sudo apt-get install libmysqlclient-dev
 
 # install pip for python3.10
 curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
@@ -50,6 +48,21 @@ pip install -r requirements.txt
 ```
 
 ## Fresh DB Installation Instructions:
+1) (Ubuntu / Debian only)   
+	Install MySQL or MariaDB development packages, depending on which intend to use for as the database engine for this application    
+
+	1.1) MySQL development package download  
+	```shell
+	sudo apt update
+	sudo apt install libmysqlclient-dev
+	```
+
+	1.2) MariaDB development package download  
+	```shell
+	sudo apt update
+	sudo apt install libmariadb-dev
+	```
+
 1) Install MySql and Workbench (Products: MySQL Server, MySQL Workbench)  
 	and Setup Root password (any password you like)  
 	Install Link: https://dev.mysql.com/downloads/windows/installer/8.0.html  
@@ -59,15 +72,14 @@ pip install -r requirements.txt
 	using the root user account with the rest of the default settings
 	
 3) Open the connection and then under the query tab,  
-	paste the following 4 lines  
-	& execute (press the lighting icon) to create an empty DB & mysql user account:  
+	paste the following 4 lines & execute (press the lighting icon) to create an empty DB & mysql user account:  
 
-```sql
-CREATE DATABASE hotel_booking;  
-CREATE USER 'esc_server'@'localhost' IDENTIFIED BY 'AS12qw34!@';
-GRANT ALL PRIVILEGES ON *.* TO 'esc_server'@'localhost';  
-FLUSH PRIVILEGES;
-```
+	```sql
+	CREATE DATABASE hotel_booking;  
+	CREATE USER 'esc_server'@'localhost' IDENTIFIED BY 'AS12qw34!@';
+	GRANT ALL PRIVILEGES ON *.* TO 'esc_server'@'localhost';  
+	FLUSH PRIVILEGES;
+	```
 	
 4) Open your terminal and cd to your git project folder.  
 	Activate Python Virtual Environment: `<virtual_environment_name>\scripts\activate`  
@@ -76,17 +88,15 @@ FLUSH PRIVILEGES;
 
 5) cd to "hotel_booking_django" and run `python manage.py migrate`
 
-DONE.
-
 Before running the backend, make sure that you provide the environment secret key, email + field hash keys and DB user password in the `.env` config file that should be located in `hotel_booking_django/.env`. For an example of how the backend .env config file should look like do refer to [hotel_booking_django/.env.example](https://github.com/milselarch/hotel-booking/blob/master/hotel_booking_django/.env.example)  
 
 To run the backend code, go to "hotel_booking_django" and run `python manage.py runserver`  
 (requires db install instructions and `python manage.py migrate` to have been run already, and for backend .env config file to be setup)  
 
 ## Elaboration on django backend `hotel_booking_django/.env` config file  
-The secret key is a randomly generated string, while the field encryption key and hash keys are randomly generated 32 byte hexadecimal strings. The email and field hash keys are used for ensuring secure encryption and decryption of PII info, while the django secret key is used to ensure secure cryptographic signing by the backend. If you're setting up the backend for the first time you can use the `env generator.py` under hotel_booking_django to generate the .env file. 
+The secret key is a randomly generated string, while the field encryption key and hash keys are randomly generated 32 byte hexadecimal strings. The email and field hash keys are used for ensuring secure encryption and decryption of PII info, while the django secret key is used to ensure secure cryptographic signing by the backend. If you're setting up the backend for the first time you can use the `env_generator.py` under hotel_booking_django to generate the secret, email, and field hash keys.
 
-To use `env generator.py`, first open the file and fill in your MySQL database credentials. Next, simply run the file to generate the .env file.
+To use `env_generator.py`, first open the file and fill in your MySQL database credentials. Next, simply run the file to generate the secret, email, and field hash keys, which you can then copy over to the config .env file.
 
 ## Frontend node environment setup (Ubuntu 20.04)
 [instructions were based on this tutorial](https://tecadmin.net/how-to-install-nvm-on-debian-10/)
