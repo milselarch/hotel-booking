@@ -88,7 +88,9 @@ pip install -r requirements.txt
 
 5) cd to "hotel_booking_django" and run `python manage.py migrate`
 
-Before running the backend, make sure that you provide the environment secret key, email + field hash keys and DB user password in the `.env` config file that should be located in `hotel_booking_django/.env`. For an example of how the backend .env config file should look like do refer to [hotel_booking_django/.env.example](https://github.com/milselarch/hotel-booking/blob/master/hotel_booking_django/.env.example)  
+Before running the backend:
+1) make sure that you provide the environment secret key, email + field hash keys and DB user password in the `.env` config file that should be located in `hotel_booking_django/.env`. For an example of how the backend .env config file should look like do refer to [hotel_booking_django/.env.example](https://github.com/milselarch/hotel-booking/blob/master/hotel_booking_django/.env.example)  
+2) create a settings.py file in the `hotel_booking_django/` backend directory and modify it as needed. Copying over `hotel_booking_django/settings.example.py` into 	settings.py` should work right out of the box if you're using MySQL / MariaDB as the database for running this application.
 
 To run the backend code, go to "hotel_booking_django" and run `python manage.py runserver`  
 (requires db install instructions and `python manage.py migrate` to have been run already, and for backend .env config file to be setup)  
