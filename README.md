@@ -61,6 +61,7 @@ pip install -r requirements.txt
 	```shell
 	sudo apt update
 	sudo apt install libmariadb-dev
+	sudo apt-get install mariadb-client mariadb-server
 	```
 
 1) Install MySql and Workbench (Products: MySQL Server, MySQL Workbench)  
