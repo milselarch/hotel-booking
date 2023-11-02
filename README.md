@@ -1,4 +1,4 @@
-# A+ Ascenda Hotel Booking Web App
+# Ascenda Hotel Booking Web App
 
 50.003 hotel booking 1D project website project for Ascenda hotels (C02G01).  
 Created using VueJS on the frontend, Django for the backend, and MySQL as our database. 
