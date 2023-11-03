@@ -92,7 +92,10 @@ pip install -r requirements.txt
 ## Backend Setup Instructions:
 
 1) make sure that you provide the environment secret key, email + field hash keys and DB user password in the `.env` config file that should be located in `hotel_booking_django/.env`. For an example of how the backend .env config file should look like do refer to [hotel_booking_django/.env.example](https://github.com/milselarch/hotel-booking/blob/master/hotel_booking_django/.env.example)  
-2) create a settings.py file in the `hotel_booking_django/` backend directory and modify it as needed. Copying over `hotel_booking_django/settings.example.py` into 	settings.py` should work right out of the box if you're using MySQL / MariaDB as the database for running this application.
+2) create a settings.py file in the `hotel_booking_django/` backend directory and modify it as needed. Copying over `hotel_booking_django/settings.example.py` into 	settings.py` should work right out of the box if you're using MySQL / MariaDB as the database for running this application.  
+  
+	- If the frontend is accessing the backend using a non-localhost IP / a domain name / using a custom a port number, then you will have to add the custom IP / domain name / custom port to the `ALLOWED_HOSTS` list in `settings.py` as well. See the default list of allowed backend hosts in settings.example.py to get an idea of the expected format required for whitelisting custom backend endpoint IPs / domains.
+
 3) To run the backend code, go to "hotel_booking_django" and run `python manage.py runserver`  
 (requires db install instructions and `python manage.py migrate` to have been run already, and for backend .env config file to be setup, and for a settings.py to have been setup already for the django backend application)  
 
@@ -130,15 +133,16 @@ Download and Install node v14.19.0 from https://nodejs.org/download/release/v14.
 
 ## Frontend setup instructions
 
-1) cd to "dest-search" and run `npm install`  
-2) to run the frontend code locally use `npm run dev`  
+1) cd to "dest-search" and run `npm install`
+2) copy `dest-search/settings.example.js` into `dest-search/settings.js` file and edit it to specify the backend url endpoints that will be called when the frontend is run in development and production modes
+3) to run the frontend code locally use `npm run dev`  
 	Note that to use the google maps api (used in the HotelInfo page to show hotel location) in the website you will need to provide
 	google map API key credentials in a `.env` config file to be located in `dest-search`.
 	Refer to [dest-search/.env.example](https://github.com/milselarch/hotel-booking/blob/master/dest-search/.env.example) for an example of how the config file should look like. Also note that you will have to whitelist your google maps api key on the google maps setup site for the various domains that you intend to run your website on as well (such as localhost:8080, hotels.milselarch.com etc. etc.)
 	
-3) to run the 56 frontend unit tests in `dest-search/tests/unit`, run `npm run test:unit`. Note that many of the tests require that the backend server also be running at `http://localhost:8000`, so make sure that the backend is running there first before executing the frontend unit tests.
-4) to build the frontend code for production deployment, run `npm run build-cli`
-5) You can deploy to firebase static hosting after running `npm run build-cli` (and after setting up firebase config in your project) by executing `firebase deploy`	
+4) to run the 56 frontend unit tests in `dest-search/tests/unit`, run `npm run test:unit`. Note that many of the tests require that the backend server also be running at `http://localhost:8000`, so make sure that the backend is running there first before executing the frontend unit tests.
+5) to build the frontend code for production deployment, run `npm run build-cli`
+6) You can deploy to firebase static hosting after running `npm run build-cli` (and after setting up firebase config in your project) by executing `firebase deploy`	
 
 ## SQL Version Control Flow:
 1) After any "models.py" changes are made in django,  
