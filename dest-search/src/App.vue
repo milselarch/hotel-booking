@@ -157,11 +157,25 @@
             </section>
           </b-navbar-item>
           
+          <!--
+          <b-navbar-item>
+            <b-icon
+              icon-pack="fas" 
+              icon="github"
+              size="is-small"
+            >
+            </b-icon>
+          </b-navbar-item>
+          -->
+
         </b-navbar-item>
+        
       </template>
     </b-navbar>
 
-    <div id="content-wrapper">
+    <div 
+      id="content-wrapper"
+    >
       <keep-alive include="Home">
         <router-view 
           id="router-view"
@@ -419,6 +433,16 @@ body {
   margin: 0px;
   width: 100%;
   // height: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+}
+
+div#content-wrapper {
+  display: flex;
+  flex-direction: column; 
+  flex-grow: 1;
 }
 
 @media screen and (min-width: 1024px) {
@@ -433,6 +457,11 @@ body {
   }
 }
 
+body > div#app {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
 
 body > div#app > #router-view {
   padding: 0px;

@@ -139,11 +139,24 @@ div.media-content {
   overflow-x: initial;
 }
 
+@keyframes fadeInScaleUp {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .card {
   margin: 1rem;
   cursor: pointer;
   outline: 2px solid #EEE;
   box-shadow: none;
+
+  animation: fadeInScaleUp 1s ease forwards;
 
   & img.card-image {
     // preserve aspect ratio for card images

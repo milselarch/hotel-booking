@@ -1,6 +1,12 @@
 <template>
-  <div id="home">
-    <div id="front-wrapper">
+  <div 
+    class="homepage"
+    v-bind:class="{ 'full-bleed': full_bleed }"
+  >
+    <div 
+      id="front-wrapper"
+      v-bind:class="{ 'full-bleed': full_bleed }"
+    >
       <div id="front-cover">
         <div class="description-wrapper">
           <div class="description">
@@ -171,27 +177,31 @@
         </div>
       </div>
 
-      <hr/>
-
       <div 
-        v-bind:class="{ bland: is_destination_valid }"
-        id="hotel-load-status"
+        v-show="!full_bleed || is_loading || load_error"
+        id="status-bar-wrapper"
       >
-        <div class="blur-background"></div>
-        <div id="status" v-show="true">
-          <p id="status-text">{{ status_text }}</p>
-          <square id="spinner" v-show="is_loading"></square>
+        <hr/>
+        <div 
+          v-bind:class="{ bland: is_destination_valid }"
+          id="hotel-load-status"
+        >        
+          <div class="blur-background"></div>
+          <div id="status" v-show="true">
+            <p id="status-text">{{ status_text }}</p>
+            <square id="spinner" v-show="is_loading"></square>
 
-          <p id="search-params" v-show="search_success">
-            <b-taglist class="search-taglist">
-              <b-tag class="search-tag" type="is-light" size="is-medium">
-                {{ date_info }}
-              </b-tag>
-              <b-tag class="search-tag" type="is-light" size="is-medium">
-                {{ guests_info }}
-              </b-tag>
-            </b-taglist>
-          </p>
+            <p id="search-params" v-show="search_success">
+              <b-taglist class="search-taglist">
+                <b-tag class="search-tag" type="is-light" size="is-medium">
+                  {{ date_info }}
+                </b-tag>
+                <b-tag class="search-tag" type="is-light" size="is-medium">
+                  {{ guests_info }}
+                </b-tag>
+              </b-taglist>
+            </p>
+          </div>
         </div>
       </div>
 
@@ -199,6 +209,7 @@
 
     <div
       id="hotel-cards" ref="cards_holder"
+      v-show="!full_bleed"
       v-infinite-scroll="render_more_hotels" 
       infinite-scroll-disabled="all_hotels_loaded"
       infinite-scroll-distance="100"
@@ -214,7 +225,8 @@
     </div>
 
     <div
-      id="end-bar" v-show="all_hotels_loaded && scrollable"
+      id="end-bar" 
+      v-show="all_hotels_loaded && scrollable && !full_bleed"
       ref="end_bar"
     >
       <a v-on:click="scroll_to_top()">— Go back to top —</a>
@@ -275,6 +287,8 @@ export default {
 
       hotels: [],
       hotels_loaded: [],
+      hotels_searched_before: false,
+
       selected: null,
       destination: '',
       destination_input: '',
@@ -850,8 +864,10 @@ export default {
             return 0
           }
         })
+
         self.hotels_loaded = []
         self.render_more_hotels();
+        self.hotels_searched_before = true;
         
       } catch (error) {
         self.load_error = true;
@@ -1268,6 +1284,14 @@ export default {
       return dest_name
     },
 
+    full_bleed() {
+      return (
+        (this.hotels.length === 0) &&
+        (this.hotels_loaded.length === 0) &&
+        !this.hotels_searched_before
+      )
+    },
+
     all_hotels_loaded() {
       console.log(
         'H_LOADED', this.hotels.length, this.hotels_loaded.length
@@ -1315,6 +1339,26 @@ input {
 <style lang="scss" scoped>
 * {
   font-family: 'Open Sans', sans-serif;
+}
+
+.homepage.full-bleed {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+@keyframes fadeInScaleUp {
+  0% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+div#status-bar-wrapper {
+  /* Apply transition to transform property */
+  animation: fadeInScaleUp 0.2s ease-in forwards;
 }
 
 div#end-bar {
@@ -1366,12 +1410,20 @@ div#front-wrapper {
   background-image: url(
     "../assets/alena-aenami-serenity-1k.jpg"
   );
+
   & div.blur-background {
     width: 100%;
     backdrop-filter: sepia(0.8);
     /* z-index: 100; */
     opacity: 0.9;
     height: 100%;
+  }
+
+  &.full-bleed {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    flex-grow: 1;
   }
 }
 

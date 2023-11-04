@@ -5,7 +5,7 @@
     <div id="wrapper">
       <div id="figures">
         <b-carousel id="carousel" v-if="check_carousel" :indicator=true indicator-custom indicator-inside=false pause-text="paused" indicator-custom-size="is-medium">
-        <b-carousel-item id="carouselimg" v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
+        <b-carousel-item class="carousel-img" v-for="(img, i) in this.hotelImages.count" v-bind:key="i">
           <b-image class="image" :src="build_carousel(i)" @error="replace_default_image"></b-image>
         </b-carousel-item>
         <template #indicators="props" v-if="check_carousel">
@@ -330,13 +330,14 @@ div#figures{
   height: 30rem;
   // border: solid;
 }
-#carouselimg {
+.carousel-img {
   margin: auto;
   margin-top: 0;
   max-width: 30rem;
   max-height: 20rem;
   object-fit: cover;
   vertical-align: middle;
+  border-radius: 4px;
 }
 #gallery {
   flex-direction: column;
