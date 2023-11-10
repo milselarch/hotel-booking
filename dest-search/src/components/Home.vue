@@ -1411,6 +1411,9 @@ div#front-wrapper {
     "../assets/alena-aenami-serenity-1k.jpg"
   );
 
+  background-size: cover;
+  background-repeat: no-repeat;
+
   & div.blur-background {
     width: 100%;
     backdrop-filter: sepia(0.8);
