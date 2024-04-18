@@ -29,7 +29,8 @@
           <div id="amenities" v-if="check_amenities">
             <p><font size="4rem"><b>Amenities</b></font></p>
             <ul v-for="(am, key) in this.hotelAmenities" v-bind:key="key">
-              <font-awesome-icon v-show="formatAmenities(key)!=null" icon="fa-solid fa-check" color="green"/><li v-show="formatAmenities(key)!=null">{{formatAmenities(key)}}</li>
+              <font-awesome-icon v-show="formatAmenities(key)!=null" icon="fa-solid fa-check" color="green"/>
+              <li v-show="formatAmenities(key)!=null">{{formatAmenities(key)}}</li>
             </ul>
             <!-- <p>{{hotelAmenities}}</p> -->
           </div>

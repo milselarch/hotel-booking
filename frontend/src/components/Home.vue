@@ -1341,6 +1341,13 @@ input {
   font-family: 'Open Sans', sans-serif;
 }
 
+button#search-button {
+  &[disabled] {
+    opacity: 1;
+    filter: contrast(0.5);
+  }
+}
+
 .homepage.full-bleed {
   display: flex;
   flex-direction: column;

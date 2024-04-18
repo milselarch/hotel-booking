@@ -13,6 +13,8 @@ import 'buefy/dist/buefy.css'
 import { library } from '@fortawesome/fontawesome-svg-core';
 // internal icons
 import { fas } from "@fortawesome/free-solid-svg-icons";
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
+
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import router from './router'
 
@@ -46,6 +48,7 @@ Vue.use(VueGoogleMaps, {
 });
 
 library.add(fas)
+library.add(faGithub)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(Buefy, { defaultIconPack: 'fas' })
 

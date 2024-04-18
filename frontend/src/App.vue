@@ -33,10 +33,14 @@
 
       <template #end>
         <b-navbar-item tag="div" class="nav-group">
-          <b-navbar-item href="#">
-            <router-link to="/">Home</router-link>
-          </b-navbar-item>
-
+          <a href="https://github.com/milselarch/hotel-booking" target="_blank">
+            <b-navbar-item>
+              <font-awesome-icon 
+                icon="fa-brands fa-github fa-xl" color="black"
+              />  
+            </b-navbar-item>
+          </a>
+          
           <b-navbar-item
             class="mobile-nav"
             aria-role="listitem" v-show="!authenticated"
@@ -156,18 +160,6 @@
 
             </section>
           </b-navbar-item>
-          
-          <!--
-          <b-navbar-item>
-            <b-icon
-              icon-pack="fas" 
-              icon="github"
-              size="is-small"
-            >
-            </b-icon>
-          </b-navbar-item>
-          -->
-
         </b-navbar-item>
         
       </template>

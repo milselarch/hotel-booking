@@ -87,22 +87,22 @@ pip install -r requirements.txt
 	Run `pip install -r requirements.txt` if you have not already,  
 	which ensures that mysqlclient is installed as a python package
 
-5) cd to "hotel_booking_django" and run `python manage.py migrate`
+5) cd to "backend" and run `python manage.py migrate`
 
 ## Backend Setup Instructions:
 
-1) make sure that you provide the environment secret key, email + field hash keys and DB user password in the `.env` config file that should be located in `hotel_booking_django/.env`. For an example of how the backend .env config file should look like do refer to [hotel_booking_django/.env.example](https://github.com/milselarch/hotel-booking/blob/master/hotel_booking_django/.env.example)  
-2) create a settings.py file in the `hotel_booking_django/` backend directory and modify it as needed. Copying over `hotel_booking_django/settings.example.py` into 	settings.py` should work right out of the box if you're using MySQL / MariaDB as the database for running this application.  
+1) make sure that you provide the environment secret key, email + field hash keys and DB user password in the `.env` config file that should be located in `backend/.env`. For an example of how the backend .env config file should look like do refer to [backend/.env.example](https://github.com/milselarch/hotel-booking/blob/master/backend/.env.example)  
+2) create a settings.py file in the `backend/` backend directory and modify it as needed. Copying over `backend/settings.example.py` into 	settings.py` should work right out of the box if you're using MySQL / MariaDB as the database for running this application.  
   
 	- If the frontend is accessing the backend using a non-localhost IP / a domain name / using a custom port number, then you will have to add the custom IP / domain name / custom port to the `ALLOWED_HOSTS` list in `settings.py` as well. See the default list of allowed backend hosts in settings.example.py to get an idea of the expected format required for whitelisting custom backend endpoint IPs / domains.
 
-3) To run the backend code, go to "hotel_booking_django" and run `python manage.py runserver`  
+3) To run the backend code, go to "backend" and run `python manage.py runserver`  
 (requires db install instructions and `python manage.py migrate` to have been run already, and for backend .env config file to be setup, and for a settings.py to have been setup already for the django backend application)  
 
-## Elaboration on django backend `hotel_booking_django/.env` config file  
-The secret key is a randomly generated string, while the field encryption key and hash keys are randomly generated 32 byte hexadecimal strings. The email and field hash keys are used for ensuring secure encryption and decryption of PII info, while the django secret key is used to ensure secure cryptographic signing by the backend. If you're setting up the backend for the first time you can use the `env_generator.py` under hotel_booking_django to generate the secret, email, and field hash keys.
+## Elaboration on django backend `backend/.env` config file  
+The secret key is a randomly generated string, while the field encryption key and hash keys are randomly generated 32 byte hexadecimal strings. The email and field hash keys are used for ensuring secure encryption and decryption of PII info, while the django secret key is used to ensure secure cryptographic signing by the backend. If you're setting up the backend for the first time you can use the `env_generator.py` under `backend` to generate the secret, email, and field hash keys.
 
-To use `env_generator.py`, first open the file and fill in your MySQL database credentials. Next, simply run the file to generate the secret, email, and field hash keys, which you can then copy over to the config .env file.
+To use `env_generator.py`, first open the file and fill in your MySQL database credentials. Next, simply run the file to generate the secret, email, and field hash keys, which you can then copy over to the `config.env` file.
 
 ## Frontend node environment setup (Ubuntu 20.04)
 [instructions were based on this tutorial](https://tecadmin.net/how-to-install-nvm-on-debian-10/)
@@ -133,20 +133,20 @@ Download and Install node v14.19.0 from https://nodejs.org/download/release/v14.
 
 ## Frontend setup instructions
 
-1) cd to "dest-search" and run `npm install`
-2) copy `dest-search/settings.example.js` into `dest-search/settings.js` file and edit it to specify the backend url endpoints that will be called when the frontend is run in development and production modes
+1) cd to `frontend` and run `npm install`
+2) copy `frontend/settings.example.js` into `frontend/settings.js` file and edit it to specify the backend url endpoints that will be called when the frontend is run in development and production modes
 3) to run the frontend code locally use `npm run dev`  
 	Note that to use the google maps api (used in the HotelInfo page to show hotel location) in the website you will need to provide
-	google map API key credentials in a `.env` config file to be located in `dest-search`.
-	Refer to [dest-search/.env.example](https://github.com/milselarch/hotel-booking/blob/master/dest-search/.env.example) for an example of how the config file should look like. Also note that you will have to whitelist your google maps api key on the google maps setup site for the various domains that you intend to run your website on as well (such as localhost:8080, hotels.milselarch.com etc. etc.)
+	google map API key credentials in a `.env` config file to be located in `frontend`.
+	Refer to [frontend/.env.example](https://github.com/milselarch/hotel-booking/blob/master/frontend/.env.example) for an example of how the config file should look like. Also note that you will have to whitelist your google maps api key on the google maps setup site for the various domains that you intend to run your website on as well (such as localhost:8080, hotels.milselarch.com etc. etc.)
 	
-4) to run the 56 frontend unit tests in `dest-search/tests/unit`, run `npm run test:unit`. Note that many of the tests require that the backend server also be running at `http://localhost:8000`, so make sure that the backend is running there first before executing the frontend unit tests.
+4) to run the 56 frontend unit tests in `frontend/tests/unit`, run `npm run test:unit`. Note that many of the tests require that the backend server also be running at `http://localhost:8000`, so make sure that the backend is running there first before executing the frontend unit tests.
 5) to build the frontend code for production deployment, run `npm run build-cli`
 6) You can deploy to firebase static hosting after running `npm run build-cli` (and after setting up firebase config in your project) by executing `firebase deploy`	
 
 ## SQL Version Control Flow:
 1) After any "models.py" changes are made in django,  
-switch to command line, cd to "<git_project_root_folder>\hotel_booking_django"
+switch to command line, cd to "<git_project_root_folder>\backend"
 
 2) run `python manage.py makemigrations`   
 	This would create "migration" scripts  
@@ -156,7 +156,7 @@ switch to command line, cd to "<git_project_root_folder>\hotel_booking_django"
 
 4) Before commiting this migration scripts into git,  
 	ensure you've pulled the latest files  
-	and in the migrations folder of the corresponding django app (i.e "<git_project_root_folder>\hotel_booking_django\accounts\migrations"),  
+	and in the migrations folder of the corresponding django app (i.e "<git_project_root_folder>\backend\accounts\migrations"),  
 	__ensure your newly generated script's running number does not conflict with existing scripts.__  
 	If the number conflicts, ensure you __rename your script file name with the next appropriate number__.  
 	>Note: the running number is the number in the file name.  
