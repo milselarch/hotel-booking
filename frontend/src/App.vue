@@ -36,7 +36,8 @@
           <a href="https://github.com/milselarch/hotel-booking" target="_blank">
             <b-navbar-item>
               <font-awesome-icon 
-                icon="fa-brands fa-github fa-xl" color="black"
+                icon="fa-brands fa-github" color="black"
+                class="fa-lg"
               />  
             </b-navbar-item>
           </a>
